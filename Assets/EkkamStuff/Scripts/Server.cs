@@ -87,6 +87,11 @@ namespace Ekkam
                             Debug.Log($"Received rotation y from {rotationYPacket.playerData.name}: {rotationYPacket.rotationY}");
                             BroadcastData(buffer, client);
                             break;
+                        case BasePacket.Type.AnimationState:
+                            AnimationStatePacket animationStatePacket = new AnimationStatePacket().Deserialize(buffer);
+                            Debug.Log($"Received animation state from {animationStatePacket.playerData.name}: {animationStatePacket.commandType} {animationStatePacket.parameterName} {animationStatePacket.boolValue} {animationStatePacket.floatValue}");
+                            BroadcastData(buffer, client);
+                            break;
                     }
                 }
             }

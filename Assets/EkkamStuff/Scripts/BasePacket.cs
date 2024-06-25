@@ -9,7 +9,8 @@ namespace Ekkam
         {
             None,
             Position,
-            Rotation
+            Rotation,
+            AnimationState
         }
 
         public Type type;
@@ -128,6 +129,61 @@ namespace Ekkam
             packet.type = basePacket.type;
             packet.playerData = basePacket.playerData;
             packet.rotationY = basePacket.br.ReadSingle();
+            return packet;
+        }
+    }
+    
+    public class AnimationStatePacket : BasePacket
+    {
+        public enum AnimationCommandType
+        {
+            Bool,
+            Trigger,
+            Float
+        }
+
+        public AnimationCommandType commandType;
+        public string parameterName;
+        public bool boolValue;
+        public float floatValue;
+
+        public AnimationStatePacket() : base(Type.AnimationState, new PlayerData("", ""))
+        {
+            this.commandType = AnimationCommandType.Bool;
+            this.parameterName = "";
+            this.boolValue = false;
+            this.floatValue = 0f;
+        }
+
+        public AnimationStatePacket(Type type, PlayerData playerData, AnimationCommandType commandType, string parameterName, bool boolValue, float floatValue) 
+            : base(type, playerData)
+        {
+            this.commandType = commandType;
+            this.parameterName = parameterName;
+            this.boolValue = boolValue;
+            this.floatValue = floatValue;
+        }
+
+        public override byte[] Serialize()
+        {
+            BeginSerialize();
+            bw.Write((int)commandType);
+            bw.Write(parameterName);
+            bw.Write(boolValue);
+            bw.Write(floatValue);
+            return EndSerialize();
+        }
+
+        public AnimationStatePacket Deserialize(byte[] data)
+        {
+            AnimationStatePacket packet = new AnimationStatePacket();
+            BasePacket basePacket = packet.BaseDeserialize(data);
+            packet.type = basePacket.type;
+            packet.playerData = basePacket.playerData;
+            packet.commandType = (AnimationCommandType)basePacket.br.ReadInt32();
+            packet.parameterName = basePacket.br.ReadString();
+            packet.boolValue = basePacket.br.ReadBoolean();
+            packet.floatValue = basePacket.br.ReadSingle();
             return packet;
         }
     }

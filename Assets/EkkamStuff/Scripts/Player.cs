@@ -35,6 +35,8 @@ namespace Ekkam
         public float rotationSpeed = 5f;
         public float horizontalInput = 0f;
         public float verticalInput = 0f;
+        public float moveX;
+        public float moveZ;
         Vector3 moveDirection;
         Vector3 combatRotationDirection;
         
@@ -48,6 +50,7 @@ namespace Ekkam
         
         public bool isGrounded;
         public bool isJumping;
+        public bool isMoving;
         public bool isSprinting;
         public bool allowDoubleJump;
         public bool doubleJumped;
@@ -63,17 +66,21 @@ namespace Ekkam
         private float jumpStartTime;
         
         [Header("--- Networking Settings ---")]
-        private float networkSendRate = 0.1f;
+        private float networkSendRate = 0.05f;
         private float networkPositionSendTimer;
         private float networkRotationSendTimer;
+        private float networkAnimationSendTimer;
+        public float syncSmoothness = 20f;
         public NetworkComponent networkComponent;
         public bool isMine;
         public Vector3 lastSentPosition;
         private bool sendingPosition;
         public float lastSentRotationY;
+        private bool isMovingUpdateSent;
 
         void Start()
         {
+            anim = GetComponent<Animator>();
             networkComponent = GetComponent<NetworkComponent>();
             
             isMine = networkComponent.IsMine();
@@ -84,7 +91,6 @@ namespace Ekkam
             }
             
             rb = GetComponent<Rigidbody>();
-            anim = GetComponent<Animator>();
             
             cameraObj = Camera.main.transform;
 
@@ -99,11 +105,12 @@ namespace Ekkam
         {
             networkPositionSendTimer += Time.deltaTime;
             networkRotationSendTimer += Time.deltaTime;
+            networkAnimationSendTimer += Time.deltaTime;
             
             if (!isMine)
             {
-                transform.position = Vector3.Lerp(transform.position, lastSentPosition, Time.deltaTime * 10f);
-                transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.Euler(0, lastSentRotationY, 0), Time.deltaTime * 10f);
+                transform.position = Vector3.Lerp(transform.position, lastSentPosition, Time.deltaTime * syncSmoothness);
+                transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(0, lastSentRotationY, 0), Time.deltaTime * syncSmoothness);
                 return;
             }
             
@@ -112,9 +119,18 @@ namespace Ekkam
             viewDirection.y = 0;
             orientation.forward = viewDirection.normalized;
 
-            // Animation
-            anim.SetBool("isMoving", verticalInput != 0 || horizontalInput != 0);
-
+            // Movement animation
+            moveX = Mathf.Lerp(moveX, horizontalInput, Time.deltaTime * 5f);
+            moveZ = Mathf.Lerp(moveZ, verticalInput, Time.deltaTime * 5f);
+            anim.SetFloat("moveX", moveX);
+            anim.SetFloat("moveZ", moveZ);
+            if (networkAnimationSendTimer >= networkSendRate + 0.1f)
+            {
+                networkAnimationSendTimer = 0f;
+                Client.instance.SendAnimationState(AnimationStatePacket.AnimationCommandType.Float, "moveX", false, moveX);
+                Client.instance.SendAnimationState(AnimationStatePacket.AnimationCommandType.Float, "moveZ", false, moveZ);
+            }
+            
             // Movement
             speed = isSprinting ? sprintSpeed : walkSpeed;
             maxSpeed = speed + maxSpeedOffset;
@@ -129,6 +145,7 @@ namespace Ekkam
             )
             {
                 networkPositionSendTimer = 0f;
+                
                 if (rb.velocity.magnitude > 0.1f)
                 {
                     sendingPosition = true;

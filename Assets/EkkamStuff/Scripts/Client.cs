@@ -121,6 +121,31 @@ namespace Ekkam
                             SpawnPlayer(rotationYPacket.playerData.id, Vector3.zero);
                         }
                         break;
+                    case BasePacket.Type.AnimationState:
+                        AnimationStatePacket animationStatePacket = new AnimationStatePacket().Deserialize(buffer);
+                        Debug.Log($"Received animation state: {animationStatePacket.commandType} from {animationStatePacket.playerData.name}");
+                        
+                        if (players.ContainsKey(animationStatePacket.playerData.id))
+                        {
+                            Player player = players[animationStatePacket.playerData.id].GetComponent<Player>();
+                            switch (animationStatePacket.commandType)
+                            {
+                                case AnimationStatePacket.AnimationCommandType.Bool:
+                                    player.anim.SetBool(animationStatePacket.parameterName, animationStatePacket.boolValue);
+                                    break;
+                                case AnimationStatePacket.AnimationCommandType.Trigger:
+                                    player.anim.SetTrigger(animationStatePacket.parameterName);
+                                    break;
+                                case AnimationStatePacket.AnimationCommandType.Float:
+                                    player.anim.SetFloat(animationStatePacket.parameterName, animationStatePacket.floatValue);
+                                    break;
+                            }
+                        }
+                        else
+                        {
+                            SpawnPlayer(animationStatePacket.playerData.id, Vector3.zero);
+                        }
+                        break;
                 }
             }
         }
@@ -135,6 +160,12 @@ namespace Ekkam
         {
             RotationYPacket rotationYPacket = new RotationYPacket(BasePacket.Type.Rotation, playerData, rotationY);
             SendDataToServer(rotationYPacket);
+        }
+        
+        public void SendAnimationState(AnimationStatePacket.AnimationCommandType commandType, string parameterName, bool boolValue, float floatValue)
+        {
+            AnimationStatePacket animationStatePacket = new AnimationStatePacket(BasePacket.Type.AnimationState, playerData, commandType, parameterName, boolValue, floatValue);
+            SendDataToServer(animationStatePacket);
         }
         
         private void SpawnPlayer(string playerId, Vector3 position)

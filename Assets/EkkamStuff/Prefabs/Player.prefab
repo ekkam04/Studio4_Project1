@@ -1344,13 +1344,16 @@ MonoBehaviour:
   rotationSpeed: 10
   horizontalInput: 0
   verticalInput: 0
-  walkSpeed: 3
-  sprintSpeed: 5
+  moveX: 0
+  moveZ: 0
+  walkSpeed: 1.5
+  sprintSpeed: 3
   maxSpeedOffset: 2
   groundDrag: 3
   groundDistance: 0.2
   isGrounded: 0
   isJumping: 0
+  isMoving: 0
   isSprinting: 0
   allowDoubleJump: 0
   doubleJumped: 0
@@ -1358,7 +1361,11 @@ MonoBehaviour:
   jumpHeightApex: 4
   jumpDuration: 0.75
   normalDownwardsGravityMultiplier: 1.5
+  syncSmoothness: 20
   networkComponent: {fileID: 0}
+  isMine: 0
+  lastSentPosition: {x: 0, y: 0, z: 0}
+  lastSentRotationY: 0
 --- !u!54 &1804160160454093402
 Rigidbody:
   m_ObjectHideFlags: 0
