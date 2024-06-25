@@ -28,6 +28,7 @@ namespace Ekkam
         public Vector3 viewDirection;
         public Transform orientation;
 
+        public Transform cameraPos;
         public Transform cameraObj;
 
         [Header("--- Movement Settings ---")]
@@ -60,11 +61,32 @@ namespace Ekkam
         float gravity;
         private float initialJumpVelocity;
         private float jumpStartTime;
+        
+        [Header("--- Networking Settings ---")]
+        private float networkSendRate = 0.1f;
+        private float networkPositionSendTimer;
+        private float networkRotationSendTimer;
+        public NetworkComponent networkComponent;
+        public bool isMine;
+        public Vector3 lastSentPosition;
+        private bool sendingPosition;
+        public float lastSentRotationY;
 
         void Start()
         {
+            networkComponent = GetComponent<NetworkComponent>();
+            
+            isMine = networkComponent.IsMine();
+            if (!isMine)
+            {
+                Destroy(rb);
+                return;
+            }
+            
             rb = GetComponent<Rigidbody>();
             anim = GetComponent<Animator>();
+            
+            cameraObj = Camera.main.transform;
 
             gravity = -2 * jumpHeightApex / (jumpDuration * jumpDuration);
             initialJumpVelocity = Mathf.Abs(gravity) * jumpDuration;
@@ -75,13 +97,23 @@ namespace Ekkam
 
         void Update()
         {
+            networkPositionSendTimer += Time.deltaTime;
+            networkRotationSendTimer += Time.deltaTime;
+            
+            if (!isMine)
+            {
+                transform.position = Vector3.Lerp(transform.position, lastSentPosition, Time.deltaTime * 10f);
+                transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.Euler(0, lastSentRotationY, 0), Time.deltaTime * 10f);
+                return;
+            }
+            
             // Camera and orientation
             viewDirection = cameraObj.forward;
             viewDirection.y = 0;
             orientation.forward = viewDirection.normalized;
 
             // Animation
-            // anim.SetBool("isMoving", verticalInput != 0 || horizontalInput != 0);
+            anim.SetBool("isMoving", verticalInput != 0 || horizontalInput != 0);
 
             // Movement
             speed = isSprinting ? sprintSpeed : walkSpeed;
@@ -90,11 +122,30 @@ namespace Ekkam
             ControlSpeed();
             CheckForGround();
             MovementStateHandler();
-    
+            
+            if (
+                networkPositionSendTimer >= networkSendRate &&
+                Client.instance != null
+            )
+            {
+                networkPositionSendTimer = 0f;
+                if (rb.velocity.magnitude > 0.1f)
+                {
+                    sendingPosition = true;
+                    Client.instance.SendPosition(transform.position);
+                }
+                else if (sendingPosition) // Send position one last time when player stops
+                {
+                    sendingPosition = false;
+                    Client.instance.SendPosition(transform.position);
+                }
+            }
         }
 
         void FixedUpdate()
         {
+            if (!isMine) return;
+            
             // Move player
             MovePlayer();
 
@@ -123,6 +174,7 @@ namespace Ekkam
 
         public void OnMove(InputAction.CallbackContext context)
         {
+            if (!this.enabled || !isMine) return;
             Vector2 input = context.ReadValue<Vector2>();
             horizontalInput = input.x;
             verticalInput = input.y;
@@ -132,7 +184,7 @@ namespace Ekkam
         {
             if (context.started)
             {
-                if (!this.enabled) return;
+                if (!this.enabled || !isMine) return;
                 if (!isGrounded && allowDoubleJump && !doubleJumped)
                 {
                     doubleJumped = true;
@@ -144,6 +196,19 @@ namespace Ekkam
                     doubleJumped = false;
                     StartJump(jumpHeightApex, jumpDuration);
                 }
+            }
+        }
+        
+        public void OnLook(InputAction.CallbackContext context)
+        {
+            if (!this.enabled || !isMine) return;
+            if (
+                networkRotationSendTimer >= networkSendRate &&
+                Client.instance != null
+            )
+            {
+                networkRotationSendTimer = 0f;
+                Client.instance.SendRotationY(transform.rotation.eulerAngles.y);
             }
         }
 
