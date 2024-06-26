@@ -127,8 +127,10 @@ namespace Ekkam
             if (networkAnimationSendTimer >= networkSendRate + 0.1f)
             {
                 networkAnimationSendTimer = 0f;
-                Client.instance.SendAnimationState(AnimationStatePacket.AnimationCommandType.Float, "moveX", false, moveX);
-                Client.instance.SendAnimationState(AnimationStatePacket.AnimationCommandType.Float, "moveZ", false, moveZ);
+                // Client.instance.SendAnimationState(AnimationStatePacket.AnimationCommandType.Float, "moveX", false, moveX);
+                // Client.instance.SendAnimationState(AnimationStatePacket.AnimationCommandType.Float, "moveZ", false, moveZ);
+                // SendAnimationMoveXPacket();
+                // Invoke(nameof(SendAnimationMoveZPacket), 0.05f);
             }
             
             // Movement
@@ -312,6 +314,15 @@ namespace Ekkam
             {
                 movementState = MovementState.Air;
             }
+        }
+        
+        private void SendAnimationMoveXPacket()
+        {
+            Client.instance.SendAnimationState(AnimationStatePacket.AnimationCommandType.Float, "moveX", false, moveX);
+        }        
+        private void SendAnimationMoveZPacket()
+        {
+            Client.instance.SendAnimationState(AnimationStatePacket.AnimationCommandType.Float, "moveZ", false, moveZ);
         }
     }
 }
