@@ -114,6 +114,12 @@ namespace Ekkam
                 return;
             }
             
+            if (Input.GetKeyDown("escape"))
+            {
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
+            }
+            
             // Camera and orientation
             viewDirection = cameraObj.forward;
             viewDirection.y = 0;
