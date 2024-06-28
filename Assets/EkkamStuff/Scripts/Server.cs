@@ -71,28 +71,30 @@ namespace Ekkam
             {
                 if (client.Available > 0)
                 {
+                    Debug.Log("Received data from client.");
                     byte[] buffer = new byte[client.Available];
                     client.Receive(buffer);
+                    BroadcastData(buffer, client);
                     
-                    BasePacket packet = new BasePacket().BaseDeserialize(buffer);
-                    switch (packet.type)
-                    {
-                        case BasePacket.Type.Position:
-                            PositionPacket positionPacket = new PositionPacket().Deserialize(buffer);
-                            Debug.Log($"Received position from {positionPacket.playerData.name}: {positionPacket.position}");
-                            BroadcastData(buffer, client);
-                            break;
-                        case BasePacket.Type.Rotation:
-                            RotationYPacket rotationYPacket = new RotationYPacket().Deserialize(buffer);
-                            Debug.Log($"Received rotation y from {rotationYPacket.playerData.name}: {rotationYPacket.rotationY}");
-                            BroadcastData(buffer, client);
-                            break;
-                        case BasePacket.Type.AnimationState:
-                            AnimationStatePacket animationStatePacket = new AnimationStatePacket().Deserialize(buffer);
-                            Debug.Log($"Received animation state from {animationStatePacket.playerData.name}: {animationStatePacket.commandType} {animationStatePacket.parameterName} {animationStatePacket.boolValue} {animationStatePacket.floatValue}");
-                            BroadcastData(buffer, client);
-                            break;
-                    }
+                    // BasePacket packet = new BasePacket().BaseDeserialize(buffer);
+                    // switch (packet.type)
+                    // {
+                    //     case BasePacket.Type.Position:
+                    //         PositionPacket positionPacket = new PositionPacket().Deserialize(buffer);
+                    //         Debug.Log($"Received position from {positionPacket.playerData.name}: {positionPacket.position}");
+                    //         BroadcastData(buffer, client);
+                    //         break;
+                    //     case BasePacket.Type.Rotation:
+                    //         RotationYPacket rotationYPacket = new RotationYPacket().Deserialize(buffer);
+                    //         Debug.Log($"Received rotation y from {rotationYPacket.playerData.name}: {rotationYPacket.rotationY}");
+                    //         BroadcastData(buffer, client);
+                    //         break;
+                    //     case BasePacket.Type.AnimationState:
+                    //         AnimationStatePacket animationStatePacket = new AnimationStatePacket().Deserialize(buffer);
+                    //         Debug.Log($"Received animation state from {animationStatePacket.playerData.name}: {animationStatePacket.commandType} {animationStatePacket.parameterName} {animationStatePacket.boolValue} {animationStatePacket.floatValue}");
+                    //         BroadcastData(buffer, client);
+                    //         break;
+                    // }
                 }
             }
         }

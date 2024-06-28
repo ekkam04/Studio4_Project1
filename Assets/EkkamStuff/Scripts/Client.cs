@@ -90,62 +90,88 @@ namespace Ekkam
                 byte[] buffer = new byte[socket.Available];
                 socket.Receive(buffer);
 
-                BasePacket packet = new BasePacket().BaseDeserialize(buffer);
-                switch (packet.type)
+                int bufferOffset = 0;
+                int currentBufferSize = buffer.Length;
+                
+                while (currentBufferSize > 0)
                 {
-                    case BasePacket.Type.Position:
-                        PositionPacket positionPacket = new PositionPacket().Deserialize(buffer);
-                        Debug.Log($"Received position: {positionPacket.position} from {positionPacket.playerData.name}");
-                        // onPositionReceived?.Invoke(positionPacket.position);
-                        
-                        if (players.ContainsKey(positionPacket.playerData.id))
-                        {
-                            players[positionPacket.playerData.id].GetComponent<Player>().lastSentPosition = positionPacket.position;
-                        }
-                        else
-                        {
-                            SpawnPlayer(positionPacket.playerData.id, positionPacket.position);
-                        }
+                    BasePacket packet = new BasePacket().BaseDeserialize(buffer, bufferOffset);
+                    currentBufferSize -= packet.packetSize;
+                    if (currentBufferSize <= 0)
+                    {
+                        Debug.LogWarning("Breaking loop");
                         break;
+                    }
                     
-                    case BasePacket.Type.Rotation:
-                        RotationYPacket rotationYPacket = new RotationYPacket().Deserialize(buffer);
-                        Debug.Log($"Received rotation: {rotationYPacket.rotationY} from {rotationYPacket.playerData.name}");
-                        
-                        if (players.ContainsKey(rotationYPacket.playerData.id))
-                        {
-                            players[rotationYPacket.playerData.id].GetComponent<Player>().lastSentRotationY = rotationYPacket.rotationY;
-                        }
-                        else
-                        {
-                            SpawnPlayer(rotationYPacket.playerData.id, Vector3.zero);
-                        }
-                        break;
-                    case BasePacket.Type.AnimationState:
-                        AnimationStatePacket animationStatePacket = new AnimationStatePacket().Deserialize(buffer);
-                        Debug.Log($"Received animation state: {animationStatePacket.commandType} from {animationStatePacket.playerData.name}");
-                        
-                        if (players.ContainsKey(animationStatePacket.playerData.id))
-                        {
-                            Player player = players[animationStatePacket.playerData.id].GetComponent<Player>();
-                            switch (animationStatePacket.commandType)
+                    switch (packet.type)
+                    {
+                        case BasePacket.Type.Position:
+                            PositionPacket positionPacket = new PositionPacket().Deserialize(buffer, bufferOffset);
+                            bufferOffset += positionPacket.packetSize;
+                            Debug.Log(
+                                $"Received position: {positionPacket.position} from {positionPacket.playerData.name}");
+                            // onPositionReceived?.Invoke(positionPacket.position);
+
+                            if (players.ContainsKey(positionPacket.playerData.id))
                             {
-                                case AnimationStatePacket.AnimationCommandType.Bool:
-                                    player.anim.SetBool(animationStatePacket.parameterName, animationStatePacket.boolValue);
-                                    break;
-                                case AnimationStatePacket.AnimationCommandType.Trigger:
-                                    player.anim.SetTrigger(animationStatePacket.parameterName);
-                                    break;
-                                case AnimationStatePacket.AnimationCommandType.Float:
-                                    player.anim.SetFloat(animationStatePacket.parameterName, animationStatePacket.floatValue);
-                                    break;
+                                players[positionPacket.playerData.id].GetComponent<Player>().lastSentPosition =
+                                    positionPacket.position;
                             }
-                        }
-                        else
-                        {
-                            SpawnPlayer(animationStatePacket.playerData.id, Vector3.zero);
-                        }
-                        break;
+                            else
+                            {
+                                SpawnPlayer(positionPacket.playerData.id, positionPacket.position);
+                            }
+
+                            break;
+
+                        case BasePacket.Type.Rotation:
+                            RotationYPacket rotationYPacket = new RotationYPacket().Deserialize(buffer, bufferOffset);
+                            bufferOffset += rotationYPacket.packetSize;
+                            Debug.Log(
+                                $"Received rotation: {rotationYPacket.rotationY} from {rotationYPacket.playerData.name}");
+
+                            if (players.ContainsKey(rotationYPacket.playerData.id))
+                            {
+                                players[rotationYPacket.playerData.id].GetComponent<Player>().lastSentRotationY =
+                                    rotationYPacket.rotationY;
+                            }
+                            else
+                            {
+                                SpawnPlayer(rotationYPacket.playerData.id, Vector3.zero);
+                            }
+
+                            break;
+                        case BasePacket.Type.AnimationState:
+                            AnimationStatePacket animationStatePacket = new AnimationStatePacket().Deserialize(buffer, bufferOffset);
+                            bufferOffset += animationStatePacket.packetSize;
+                            Debug.Log(
+                                $"Received animation state: {animationStatePacket.commandType} from {animationStatePacket.playerData.name}");
+
+                            if (players.ContainsKey(animationStatePacket.playerData.id))
+                            {
+                                Player player = players[animationStatePacket.playerData.id].GetComponent<Player>();
+                                switch (animationStatePacket.commandType)
+                                {
+                                    case AnimationStatePacket.AnimationCommandType.Bool:
+                                        player.anim.SetBool(animationStatePacket.parameterName,
+                                            animationStatePacket.boolValue);
+                                        break;
+                                    case AnimationStatePacket.AnimationCommandType.Trigger:
+                                        player.anim.SetTrigger(animationStatePacket.parameterName);
+                                        break;
+                                    case AnimationStatePacket.AnimationCommandType.Float:
+                                        player.anim.SetFloat(animationStatePacket.parameterName,
+                                            animationStatePacket.floatValue);
+                                        break;
+                                }
+                            }
+                            else
+                            {
+                                SpawnPlayer(animationStatePacket.playerData.id, Vector3.zero);
+                            }
+
+                            break;
+                    }
                 }
             }
         }

@@ -114,7 +114,7 @@ namespace Ekkam
                 return;
             }
             
-            if (Input.GetKeyDown("escape"))
+            if (Input.GetKeyDown(KeyCode.Q))
             {
                 Cursor.lockState = CursorLockMode.None;
                 Cursor.visible = true;

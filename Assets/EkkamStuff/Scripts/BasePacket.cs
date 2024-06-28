@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using System.IO;
 
 namespace Ekkam
@@ -15,6 +16,7 @@ namespace Ekkam
 
         public Type type;
         public PlayerData playerData;
+        public int packetSize;
 
         protected MemoryStream wms;
         protected BinaryWriter bw;
@@ -49,10 +51,11 @@ namespace Ekkam
             return wms.ToArray();
         }
 
-        public BasePacket BaseDeserialize(byte[] data)
+        public BasePacket BaseDeserialize(byte[] data, int bufferOffset)
         {
             rms = new MemoryStream(data);
             br = new BinaryReader(rms);
+            rms.Seek(bufferOffset, SeekOrigin.Begin);
 
             type = (Type)br.ReadInt32();
             playerData = new PlayerData(br.ReadString(), br.ReadString());
@@ -90,10 +93,10 @@ namespace Ekkam
             return EndSerialize();
         }
 
-        public PositionPacket Deserialize(byte[] data)
+        public PositionPacket Deserialize(byte[] data, int bufferOffset)
         {
             PositionPacket packet = new PositionPacket();
-            BasePacket basePacket = packet.BaseDeserialize(data);
+            BasePacket basePacket = packet.BaseDeserialize(data, bufferOffset);
             packet.type = basePacket.type;
             packet.playerData = basePacket.playerData;
             packet.position = new Vector3(basePacket.br.ReadSingle(), basePacket.br.ReadSingle(), basePacket.br.ReadSingle());
@@ -122,10 +125,10 @@ namespace Ekkam
             return EndSerialize();
         }
 
-        public RotationYPacket Deserialize(byte[] data)
+        public RotationYPacket Deserialize(byte[] data, int bufferOffset)
         {
             RotationYPacket packet = new RotationYPacket();
-            BasePacket basePacket = packet.BaseDeserialize(data);
+            BasePacket basePacket = packet.BaseDeserialize(data, bufferOffset);
             packet.type = basePacket.type;
             packet.playerData = basePacket.playerData;
             packet.rotationY = basePacket.br.ReadSingle();
@@ -174,10 +177,10 @@ namespace Ekkam
             return EndSerialize();
         }
 
-        public AnimationStatePacket Deserialize(byte[] data)
+        public AnimationStatePacket Deserialize(byte[] data, int bufferOffset)
         {
             AnimationStatePacket packet = new AnimationStatePacket();
-            BasePacket basePacket = packet.BaseDeserialize(data);
+            BasePacket basePacket = packet.BaseDeserialize(data, bufferOffset);
             packet.type = basePacket.type;
             packet.playerData = basePacket.playerData;
             packet.commandType = (AnimationCommandType)basePacket.br.ReadInt32();
