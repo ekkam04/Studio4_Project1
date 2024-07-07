@@ -100,7 +100,7 @@ namespace Ekkam
                         
                         if (players.ContainsKey(positionPacket.playerData.id))
                         {
-                            players[positionPacket.playerData.id].GetComponent<Player>().lastSentPosition = positionPacket.position;
+                            // players[positionPacket.playerData.id].GetComponent<Player>().lastSentPosition = positionPacket.position;
                         }
                         else
                         {
@@ -114,7 +114,7 @@ namespace Ekkam
                         
                         if (players.ContainsKey(rotationYPacket.playerData.id))
                         {
-                            players[rotationYPacket.playerData.id].GetComponent<Player>().lastSentRotationY = rotationYPacket.rotationY;
+                            // players[rotationYPacket.playerData.id].GetComponent<Player>().lastSentRotationY = rotationYPacket.rotationY;
                         }
                         else
                         {
@@ -131,13 +131,13 @@ namespace Ekkam
                             switch (animationStatePacket.commandType)
                             {
                                 case AnimationStatePacket.AnimationCommandType.Bool:
-                                    player.anim.SetBool(animationStatePacket.parameterName, animationStatePacket.boolValue);
+                                    // player.anim.SetBool(animationStatePacket.parameterName, animationStatePacket.boolValue);
                                     break;
                                 case AnimationStatePacket.AnimationCommandType.Trigger:
-                                    player.anim.SetTrigger(animationStatePacket.parameterName);
+                                    // player.anim.SetTrigger(animationStatePacket.parameterName);
                                     break;
                                 case AnimationStatePacket.AnimationCommandType.Float:
-                                    player.anim.SetFloat(animationStatePacket.parameterName, animationStatePacket.floatValue);
+                                    // player.anim.SetFloat(animationStatePacket.parameterName, animationStatePacket.floatValue);
                                     break;
                             }
                         }
@@ -177,7 +177,7 @@ namespace Ekkam
             if (networkComponent.IsMine())
             {
                 CinemachineVirtualCamera playerVCam = GameObject.Find("PlayerVCam").GetComponent<CinemachineVirtualCamera>();
-                playerVCam.Follow = playerObject.GetComponent<Player>().cameraPos;
+                // playerVCam.Follow = playerObject.GetComponent<Player>().cameraPos;
             }
             players.Add(playerId, playerObject);
         }
