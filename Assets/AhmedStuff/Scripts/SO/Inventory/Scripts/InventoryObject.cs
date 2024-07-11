@@ -14,12 +14,16 @@ public class InventoryObject : ScriptableObject
         {
             if (container[i].item == _item)
             {
+                if (container[i].item.stackble)
+                {
+                    container[i].AddAmount(_amount);
+                }
                 hasItem = true;
                 break;
             }
         }
 
-        if (!hasItem)
+        if (_item.stackble == false || !hasItem)
         {
             container.Add(new InventorySlot(_item, _amount));
         }
