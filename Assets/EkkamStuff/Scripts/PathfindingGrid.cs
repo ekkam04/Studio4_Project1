@@ -32,6 +32,8 @@ namespace Ekkam
                 var nodePosition = grid.WorldToCell(node.transform.position);
                 node.gridPosition = new Vector2Int(nodePosition.x, nodePosition.y);
             }
+            
+            UpdateBlockedNodes();
         }
 
         public PathfindingNode GetNode(Vector2Int gridPosition)
@@ -46,7 +48,6 @@ namespace Ekkam
             return null;
         }
         
-        [Command]
         async void UpdateBlockedNodes()
         {
             print("Updating blocked nodes...");

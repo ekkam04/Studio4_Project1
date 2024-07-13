@@ -9,12 +9,16 @@ namespace Ekkam
     {
         public GameObject mousePosition3DPrefab;
         private MousePosition3D mousePosition3D;
+
+        private Animator anim;
+        
         private PathfindingGrid grid;
         private Astar astar;
 
         private void Start()
         {
             mousePosition3D = Instantiate(mousePosition3DPrefab).GetComponent<MousePosition3D>();
+            anim = GetComponent<Animator>();
             grid = FindObjectOfType<PathfindingGrid>();
             astar = GetComponent<Astar>();
         }
@@ -31,25 +35,27 @@ namespace Ekkam
             
             if (Input.GetMouseButtonDown(1))
             {
-                StartCoroutine(FollowPathCoroutine());
+                StartCoroutine(FollowPath());
             }
         }
         
-        IEnumerator FollowPathCoroutine()
+        IEnumerator FollowPath()
         {
             grid.GetNode(astar.startNodePosition).Occupant = null;
+            anim.SetBool("isMoving", true);
+            
             for (int i = astar.pathNodes.Count - 1; i >= 0; i--)
             {
-                astar.pathNodes[i].Occupant = this.gameObject;
-                Vector3 targetPosition = new Vector3(astar.pathNodes[i].transform.position.x, transform.position.y, astar.pathNodes[i].transform.position.z);
+                Vector3 targetPosition = astar.pathNodes[i].transform.position;
                 while (Vector3.Distance(transform.position, targetPosition) > 0.1f)
                 {
-                    transform.position = Vector3.MoveTowards(transform.position, targetPosition, 5 * Time.deltaTime);
+                    transform.position = Vector3.MoveTowards(transform.position, targetPosition, 5f * Time.deltaTime);
+                    transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(targetPosition - transform.position), 10f * Time.deltaTime);
                     yield return null;
                 }
-                transform.position = targetPosition;
-                astar.pathNodes[i].Occupant = null;
             }
+            
+            anim.SetBool("isMoving", false);
             grid.GetNode(astar.endNodePosition).Occupant = this.gameObject;
         }
     }

@@ -39,8 +39,8 @@ namespace Ekkam
             UpdateStartPosition(grid.GetPositionFromWorldPoint(transform.position));
             PathfindingNode startingNode = grid.GetNode(startNodePosition);
             
-            PathfindingNode endingNode = grid.GetNode(endNodePosition);
-            endingNode.SetColor(endNodeColor);
+            // PathfindingNode endingNode = grid.GetNode(endNodePosition);
+            // endingNode.SetColor(endNodeColor);
             
             GetNeighbours(startingNode, startNodePosition);
         }
