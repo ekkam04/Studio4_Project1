@@ -10,17 +10,14 @@ using UnityEngine.SceneManagement;
 
 namespace Ekkam
 {
-    public class Client : MonoBehaviour
+    public class NetworkManager : MonoBehaviour
     {
-        public static Client instance;
+        public static NetworkManager instance;
 
         private Socket socket;
         
         public GameObject playerPrefab;
-
-        public delegate void OnPositionReceived(Vector3 position);
-        public static event OnPositionReceived onPositionReceived;
-
+        
         public PlayerData playerData;
         public Dictionary<string, GameObject> players = new Dictionary<string, GameObject>();
 

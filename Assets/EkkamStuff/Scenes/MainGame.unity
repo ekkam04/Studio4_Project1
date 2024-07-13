@@ -1036,7 +1036,7 @@ PrefabInstance:
     - target: {fileID: 224130951485110974, guid: 9ed2a051c32b4fe47a5e4fb95c20b03f,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -0.000015258789
+      value: -0.000030517578
       objectReference: {fileID: 0}
     - target: {fileID: 224166536479716514, guid: 9ed2a051c32b4fe47a5e4fb95c20b03f,
         type: 3}
@@ -5673,8 +5673,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 467082306}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.5, y: 0, z: 0, w: 0.8660254}
-  m_LocalPosition: {x: 3.4307175, y: 20.575348, z: -5.0133667}
+  m_LocalRotation: {x: 0.38268343, y: 0, z: 0, w: 0.92387956}
+  m_LocalPosition: {x: 3.4307175, y: 12.235352, z: -9.143372}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -7205,10 +7205,30 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 941785809587344800, guid: 09aade0ecefd01e4b8f7661acf64f5c2,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 8.41
+      objectReference: {fileID: 0}
+    - target: {fileID: 941785809587344800, guid: 09aade0ecefd01e4b8f7661acf64f5c2,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.85
+      objectReference: {fileID: 0}
     - target: {fileID: 1888427756403250876, guid: 09aade0ecefd01e4b8f7661acf64f5c2,
         type: 3}
       propertyPath: m_IsActive
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3742884627347217635, guid: 09aade0ecefd01e4b8f7661acf64f5c2,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 9.41
+      objectReference: {fileID: 0}
+    - target: {fileID: 3742884627347217635, guid: 09aade0ecefd01e4b8f7661acf64f5c2,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.85
       objectReference: {fileID: 0}
     - target: {fileID: 8345070698610564304, guid: 09aade0ecefd01e4b8f7661acf64f5c2,
         type: 3}
@@ -11727,14 +11747,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1257621289}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.5, y: 0, z: 0, w: 0.8660254}
-  m_LocalPosition: {x: 43.5, y: 364.33, z: -606.9}
+  m_LocalRotation: {x: 0.38268343, y: 0, z: 0, w: 0.92387956}
+  m_LocalPosition: {x: 43.5, y: 355.99, z: -611.03}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1661799502}
   m_Father: {fileID: 578614202}
-  m_LocalEulerAnglesHint: {x: 60, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 45, y: 0, z: 0}
 --- !u!114 &1257621291
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15320,7 +15340,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1613290275}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 8071781360103816524}
+        m_TargetAssemblyTypeName: Ekkam.Player, Assembly-CSharp
+        m_MethodName: MoveButton
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1613290275
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -23874,6 +23906,7 @@ MonoBehaviour:
   evasion: 0
   startNodePosition: {x: 0, y: 0}
   endNodePosition: {x: 0, y: 0}
+  grid: {fileID: 0}
   startNodeColor: {r: 0, g: 0.5, b: 0, a: 1}
   endNodeColor: {r: 0.5, g: 0, b: 0, a: 1}
   pathNodeColor: {r: 0, g: 0, b: 0.5, a: 1}
@@ -23883,8 +23916,13 @@ MonoBehaviour:
   pathNodes: []
   findPath: 0
   anim: {fileID: 0}
+  moveRange: 4
   mousePosition3DPrefab: {fileID: 6247423640985755484, guid: 20e8461a506c9354c9d87839c45baa95,
     type: 3}
+  selfActionUI: {fileID: 240175373}
+  reachableNodes: []
+  lastSelectedNode: {fileID: 0}
+  selectingTarget: 0
 --- !u!137 &8071781360107784493
 SkinnedMeshRenderer:
   m_ObjectHideFlags: 0

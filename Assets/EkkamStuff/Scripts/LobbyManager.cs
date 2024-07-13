@@ -19,8 +19,8 @@ namespace Ekkam
         
         void Connect()
         {
-            Client.instance.playerData = new PlayerData(Guid.NewGuid().ToString(), nameInput.text);
-            Client.instance.ConnectToServer("127.0.0.1", nameInput.text);
+            NetworkManager.instance.playerData = new PlayerData(Guid.NewGuid().ToString(), nameInput.text);
+            NetworkManager.instance.ConnectToServer("127.0.0.1", nameInput.text);
             OnConnectedToServer();
         }
 

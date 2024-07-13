@@ -9,7 +9,7 @@ namespace Ekkam
 
         public bool IsMine()
         {
-            return ownerID == Client.instance.playerData.id;
+            return ownerID == NetworkManager.instance.playerData.id;
         }
     }
 }

@@ -6,6 +6,21 @@ namespace Ekkam
 {
     public class PathfindingNode : MonoBehaviour
     {
+        public bool isActionable;
+        
+        public enum VisualType
+        {
+            None,
+            Selected,
+            Path,
+            Enemy
+        }
+        public VisualType visualType;
+        
+        public GameObject selectedVisual;
+        public GameObject pathVisual;
+        public GameObject enemyVisual;
+        
         public Vector2Int gridPosition;
         public List<PathfindingNode> neighbours = new List<PathfindingNode>();
         public bool isBlocked;
@@ -98,6 +113,29 @@ namespace Ekkam
         public void ResetColor()
         {
             GetComponent<MeshRenderer>().material.color = initialColor;
+        }
+        
+        public void SetActionable(bool actionable, VisualType visualType = VisualType.None)
+        {
+            isActionable = actionable;
+            this.visualType = visualType;
+            switch (visualType)
+            {
+                case VisualType.None:
+                    selectedVisual.SetActive(false);
+                    pathVisual.SetActive(false);
+                    enemyVisual.SetActive(false);
+                    break;
+                case VisualType.Selected:
+                    selectedVisual.SetActive(true);
+                    break;
+                case VisualType.Path:
+                    pathVisual.SetActive(true);
+                    break;
+                case VisualType.Enemy:
+                    enemyVisual.SetActive(true);
+                    break;
+            }
         }
     }
 }

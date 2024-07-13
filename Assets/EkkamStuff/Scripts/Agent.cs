@@ -16,7 +16,7 @@ namespace Ekkam
         [SerializeField] public Vector2Int startNodePosition;
         [SerializeField] public Vector2Int endNodePosition;
         
-        protected PathfindingGrid grid;
+        public PathfindingGrid grid;
         
         [SerializeField] Color startNodeColor = new Color(0, 0.5f, 0, 1);
         [SerializeField] Color endNodeColor = new Color(0.5f, 0, 0, 1);
@@ -36,6 +36,7 @@ namespace Ekkam
         [Header("--- Agent Settings ---")] // ---------------------------
         
         public Animator anim;
+        public int moveRange = 4;
 
         protected void Start()
         {
@@ -53,11 +54,13 @@ namespace Ekkam
             if (findPath) FindPath();
         }
 
+        // --- Pathfinding ---------------------------------------------------
+        
         void FindPath()
         {
             if (pathNodes.Count > 0)
             {
-                print("Path already found");
+                Debug.LogWarning("Path already found");
                 findPath = false;
                 state = PathfindingState.Success;
                 return;
@@ -65,7 +68,7 @@ namespace Ekkam
 
             if (openNodes.Count < 1)
             {
-                print("No path found");
+                Debug.LogWarning("No path found");
                 findPath = false;
                 state = PathfindingState.Failure;
                 return;
@@ -86,6 +89,7 @@ namespace Ekkam
                 print("Path found");
                 findPath = false;
                 SetPathNodes();
+                StartCoroutine(FollowPath());
                 state = PathfindingState.Success;
                 return;
             }
@@ -228,6 +232,41 @@ namespace Ekkam
             return distanceX + distanceY;
         }
         
+        public List<PathfindingNode> GetReachableNodes(int range)
+        {
+            List<PathfindingNode> reachableNodes = new List<PathfindingNode>();
+            List<PathfindingNode> openNodes = new List<PathfindingNode>();
+            List<PathfindingNode> closedNodes = new List<PathfindingNode>();
+            openNodes.Add(grid.GetNode(startNodePosition));
+            reachableNodes.Add(grid.GetNode(startNodePosition));
+            int currentRange = 0;
+            
+            while (currentRange < range)
+            {
+                List<PathfindingNode> currentNodes = new List<PathfindingNode>(openNodes);
+                openNodes.Clear();
+                foreach (var node in currentNodes)
+                {
+                    foreach (var neighbour in GetNeighbours(node, node.gridPosition))
+                    {
+                        if (neighbour == null) continue;
+                        if (neighbour.isBlocked || closedNodes.Contains(neighbour) || reachableNodes.Contains(neighbour))
+                        {
+                            continue;
+                        }
+                        openNodes.Add(neighbour);
+                        reachableNodes.Add(neighbour);
+                    }
+                    closedNodes.Add(node);
+                }
+                currentRange++;
+            }
+            reachableNodes.Remove(grid.GetNode(startNodePosition));
+            return reachableNodes;
+        }
+        
+        // --- Agent ---------------------------------------------------
+        
         public IEnumerator FollowPath()
         {
             grid.GetNode(startNodePosition).Occupant = null;
@@ -246,6 +285,16 @@ namespace Ekkam
             
             anim.SetBool("isMoving", false);
             grid.GetNode(endNodePosition).Occupant = this.gameObject;
+            
+            UpdateStartPosition(grid.GetPositionFromWorldPoint(transform.position));
+        }
+        
+        // --- Actions ---------------------------------------------------
+
+        public void MoveAction(Vector2Int targetPosition)
+        {
+            UpdateTargetPosition(targetPosition);
+            findPath = true; // finds path and starts following it if path is found
         }
     }
 }
