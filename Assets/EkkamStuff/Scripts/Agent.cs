@@ -9,13 +9,15 @@ using Unity.VisualScripting;
 
 namespace Ekkam
 {
-    public class Astar : MonoBehaviour
+    public class Agent : Damagable
     {
-        private Player player;
-        private PathfindingGrid grid;
+        [Header("--- Astar Settings ---")] // ---------------------------
+        
         [SerializeField] public Vector2Int startNodePosition;
         [SerializeField] public Vector2Int endNodePosition;
-
+        
+        protected PathfindingGrid grid;
+        
         [SerializeField] Color startNodeColor = new Color(0, 0.5f, 0, 1);
         [SerializeField] Color endNodeColor = new Color(0.5f, 0, 0, 1);
         [SerializeField] Color pathNodeColor = new Color(0, 0, 0.5f, 1);
@@ -30,22 +32,23 @@ namespace Ekkam
         private PathfindingNode[] allNodes;
 
         public bool findPath;
+        
+        [Header("--- Agent Settings ---")] // ---------------------------
+        
+        public Animator anim;
 
-        void Start()
+        protected void Start()
         {
-            player = GetComponent<Player>();
             grid = FindObjectOfType<PathfindingGrid>();
+            anim = GetComponent<Animator>();
             
             UpdateStartPosition(grid.GetPositionFromWorldPoint(transform.position));
             PathfindingNode startingNode = grid.GetNode(startNodePosition);
             
-            // PathfindingNode endingNode = grid.GetNode(endNodePosition);
-            // endingNode.SetColor(endNodeColor);
-            
             GetNeighbours(startingNode, startNodePosition);
         }
 
-        private void Update()
+        protected void Update()
         {
             if (findPath) FindPath();
         }
@@ -141,8 +144,7 @@ namespace Ekkam
             startingNode.Occupant = gameObject;
             openNodes.Add(startingNode);
         }
-
-        [Command]
+        
         public void UpdateTargetPosition(Vector2Int newTargetPosition)
         {
             #if PATHFINDING_DEBUG
@@ -224,6 +226,26 @@ namespace Ekkam
             int distanceY = Mathf.Abs(nodeA.gridPosition.y - nodeB.gridPosition.y);
             // return manhattan distance
             return distanceX + distanceY;
+        }
+        
+        public IEnumerator FollowPath()
+        {
+            grid.GetNode(startNodePosition).Occupant = null;
+            anim.SetBool("isMoving", true);
+            
+            for (int i = pathNodes.Count - 1; i >= 0; i--)
+            {
+                Vector3 targetPosition = pathNodes[i].transform.position;
+                while (Vector3.Distance(transform.position, targetPosition) > 0.1f)
+                {
+                    transform.position = Vector3.MoveTowards(transform.position, targetPosition, 5f * Time.deltaTime);
+                    transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(targetPosition - transform.position), 10f * Time.deltaTime);
+                    yield return null;
+                }
+            }
+            
+            anim.SetBool("isMoving", false);
+            grid.GetNode(endNodePosition).Occupant = this.gameObject;
         }
     }
 }

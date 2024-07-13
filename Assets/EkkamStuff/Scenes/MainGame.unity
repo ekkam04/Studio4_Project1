@@ -21344,7 +21344,6 @@ GameObject:
   - component: {fileID: 8071781360103816521}
   - component: {fileID: 8071781360103816522}
   - component: {fileID: 8071781360103816524}
-  - component: {fileID: 8071781360103816523}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -23858,28 +23857,6 @@ CapsuleCollider:
   m_Height: 1.8
   m_Direction: 1
   m_Center: {x: 0, y: 0.91653436, z: 0}
---- !u!114 &8071781360103816523
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8071781360094192009}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aa8a3b23393040698b9a35e3ff91db53, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  startNodePosition: {x: 0, y: 0}
-  endNodePosition: {x: 0, y: 0}
-  startNodeColor: {r: 0, g: 0.5, b: 0, a: 1}
-  endNodeColor: {r: 0.5, g: 0, b: 0, a: 1}
-  pathNodeColor: {r: 0, g: 0, b: 0.5, a: 1}
-  state: 0
-  openNodes: []
-  closedNodes: []
-  pathNodes: []
-  findPath: 0
 --- !u!114 &8071781360103816524
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -23892,6 +23869,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b781e979ee44153bba0268493681431, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  health: 100
+  armor: 0
+  evasion: 0
+  startNodePosition: {x: 0, y: 0}
+  endNodePosition: {x: 0, y: 0}
+  startNodeColor: {r: 0, g: 0.5, b: 0, a: 1}
+  endNodeColor: {r: 0.5, g: 0, b: 0, a: 1}
+  pathNodeColor: {r: 0, g: 0, b: 0.5, a: 1}
+  state: 0
+  openNodes: []
+  closedNodes: []
+  pathNodes: []
+  findPath: 0
+  anim: {fileID: 0}
   mousePosition3DPrefab: {fileID: 6247423640985755484, guid: 20e8461a506c9354c9d87839c45baa95,
     type: 3}
 --- !u!137 &8071781360107784493
