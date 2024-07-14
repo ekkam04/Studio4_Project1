@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Ekkam
 {
@@ -11,6 +12,7 @@ namespace Ekkam
         
         public GameObject mousePosition3DPrefab;
         public GameObject selfActionUI;
+        public Button moveButton;
         private MousePosition3D mousePosition3D;
         public List<PathfindingNode> reachableNodes = new List<PathfindingNode>();
         
@@ -22,6 +24,9 @@ namespace Ekkam
             base.Start();
             
             mousePosition3D = Instantiate(mousePosition3DPrefab).GetComponent<MousePosition3D>();
+            selfActionUI = GameObject.Find("GameUI");
+            moveButton = GameObject.Find("MoveButton").GetComponent<Button>();
+            moveButton.onClick.AddListener(MoveButton);
         }
 
         private new void Update()
@@ -66,20 +71,11 @@ namespace Ekkam
 
                     // Take action
                     MoveAction(mousePositionOnGrid);
+                    NetworkManager.instance.SendMoveAction(mousePositionOnGrid);
                     
                     selectingTarget = false;
                 }
             }
-            
-            // if (Input.GetKeyDown(KeyCode.M))
-            // {
-            //     reachableNodes = GetReachableNodes(moveRange);
-            //     foreach (var node in reachableNodes)
-            //     {
-            //         node.SetActionable(true, PathfindingNode.VisualType.Path);
-            //     }
-            //     selectingTarget = true;
-            // }
         }
         
         public void MoveButton()

@@ -8,12 +8,12 @@ namespace Ekkam
 {
     public class LobbyManager : MonoBehaviour
     {
+        public TMP_InputField ipInput;
         public TMP_InputField nameInput;
         public Button connectButton;
 
         private void Start()
         {
-            // Server.instance.connectedToServer += OnConnectedToServer;
             connectButton.onClick.AddListener(Connect);
         }
         

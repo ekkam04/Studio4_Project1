@@ -238,7 +238,7 @@ namespace Ekkam
             List<PathfindingNode> openNodes = new List<PathfindingNode>();
             List<PathfindingNode> closedNodes = new List<PathfindingNode>();
             openNodes.Add(grid.GetNode(startNodePosition));
-            reachableNodes.Add(grid.GetNode(startNodePosition));
+            // reachableNodes.Add(grid.GetNode(startNodePosition));
             int currentRange = 0;
             
             while (currentRange < range)
@@ -261,7 +261,7 @@ namespace Ekkam
                 }
                 currentRange++;
             }
-            reachableNodes.Remove(grid.GetNode(startNodePosition));
+            // reachableNodes.Remove(grid.GetNode(startNodePosition));
             return reachableNodes;
         }
         

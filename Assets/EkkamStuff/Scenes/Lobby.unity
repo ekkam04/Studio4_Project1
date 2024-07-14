@@ -376,6 +376,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 06545d397a074b7abe42ea5f3ec570c7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ipInput: {fileID: 0}
   nameInput: {fileID: 1703898878}
   connectButton: {fileID: 1152038267}
 --- !u!1 &167936620
@@ -407,6 +408,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6780480cc81d47fe9f8dcb04c244701d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  acceptingNewClients: 1
+  maxClients: 3
+  spawnPositions:
+  - {x: 0.5, y: 0, z: -1}
+  - {x: 0.5, y: 0, z: 1}
+  - {x: -1, y: 0, z: 0.5}
 --- !u!4 &167936622
 Transform:
   m_ObjectHideFlags: 0
@@ -619,7 +626,7 @@ GameObject:
   - component: {fileID: 641930076}
   - component: {fileID: 641930075}
   m_Layer: 0
-  m_Name: Client
+  m_Name: NetworkManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -637,7 +644,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a4568a6eb0544a0eb7007ede79f3175a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerPrefab: {fileID: 3195568967175673547, guid: 7f8da0d435e4d52419d2dbc009d58606,
+  playerPrefab: {fileID: 2558620899690012287, guid: 480c4c3101a2e444591cc10e7317eade,
     type: 3}
 --- !u!4 &641930076
 Transform:
