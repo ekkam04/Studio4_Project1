@@ -410,10 +410,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   acceptingNewClients: 1
   maxClients: 3
-  spawnPositions:
-  - {x: 0.5, y: 0, z: -1}
-  - {x: 0.5, y: 0, z: 1}
-  - {x: -1, y: 0, z: 0.5}
 --- !u!4 &167936622
 Transform:
   m_ObjectHideFlags: 0
@@ -646,6 +642,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerPrefab: {fileID: 2558620899690012287, guid: 480c4c3101a2e444591cc10e7317eade,
     type: 3}
+  myPlayer: {fileID: 0}
+  spawnPositions:
+  - {x: 0.5, y: 0, z: -1}
+  - {x: 0.5, y: 0, z: 1}
+  - {x: -1, y: 0, z: 0.5}
 --- !u!4 &641930076
 Transform:
   m_ObjectHideFlags: 0

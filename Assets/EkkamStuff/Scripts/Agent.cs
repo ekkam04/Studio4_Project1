@@ -43,10 +43,10 @@ namespace Ekkam
             grid = FindObjectOfType<PathfindingGrid>();
             anim = GetComponent<Animator>();
             
-            UpdateStartPosition(grid.GetPositionFromWorldPoint(transform.position));
-            PathfindingNode startingNode = grid.GetNode(startNodePosition);
-            
-            GetNeighbours(startingNode, startNodePosition);
+            // UpdateStartPosition(grid.GetPositionFromWorldPoint(transform.position));
+            // PathfindingNode startingNode = grid.GetNode(startNodePosition);
+            //
+            // GetNeighbours(startingNode, startNodePosition);
         }
 
         protected void Update()

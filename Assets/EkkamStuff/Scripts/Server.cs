@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Net.Sockets;
 using System.Net;
-using QFSW.QC;
-using TMPro;
+using ParrelSync;
 
 namespace Ekkam
 {
@@ -22,15 +21,15 @@ namespace Ekkam
         
         public bool acceptingNewClients = true;
         public int maxClients = 3;
-        public Vector3[] spawnPositions = new Vector3[]
-        {
-            new Vector3(0.5f, 0, -1f),
-            new Vector3(0.5f, 0, 1f),
-            new Vector3(-1f, 0, 0.5f)
-        };
 
         void Start()
         {
+            if (ClonesManager.IsClone())
+            {
+                Destroy(gameObject);
+                return;
+            }
+            
             if (instance == null)
             {
                 instance = this;

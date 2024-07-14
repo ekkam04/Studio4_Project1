@@ -18,11 +18,16 @@ namespace Ekkam
         
         public PathfindingNode lastSelectedNode;
         public bool selectingTarget;
+        
+        private NetworkComponent networkComponent;
 
         private new void Start()
         {
             base.Start();
+            networkComponent = GetComponent<NetworkComponent>();
+            if (!networkComponent.IsMine()) return;
             
+            networkComponent = GetComponent<NetworkComponent>();
             mousePosition3D = Instantiate(mousePosition3DPrefab).GetComponent<MousePosition3D>();
             selfActionUI = GameObject.Find("GameUI");
             moveButton = GameObject.Find("MoveButton").GetComponent<Button>();
@@ -32,6 +37,7 @@ namespace Ekkam
         private new void Update()
         {
             base.Update();
+            if (!networkComponent.IsMine()) return;
             
             Vector2Int mousePositionOnGrid = grid.GetPositionFromWorldPoint(mousePosition3D.transform.position);
             

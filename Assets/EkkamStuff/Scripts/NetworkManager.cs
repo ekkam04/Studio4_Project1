@@ -17,11 +17,16 @@ namespace Ekkam
         private Socket socket;
         
         public GameObject playerPrefab;
-        
+        public Player myPlayer;
         public PlayerData playerData;
         public Dictionary<string, GameObject> players = new Dictionary<string, GameObject>();
-        
-        private Vector3 spawnPosition = new Vector3(0.5f, 0, -1f);
+
+        public Vector3[] spawnPositions = new Vector3[]
+        {
+            new Vector3(0.5f, 0, -1f),
+            new Vector3(0.5f, 0, 1f),
+            new Vector3(-1f, 0, 0.5f)
+        };
 
         void Start()
         {
@@ -63,7 +68,7 @@ namespace Ekkam
             if (scene.name == "MainGame")
             {
                 Debug.Log("Spawning local player...");
-                SpawnPlayer(playerData.id, spawnPosition);
+                SpawnPlayer(playerData.id, Vector3.zero);
             }
         }
 
@@ -92,62 +97,14 @@ namespace Ekkam
                 BasePacket packet = new BasePacket().BaseDeserialize(buffer);
                 switch (packet.type)
                 {
-                    // case BasePacket.Type.Position:
-                    //     PositionPacket positionPacket = new PositionPacket().Deserialize(buffer);
-                    //     Debug.Log($"Received position: {positionPacket.position} from {positionPacket.playerData.name}");
-                    //     // onPositionReceived?.Invoke(positionPacket.position);
-                    //     
-                    //     if (players.ContainsKey(positionPacket.playerData.id))
-                    //     {
-                    //         // players[positionPacket.playerData.id].GetComponent<Player>().lastSentPosition = positionPacket.position;
-                    //     }
-                    //     else
-                    //     {
-                    //         SpawnPlayer(positionPacket.playerData.id, positionPacket.position);
-                    //     }
-                    //     break;
-                    //
-                    // case BasePacket.Type.Rotation:
-                    //     RotationYPacket rotationYPacket = new RotationYPacket().Deserialize(buffer);
-                    //     Debug.Log($"Received rotation: {rotationYPacket.rotationY} from {rotationYPacket.playerData.name}");
-                    //     
-                    //     if (players.ContainsKey(rotationYPacket.playerData.id))
-                    //     {
-                    //         // players[rotationYPacket.playerData.id].GetComponent<Player>().lastSentRotationY = rotationYPacket.rotationY;
-                    //     }
-                    //     else
-                    //     {
-                    //         SpawnPlayer(rotationYPacket.playerData.id, Vector3.zero);
-                    //     }
-                    //     break;
-                    // case BasePacket.Type.AnimationState:
-                    //     AnimationStatePacket animationStatePacket = new AnimationStatePacket().Deserialize(buffer);
-                    //     Debug.Log($"Received animation state: {animationStatePacket.commandType} from {animationStatePacket.playerData.name}");
-                    //     
-                    //     if (players.ContainsKey(animationStatePacket.playerData.id))
-                    //     {
-                    //         Player player = players[animationStatePacket.playerData.id].GetComponent<Player>();
-                    //         switch (animationStatePacket.commandType)
-                    //         {
-                    //             case AnimationStatePacket.AnimationCommandType.Bool:
-                    //                 // player.anim.SetBool(animationStatePacket.parameterName, animationStatePacket.boolValue);
-                    //                 break;
-                    //             case AnimationStatePacket.AnimationCommandType.Trigger:
-                    //                 // player.anim.SetTrigger(animationStatePacket.parameterName);
-                    //                 break;
-                    //             case AnimationStatePacket.AnimationCommandType.Float:
-                    //                 // player.anim.SetFloat(animationStatePacket.parameterName, animationStatePacket.floatValue);
-                    //                 break;
-                    //         }
-                    //     }
-                    //     else
-                    //     {
-                    //         SpawnPlayer(animationStatePacket.playerData.id, Vector3.zero);
-                    //     }
-                    //     break;
                     case BasePacket.Type.GameStart:
                         GameStartPacket gameStartPacket = new GameStartPacket().Deserialize(buffer);
                         Debug.Log($"Received game start packet - client index: {gameStartPacket.clientIndex}");
+                        
+                        myPlayer.transform.position = spawnPositions[gameStartPacket.clientIndex];
+                        var spawnGridPosition = myPlayer.grid.GetPositionFromWorldPoint(spawnPositions[gameStartPacket.clientIndex]);
+                        myPlayer.UpdateStartPosition(spawnGridPosition);
+                        SendTeleportAction(spawnGridPosition);
                         break;
                     case BasePacket.Type.MoveAction:
                         MoveActionPacket moveActionPacket = new MoveActionPacket().Deserialize(buffer);
@@ -155,9 +112,28 @@ namespace Ekkam
                         
                         if (!players.ContainsKey(moveActionPacket.playerData.id))
                         {
-                            SpawnPlayer(moveActionPacket.playerData.id, Vector3.zero);
+                            var player = SpawnPlayer(moveActionPacket.playerData.id, Vector3.zero);
+                            player.grid = myPlayer.grid; // There is anyways only one grid
                         }
                         players[moveActionPacket.playerData.id].GetComponent<Agent>().MoveAction(moveActionPacket.targetPosition);
+                        break;
+                    case BasePacket.Type.TeleportAction:
+                        MoveActionPacket teleportActionPacket = new MoveActionPacket().Deserialize(buffer);
+                        Debug.Log($"Received teleport action: {teleportActionPacket.targetPosition} from {teleportActionPacket.playerData.name}");
+                        
+                        if (!players.ContainsKey(teleportActionPacket.playerData.id))
+                        {
+                            var player = SpawnPlayer(teleportActionPacket.playerData.id, Vector3.zero);
+                            player.grid = myPlayer.grid;
+                        }
+                        var teleportNodePosition = myPlayer.grid.GetNode(teleportActionPacket.targetPosition).transform.position;
+                        var teleportPosition = new Vector3(
+                            teleportNodePosition.x,
+                            players[teleportActionPacket.playerData.id].transform.position.y,
+                            teleportNodePosition.z
+                        );
+                        players[teleportActionPacket.playerData.id].transform.position = teleportPosition;
+                        players[teleportActionPacket.playerData.id].GetComponent<Agent>().UpdateStartPosition(teleportActionPacket.targetPosition);
                         break;
                 }
             }
@@ -187,18 +163,25 @@ namespace Ekkam
             SendDataToServer(moveActionPacket);
         }
         
-        private void SpawnPlayer(string playerId, Vector3 position)
+        public void SendTeleportAction(Vector2Int targetPosition)
+        {
+            MoveActionPacket moveActionPacket = new MoveActionPacket(BasePacket.Type.TeleportAction, playerData, targetPosition);
+            SendDataToServer(moveActionPacket);
+        }
+        
+        private Player SpawnPlayer(string playerId, Vector3 position)
         {
             GameObject playerObject = Instantiate(playerPrefab, position, Quaternion.identity);
             players.Add(playerId, playerObject);
             NetworkComponent networkComponent = playerObject.GetComponent<NetworkComponent>();
             networkComponent.ownerID = playerId;
-            networkComponent.name = playerData.name;
+            networkComponent.ownerName = playerData.name;
             
-            if (networkComponent.IsMine())
-            {
-                // CinemachineVirtualCamera playerVCam = GameObject.Find("PlayerVCam").GetComponent<CinemachineVirtualCamera>();
-            }
+            var player = playerObject.GetComponent<Player>();
+            player.enabled = true;
+            if (networkComponent.IsMine()) myPlayer = player;
+            
+            return player;
         }
     }
 }
