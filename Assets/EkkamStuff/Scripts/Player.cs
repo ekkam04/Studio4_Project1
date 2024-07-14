@@ -13,6 +13,7 @@ namespace Ekkam
         public GameObject mousePosition3DPrefab;
         public GameObject selfActionUI;
         public Button moveButton;
+        public Button shootButton;
         private MousePosition3D mousePosition3D;
         public List<PathfindingNode> reachableNodes = new List<PathfindingNode>();
         
@@ -32,6 +33,8 @@ namespace Ekkam
             selfActionUI = GameObject.Find("GameUI");
             moveButton = GameObject.Find("MoveButton").GetComponent<Button>();
             moveButton.onClick.AddListener(MoveButton);
+            shootButton = GameObject.Find("ShootButton").GetComponent<Button>();
+            shootButton.onClick.AddListener(ShootButton);
         }
 
         private new void Update()
@@ -83,7 +86,12 @@ namespace Ekkam
                 }
             }
         }
-        
+
+        public override void StartTurn()
+        {
+            base.StartTurn();
+        }
+
         public void MoveButton()
         {
             reachableNodes = GetReachableNodes(moveRange);
@@ -92,6 +100,11 @@ namespace Ekkam
                 node.SetActionable(true, PathfindingNode.VisualType.Path);
             }
             selectingTarget = true;
+        }
+        
+        public void ShootButton()
+        {
+            TeabagAction(); // Placeholder
         }
     }
 }

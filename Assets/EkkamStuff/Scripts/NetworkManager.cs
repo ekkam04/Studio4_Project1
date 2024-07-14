@@ -20,6 +20,8 @@ namespace Ekkam
         public Player myPlayer;
         public PlayerData playerData;
         public Dictionary<string, GameObject> players = new Dictionary<string, GameObject>();
+        
+        public bool spawnPlayerOnSceneLoad = true;
 
         public Vector3[] spawnPositions = new Vector3[]
         {
@@ -65,10 +67,11 @@ namespace Ekkam
         
         private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
+            if (!spawnPlayerOnSceneLoad) return;
             if (scene.name == "MainGame")
             {
                 Debug.Log("Spawning local player...");
-                SpawnPlayer(playerData.id, Vector3.zero);
+                SpawnPlayer(playerData, Vector3.zero);
             }
         }
 
@@ -79,6 +82,12 @@ namespace Ekkam
             socket.Connect(new IPEndPoint(IPAddress.Parse(ipAddress), 3000));
             socket.Blocking = false;
             Debug.Log("Connected to server.");
+            
+            if (!spawnPlayerOnSceneLoad)
+            {
+                Debug.Log("Spawning local player...");
+                SpawnPlayer(playerData, Vector3.zero);
+            }
         }
 
         private void SendDataToServer(BasePacket packet)
@@ -105,6 +114,8 @@ namespace Ekkam
                         var spawnGridPosition = myPlayer.grid.GetPositionFromWorldPoint(spawnPositions[gameStartPacket.clientIndex]);
                         myPlayer.UpdateStartPosition(spawnGridPosition);
                         SendTeleportAction(spawnGridPosition);
+                        var turnSystem = FindObjectOfType<TurnSystem>();
+                        turnSystem.enabled = true;
                         break;
                     case BasePacket.Type.MoveAction:
                         MoveActionPacket moveActionPacket = new MoveActionPacket().Deserialize(buffer);
@@ -112,7 +123,7 @@ namespace Ekkam
                         
                         if (!players.ContainsKey(moveActionPacket.playerData.id))
                         {
-                            var player = SpawnPlayer(moveActionPacket.playerData.id, Vector3.zero);
+                            var player = SpawnPlayer(moveActionPacket.playerData, Vector3.zero);
                             player.grid = myPlayer.grid; // There is anyways only one grid
                         }
                         players[moveActionPacket.playerData.id].GetComponent<Agent>().MoveAction(moveActionPacket.targetPosition);
@@ -123,7 +134,7 @@ namespace Ekkam
                         
                         if (!players.ContainsKey(teleportActionPacket.playerData.id))
                         {
-                            var player = SpawnPlayer(teleportActionPacket.playerData.id, Vector3.zero);
+                            var player = SpawnPlayer(teleportActionPacket.playerData, Vector3.zero);
                             player.grid = myPlayer.grid;
                         }
                         var teleportNodePosition = myPlayer.grid.GetNode(teleportActionPacket.targetPosition).transform.position;
@@ -169,12 +180,12 @@ namespace Ekkam
             SendDataToServer(moveActionPacket);
         }
         
-        private Player SpawnPlayer(string playerId, Vector3 position)
+        public Player SpawnPlayer(PlayerData playerData, Vector3 position)
         {
             GameObject playerObject = Instantiate(playerPrefab, position, Quaternion.identity);
-            players.Add(playerId, playerObject);
+            players.Add(playerData.id, playerObject);
             NetworkComponent networkComponent = playerObject.GetComponent<NetworkComponent>();
-            networkComponent.ownerID = playerId;
+            networkComponent.ownerID = playerData.id;
             networkComponent.ownerName = playerData.name;
             
             var player = playerObject.GetComponent<Player>();

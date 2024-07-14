@@ -11,6 +11,7 @@ namespace Ekkam
         public TMP_InputField ipInput;
         public TMP_InputField nameInput;
         public Button connectButton;
+        public bool changeSceneOnConnect = true;
 
         private void Start()
         {
@@ -26,7 +27,14 @@ namespace Ekkam
 
         private void OnConnectedToServer()
         {
-            SceneManager.LoadScene("MainGame");
+            if (changeSceneOnConnect)
+            {
+                SceneManager.LoadScene("MainGame");
+            }
+            else
+            {
+                this.gameObject.SetActive(false);
+            }
         }
     }
 }

@@ -35,8 +35,17 @@ namespace Ekkam
         
         [Header("--- Agent Settings ---")] // ---------------------------
         
-        public Animator anim;
+        private Animator anim;
+        
+        public enum AgentType { Neutral, Friendly, Hostile }
+        public AgentType agentType;
+        
+        public delegate void OnTurnEnd(AgentType agentType);
+        public static OnTurnEnd onTurnEnd;
+        
+        public int actionPoints = 2;
         public int moveRange = 4;
+        public int shootRange = 4;
 
         protected void Start()
         {
@@ -287,14 +296,37 @@ namespace Ekkam
             grid.GetNode(endNodePosition).Occupant = this.gameObject;
             
             UpdateStartPosition(grid.GetPositionFromWorldPoint(transform.position));
+            EndAction();
         }
         
         // --- Actions ---------------------------------------------------
+        
+        public virtual void StartTurn()
+        {
+            actionPoints = 2;
+        }
 
         public void MoveAction(Vector2Int targetPosition)
         {
             UpdateTargetPosition(targetPosition);
             findPath = true; // finds path and starts following it if path is found
+        }
+        
+        public async void TeabagAction()
+        {
+            anim.SetTrigger("teabag");
+            await Task.Delay(200);
+            anim.SetTrigger("teabag");
+            EndAction();
+        }
+        
+        public void EndAction()
+        {
+            actionPoints--;
+            if (actionPoints < 1)
+            {
+                onTurnEnd?.Invoke(agentType);
+            }
         }
     }
 }

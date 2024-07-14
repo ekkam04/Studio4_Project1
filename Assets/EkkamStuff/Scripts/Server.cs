@@ -49,6 +49,7 @@ namespace Ekkam
 
         private void OnDestroy()
         {
+            if (ClonesManager.IsClone()) return;
             socket.Close();
         }
 
@@ -63,15 +64,16 @@ namespace Ekkam
         {
             try
             {
-                if (clients.Count == maxClients)
-                {
-                    acceptingNewClients = false;
-                }
-                
                 Socket newClient = socket.Accept();
                 clients.Add(newClient);
                 Debug.Log("New client connected.");
                 connectedToServer?.Invoke();
+                
+                if (clients.Count == maxClients)
+                {
+                    acceptingNewClients = false;
+                    BroadcastGameStartPacket();
+                }
                 
             }
             catch

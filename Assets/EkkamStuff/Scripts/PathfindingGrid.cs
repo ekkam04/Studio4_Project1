@@ -57,9 +57,9 @@ namespace Ekkam
             {
                 var node = nodes[i];
                 if (node == null) continue;
-                // int[] layersToIgnore = {6}; // Player
-                // LayerMask mask = ~(1 << layersToIgnore[0]) & ~(1 << layersToIgnore[1]);
-                bool isBlocked = Physics.CheckBox(node.transform.position + new Vector3(0, 0.5f, 0), new Vector3(0.5f, 0.5f, 0.5f), Quaternion.identity);
+                int[] layersToIgnore = {6}; // Player
+                int mask = ~LayerMask.GetMask(LayerMask.LayerToName(6));
+                bool isBlocked = Physics.CheckBox(node.transform.position + new Vector3(0, 0.5f, 0), new Vector3(0.5f, 0.5f, 0.5f), Quaternion.identity, mask);
                 node.isBlocked = isBlocked;
                 if (isBlocked)
                 {
