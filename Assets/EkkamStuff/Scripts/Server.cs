@@ -97,8 +97,12 @@ namespace Ekkam
                     switch (packet.type)
                     {
                         case BasePacket.Type.MoveAction:
-                            MoveActionPacket moveActionPacket = new MoveActionPacket().Deserialize(buffer);
-                            Debug.Log($"Received move action from {moveActionPacket.playerData.name}: {moveActionPacket.targetPosition}");
+                            GridPositionPacket moveActionPacket = new GridPositionPacket().Deserialize(buffer);
+                            Debug.Log($"Server received move action from {moveActionPacket.playerData.name}: {moveActionPacket.targetPosition}");
+                            break;
+                        case BasePacket.Type.AttackAction:
+                            GridPositionPacket attackActionPacket = new GridPositionPacket().Deserialize(buffer);
+                            Debug.Log($"Server received attack action from {attackActionPacket.playerData.name}: {attackActionPacket.targetPosition}");
                             break;
                     }
                 }
@@ -109,7 +113,7 @@ namespace Ekkam
         {
             foreach (Socket client in clients)
             {
-                GameStartPacket packet = new GameStartPacket(BasePacket.Type.GameStart, new PlayerData(), clients.IndexOf(client));
+                GameStartPacket packet = new GameStartPacket(BasePacket.Type.GameStart, new PlayerData(), clients.IndexOf(client), clients.Count);
                 client.Send(packet.Serialize());
             }
         }

@@ -11,6 +11,8 @@ namespace Ekkam
             GameStart,
             MoveAction,
             TeleportAction,
+            AttackAction,
+            EndTurn
         }
 
         public Type type;
@@ -70,24 +72,28 @@ namespace Ekkam
     public class GameStartPacket : BasePacket
     {
         public int clientIndex;
-
+        public int clientCount;
+        
         public GameStartPacket() : base(Type.GameStart, new PlayerData("", ""))
         {
             this.clientIndex = 0;
+            this.clientCount = 0;
         }
-
-        public GameStartPacket(Type type, PlayerData playerData, int clientIndex) : base(type, playerData)
+        
+        public GameStartPacket(Type type, PlayerData playerData, int clientIndex, int clientCount) : base(type, playerData)
         {
             this.clientIndex = clientIndex;
+            this.clientCount = clientCount;
         }
-
+        
         public override byte[] Serialize()
         {
             BeginSerialize();
             bw.Write(clientIndex);
+            bw.Write(clientCount);
             return EndSerialize();
         }
-
+        
         public GameStartPacket Deserialize(byte[] data)
         {
             GameStartPacket packet = new GameStartPacket();
@@ -95,20 +101,22 @@ namespace Ekkam
             packet.type = basePacket.type;
             packet.playerData = basePacket.playerData;
             packet.clientIndex = basePacket.br.ReadInt32();
+            packet.clientCount = basePacket.br.ReadInt32();
             return packet;
         }
     }
     
-    public class MoveActionPacket : BasePacket
+    // This packet is sent with different types of actions that only require a target position (pro gamer move)
+    public class GridPositionPacket : BasePacket
     {
         public Vector2Int targetPosition;
 
-        public MoveActionPacket() : base(Type.MoveAction, new PlayerData("", ""))
+        public GridPositionPacket() : base(Type.None, new PlayerData("", ""))
         {
             this.targetPosition = Vector2Int.zero;
         }
 
-        public MoveActionPacket(Type type, PlayerData playerData, Vector2Int targetPosition) : base(type, playerData)
+        public GridPositionPacket(Type type, PlayerData playerData, Vector2Int targetPosition) : base(type, playerData)
         {
             this.targetPosition = targetPosition;
         }
@@ -121,9 +129,9 @@ namespace Ekkam
             return EndSerialize();
         }
 
-        public MoveActionPacket Deserialize(byte[] data)
+        public GridPositionPacket Deserialize(byte[] data)
         {
-            MoveActionPacket packet = new MoveActionPacket();
+            GridPositionPacket packet = new GridPositionPacket();
             BasePacket basePacket = packet.BaseDeserialize(data);
             packet.type = basePacket.type;
             packet.playerData = basePacket.playerData;
@@ -132,35 +140,28 @@ namespace Ekkam
         }
     }
     
-    public class TeleportActionPacket : BasePacket
+    public class EndTurnPacket : BasePacket
     {
-        public Vector2Int targetPosition;
-
-        public TeleportActionPacket() : base(Type.TeleportAction, new PlayerData("", ""))
+        public EndTurnPacket() : base(Type.EndTurn, new PlayerData("", ""))
         {
-            this.targetPosition = Vector2Int.zero;
         }
 
-        public TeleportActionPacket(Type type, PlayerData playerData, Vector2Int targetPosition) : base(type, playerData)
+        public EndTurnPacket(Type type, PlayerData playerData) : base(type, playerData)
         {
-            this.targetPosition = targetPosition;
         }
 
         public override byte[] Serialize()
         {
             BeginSerialize();
-            bw.Write(targetPosition.x);
-            bw.Write(targetPosition.y);
             return EndSerialize();
         }
 
-        public TeleportActionPacket Deserialize(byte[] data)
+        public EndTurnPacket Deserialize(byte[] data)
         {
-            TeleportActionPacket packet = new TeleportActionPacket();
+            EndTurnPacket packet = new EndTurnPacket();
             BasePacket basePacket = packet.BaseDeserialize(data);
             packet.type = basePacket.type;
             packet.playerData = basePacket.playerData;
-            packet.targetPosition = new Vector2Int(basePacket.br.ReadInt32(), basePacket.br.ReadInt32());
             return packet;
         }
     }

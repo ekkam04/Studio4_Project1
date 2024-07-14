@@ -108,17 +108,18 @@ namespace Ekkam
                 {
                     case BasePacket.Type.GameStart:
                         GameStartPacket gameStartPacket = new GameStartPacket().Deserialize(buffer);
-                        Debug.Log($"Received game start packet - client index: {gameStartPacket.clientIndex}");
+                        Debug.Log($"Received game start packet - client index: {gameStartPacket.clientIndex} - client count: {gameStartPacket.clientCount}");
                         
                         myPlayer.transform.position = spawnPositions[gameStartPacket.clientIndex];
                         var spawnGridPosition = myPlayer.grid.GetPositionFromWorldPoint(spawnPositions[gameStartPacket.clientIndex]);
                         myPlayer.UpdateStartPosition(spawnGridPosition);
                         SendTeleportAction(spawnGridPosition);
                         var turnSystem = FindObjectOfType<TurnSystem>();
-                        turnSystem.enabled = true;
+                        // turnSystem.enabled = true;
+                        turnSystem.friendlyCount = gameStartPacket.clientCount;
                         break;
                     case BasePacket.Type.MoveAction:
-                        MoveActionPacket moveActionPacket = new MoveActionPacket().Deserialize(buffer);
+                        GridPositionPacket moveActionPacket = new GridPositionPacket().Deserialize(buffer);
                         Debug.Log($"Received move action: {moveActionPacket.targetPosition} from {moveActionPacket.playerData.name}");
                         
                         if (!players.ContainsKey(moveActionPacket.playerData.id))
@@ -129,7 +130,7 @@ namespace Ekkam
                         players[moveActionPacket.playerData.id].GetComponent<Agent>().MoveAction(moveActionPacket.targetPosition);
                         break;
                     case BasePacket.Type.TeleportAction:
-                        MoveActionPacket teleportActionPacket = new MoveActionPacket().Deserialize(buffer);
+                        GridPositionPacket teleportActionPacket = new GridPositionPacket().Deserialize(buffer);
                         Debug.Log($"Received teleport action: {teleportActionPacket.targetPosition} from {teleportActionPacket.playerData.name}");
                         
                         if (!players.ContainsKey(teleportActionPacket.playerData.id))
@@ -146,38 +147,54 @@ namespace Ekkam
                         players[teleportActionPacket.playerData.id].transform.position = teleportPosition;
                         players[teleportActionPacket.playerData.id].GetComponent<Agent>().UpdateStartPosition(teleportActionPacket.targetPosition);
                         break;
+                    case BasePacket.Type.AttackAction:
+                        GridPositionPacket attackActionPacket = new GridPositionPacket().Deserialize(buffer);
+                        Debug.Log($"Received attack action: {attackActionPacket.targetPosition} from {attackActionPacket.playerData.name}");
+                        
+                        if (!players.ContainsKey(attackActionPacket.playerData.id))
+                        {
+                            var player = SpawnPlayer(attackActionPacket.playerData, Vector3.zero);
+                            player.grid = myPlayer.grid;
+                        }
+                        players[attackActionPacket.playerData.id].GetComponent<Agent>().AttackAction(attackActionPacket.targetPosition);
+                        break;
+                    case BasePacket.Type.EndTurn:
+                        EndTurnPacket endTurnPacket = new EndTurnPacket().Deserialize(buffer);
+                        Debug.Log($"Received end turn from {endTurnPacket.playerData.name}");
+                        
+                        if (!players.ContainsKey(endTurnPacket.playerData.id))
+                        {
+                            var player = SpawnPlayer(endTurnPacket.playerData, Vector3.zero);
+                            player.grid = myPlayer.grid;
+                        }
+                        players[endTurnPacket.playerData.id].GetComponent<Agent>().EndTurn();
+                        break;
                 }
             }
         }
-
-        // public void SendPosition(Vector3 position)
-        // {
-        //     PositionPacket positionPacket = new PositionPacket(BasePacket.Type.Position, playerData, position);
-        //     SendDataToServer(positionPacket);
-        // }
-        
-        // public void SendRotationY(float rotationY)
-        // {
-        //     RotationYPacket rotationYPacket = new RotationYPacket(BasePacket.Type.Rotation, playerData, rotationY);
-        //     SendDataToServer(rotationYPacket);
-        // }
-        
-        // public void SendAnimationState(AnimationStatePacket.AnimationCommandType commandType, string parameterName, bool boolValue, float floatValue)
-        // {
-        //     AnimationStatePacket animationStatePacket = new AnimationStatePacket(BasePacket.Type.AnimationState, playerData, commandType, parameterName, boolValue, floatValue);
-        //     SendDataToServer(animationStatePacket);
-        // }
         
         public void SendMoveAction(Vector2Int targetPosition)
         {
-            MoveActionPacket moveActionPacket = new MoveActionPacket(BasePacket.Type.MoveAction, playerData, targetPosition);
-            SendDataToServer(moveActionPacket);
+            GridPositionPacket gridPositionPacket = new GridPositionPacket(BasePacket.Type.MoveAction, playerData, targetPosition);
+            SendDataToServer(gridPositionPacket);
         }
         
         public void SendTeleportAction(Vector2Int targetPosition)
         {
-            MoveActionPacket moveActionPacket = new MoveActionPacket(BasePacket.Type.TeleportAction, playerData, targetPosition);
-            SendDataToServer(moveActionPacket);
+            GridPositionPacket gridPositionPacket = new GridPositionPacket(BasePacket.Type.TeleportAction, playerData, targetPosition);
+            SendDataToServer(gridPositionPacket);
+        }
+        
+        public void SendAttackAction(Vector2Int targetPosition)
+        {
+            GridPositionPacket gridPositionPacket = new GridPositionPacket(BasePacket.Type.AttackAction, playerData, targetPosition);
+            SendDataToServer(gridPositionPacket);
+        }
+        
+        public void SendEndTurn()
+        {
+            EndTurnPacket endTurnPacket = new EndTurnPacket(BasePacket.Type.EndTurn, playerData);
+            SendDataToServer(endTurnPacket);
         }
         
         public Player SpawnPlayer(PlayerData playerData, Vector3 position)

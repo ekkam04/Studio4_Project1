@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace Ekkam
 {
@@ -11,9 +10,8 @@ namespace Ekkam
         [Header("--- Player Settings ---")]
         
         public GameObject mousePosition3DPrefab;
-        public GameObject selfActionUI;
-        public Button moveButton;
-        public Button shootButton;
+        
+        private UIManager uiManager;
         private MousePosition3D mousePosition3D;
         public List<PathfindingNode> reachableNodes = new List<PathfindingNode>();
         
@@ -30,11 +28,9 @@ namespace Ekkam
             
             networkComponent = GetComponent<NetworkComponent>();
             mousePosition3D = Instantiate(mousePosition3DPrefab).GetComponent<MousePosition3D>();
-            selfActionUI = GameObject.Find("GameUI");
-            moveButton = GameObject.Find("MoveButton").GetComponent<Button>();
-            moveButton.onClick.AddListener(MoveButton);
-            shootButton = GameObject.Find("ShootButton").GetComponent<Button>();
-            shootButton.onClick.AddListener(ShootButton);
+            
+            uiManager = GameObject.FindObjectOfType<UIManager>();
+            uiManager.AssignPlayerActions(this);
         }
 
         private new void Update()
@@ -42,16 +38,21 @@ namespace Ekkam
             base.Update();
             if (!networkComponent.IsMine()) return;
             
+            if (isTakingAction) return;
+            
             Vector2Int mousePositionOnGrid = grid.GetPositionFromWorldPoint(mousePosition3D.transform.position);
             
-            if (Input.GetMouseButtonDown(0) && grid.GetNode(mousePositionOnGrid) != null)
+            if (
+                Input.GetMouseButtonDown(0)
+                && grid.GetNode(mousePositionOnGrid) != null
+            )
             {
                 var selectedNode = grid.GetNode(mousePositionOnGrid);
 
                 if (!selectingTarget)
                 {
-                    lastSelectedNode?.SetActionable(false);
-                    selfActionUI.SetActive(false);
+                    UnselectAction();
+                    
                     print("Occupant: " + selectedNode.occupantText.text);
                     if (selectedNode.Occupant == null) return;
 
@@ -60,41 +61,85 @@ namespace Ekkam
                         print("Selected self");
                         selectedNode.SetActionable(false, PathfindingNode.VisualType.Selected);
                         lastSelectedNode = selectedNode;
-                        selfActionUI.SetActive(true);
+                        uiManager.playerActionsUI.SetActive(true);
                     }
                 }
                 else
                 {
+                    if (selectedNode.Occupant == this.gameObject)
+                    {
+                        print("Selected self while selecting target");
+                        selectedNode.SetActionable(false);
+                        UnselectAction();
+                        return;
+                    }
+                    
                     if (!selectedNode.pathVisual.activeSelf)
                     {
                         print("Target is unreachable");
                         return;
                     }
 
-                    lastSelectedNode.SetActionable(false);
-                    selfActionUI.SetActive(false);
-                    foreach (var node in reachableNodes)
-                    {
-                        node.SetActionable(false);
-                    }
-
-                    // Take action
+                    // Move action
                     MoveAction(mousePositionOnGrid);
                     NetworkManager.instance.SendMoveAction(mousePositionOnGrid);
-                    
-                    selectingTarget = false;
                 }
             }
+        }
+        
+        private void UnselectAction()
+        {
+            lastSelectedNode?.SetActionable(false);
+            uiManager.playerActionsUI.SetActive(false);
+            foreach (var node in reachableNodes)
+            {
+                node.SetActionable(false);
+            }
+            selectingTarget = false;
         }
 
         public override void StartTurn()
         {
             base.StartTurn();
+            if (!networkComponent.IsMine()) return;
+            
+            uiManager.gameUI.SetActive(true);
+        }
+        
+        public override void OnActionStart()
+        {
+            base.OnActionStart();
+            if (!networkComponent.IsMine()) return;
+            
+            uiManager.endTurnButton.interactable = false;
+            
+            UnselectAction();
+            uiManager.playerActionsUI.SetActive(false);
+            lastSelectedNode?.SetActionable(false);
+        }
+        
+        public override void OnActionEnd()
+        {
+            base.OnActionEnd();
+            if (!networkComponent.IsMine()) return;
+            
+            uiManager.endTurnButton.interactable = true;
+        }
+        
+        public void EndTurnButton()
+        {
+            EndTurn();
+            NetworkManager.instance.SendEndTurn();
+            
+            UnselectAction();
+            uiManager.gameUI.SetActive(false);
         }
 
         public void MoveButton()
         {
-            reachableNodes = GetReachableNodes(moveRange);
+            if (movementPoints <= 0) Debug.LogWarning("Not enough movement points");
+            
+            reachableNodes = GetReachableNodes(movementPoints);
             foreach (var node in reachableNodes)
             {
                 node.SetActionable(true, PathfindingNode.VisualType.Path);
@@ -102,9 +147,13 @@ namespace Ekkam
             selectingTarget = true;
         }
         
-        public void ShootButton()
+        public void AttackButton()
         {
-            TeabagAction(); // Placeholder
+            if (actionPoints <= 0) Debug.LogWarning("Not enough action points");
+            
+            // Placeholder for attack action
+            AttackAction(Vector2Int.zero);
+            NetworkManager.instance.SendAttackAction(Vector2Int.zero);
         }
     }
 }

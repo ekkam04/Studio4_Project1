@@ -5,7 +5,7 @@ namespace Ekkam
 {
     public class TurnSystem : MonoBehaviour
     {
-        public int friendlyCount;
+        public int friendlyCount = Int32.MaxValue;
         public int friendlyTurnsCompleted;
         
         public int hostileCount;
@@ -18,11 +18,7 @@ namespace Ekkam
             Agent.onTurnEnd += OnTurnEnd;
             foreach (var agent in FindObjectsOfType<Agent>())
             {
-                if (agent.agentType == Agent.AgentType.Friendly)
-                {
-                    friendlyCount++;
-                }
-                else if (agent.agentType == Agent.AgentType.Hostile)
+                if (agent.agentType == Agent.AgentType.Hostile)
                 {
                     hostileCount++;
                 }

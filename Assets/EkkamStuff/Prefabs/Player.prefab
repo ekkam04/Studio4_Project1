@@ -939,14 +939,11 @@ MonoBehaviour:
   pathNodes: []
   findPath: 0
   agentType: 1
+  movementPoints: 4
   actionPoints: 2
-  moveRange: 4
   shootRange: 4
   mousePosition3DPrefab: {fileID: 6247423640985755484, guid: 20e8461a506c9354c9d87839c45baa95,
     type: 3}
-  selfActionUI: {fileID: 0}
-  moveButton: {fileID: 0}
-  shootButton: {fileID: 0}
   reachableNodes: []
   lastSelectedNode: {fileID: 0}
   selectingTarget: 0

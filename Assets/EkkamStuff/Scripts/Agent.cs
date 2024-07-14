@@ -36,15 +36,18 @@ namespace Ekkam
         [Header("--- Agent Settings ---")] // ---------------------------
         
         private Animator anim;
+        public bool isTakingAction;
         
         public enum AgentType { Neutral, Friendly, Hostile }
         public AgentType agentType;
         
         public delegate void OnTurnEnd(AgentType agentType);
         public static OnTurnEnd onTurnEnd;
-        
+
+        public int movementPoints = 6;
+        private int maxMovementPoints;
         public int actionPoints = 2;
-        public int moveRange = 4;
+        private int maxActionPoints;
         public int shootRange = 4;
 
         protected void Start()
@@ -52,10 +55,8 @@ namespace Ekkam
             grid = FindObjectOfType<PathfindingGrid>();
             anim = GetComponent<Animator>();
             
-            // UpdateStartPosition(grid.GetPositionFromWorldPoint(transform.position));
-            // PathfindingNode startingNode = grid.GetNode(startNodePosition);
-            //
-            // GetNeighbours(startingNode, startNodePosition);
+            maxMovementPoints = movementPoints;
+            maxActionPoints = actionPoints;
         }
 
         protected void Update()
@@ -71,6 +72,7 @@ namespace Ekkam
             {
                 Debug.LogWarning("Path already found");
                 findPath = false;
+                OnActionEnd();
                 state = PathfindingState.Success;
                 return;
             }
@@ -79,6 +81,7 @@ namespace Ekkam
             {
                 Debug.LogWarning("No path found");
                 findPath = false;
+                OnActionEnd();
                 state = PathfindingState.Failure;
                 return;
             }
@@ -247,7 +250,6 @@ namespace Ekkam
             List<PathfindingNode> openNodes = new List<PathfindingNode>();
             List<PathfindingNode> closedNodes = new List<PathfindingNode>();
             openNodes.Add(grid.GetNode(startNodePosition));
-            // reachableNodes.Add(grid.GetNode(startNodePosition));
             int currentRange = 0;
             
             while (currentRange < range)
@@ -270,7 +272,6 @@ namespace Ekkam
                 }
                 currentRange++;
             }
-            // reachableNodes.Remove(grid.GetNode(startNodePosition));
             return reachableNodes;
         }
         
@@ -290,43 +291,59 @@ namespace Ekkam
                     transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(targetPosition - transform.position), 10f * Time.deltaTime);
                     yield return null;
                 }
+                movementPoints--;
             }
             
             anim.SetBool("isMoving", false);
             grid.GetNode(endNodePosition).Occupant = this.gameObject;
             
             UpdateStartPosition(grid.GetPositionFromWorldPoint(transform.position));
-            EndAction();
+            OnActionEnd();
         }
         
         // --- Actions ---------------------------------------------------
         
         public virtual void StartTurn()
         {
-            actionPoints = 2;
+            movementPoints = maxMovementPoints;
+            actionPoints = maxActionPoints;
+        }
+        
+        public virtual void OnActionStart()
+        {
+            isTakingAction = true;
+        }
+        
+        public virtual void OnActionEnd()
+        {
+            isTakingAction = false;
         }
 
         public void MoveAction(Vector2Int targetPosition)
         {
+            OnActionStart();
             UpdateTargetPosition(targetPosition);
             findPath = true; // finds path and starts following it if path is found
         }
         
-        public async void TeabagAction()
+        public async void AttackAction(Vector2Int targetPosition)
         {
+            OnActionStart();
+            actionPoints--;
+            
             anim.SetTrigger("teabag");
             await Task.Delay(200);
             anim.SetTrigger("teabag");
-            EndAction();
+            await Task.Delay(1000);
+            
+            OnActionEnd();
         }
         
-        public void EndAction()
+        public void EndTurn()
         {
-            actionPoints--;
-            if (actionPoints < 1)
-            {
-                onTurnEnd?.Invoke(agentType);
-            }
+            movementPoints = 0;
+            actionPoints = 0;
+            onTurnEnd?.Invoke(agentType);
         }
     }
 }

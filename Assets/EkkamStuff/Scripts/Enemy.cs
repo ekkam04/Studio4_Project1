@@ -24,9 +24,9 @@ namespace Ekkam
         IEnumerator SimulateTurn()
         {
             yield return new WaitForSeconds(1f);
-            TeabagAction();
-            yield return new WaitForSeconds(0.75f);
-            TeabagAction();
+            AttackAction(Vector2Int.zero);
+            yield return new WaitForSeconds(1f);
+            EndTurn();
         }
     }
 }
