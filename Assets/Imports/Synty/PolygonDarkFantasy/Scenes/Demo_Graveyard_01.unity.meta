@@ -1,5 +1,10 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/AhmedStuff/Materials.meta
+guid: 6abe6effb6ee6584296736a4141ff222
+folderAsset: yes
+========
 guid: 8368882deebe81b4bb278e5aba53948a
+>>>>>>>> master:Assets/Imports/Synty/PolygonDarkFantasy/Scenes/Demo_Graveyard_01.unity.meta
 DefaultImporter:
   externalObjects: {}
   userData: 
