@@ -2,18 +2,18 @@
 
 namespace Ekkam
 {
-    public class PlayerData
+    public class AgentData
     {
         public string id;
         public string name;
 
-        public PlayerData()
+        public AgentData()
         {
             this.id = "";
             this.name = "";
         }
 
-        public PlayerData(string id, string name)
+        public AgentData(string id, string name)
         {
             this.id = id;
             this.name = name;

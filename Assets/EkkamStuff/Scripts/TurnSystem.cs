@@ -13,9 +13,12 @@ namespace Ekkam
         
         public Agent.AgentType currentTurn;
         
+        EnemyManager enemyManager;
+        
         private void OnEnable()
         {
             Agent.onTurnEnd += OnTurnEnd;
+            enemyManager = FindObjectOfType<EnemyManager>();
             foreach (var agent in FindObjectsOfType<Agent>())
             {
                 if (agent.agentType == Agent.AgentType.Hostile)
@@ -40,13 +43,7 @@ namespace Ekkam
                 {
                     friendlyTurnsCompleted = 0;
                     currentTurn = Agent.AgentType.Hostile;
-                    foreach (var agent in FindObjectsOfType<Agent>())
-                    {
-                        if (agent.agentType == Agent.AgentType.Hostile)
-                        {
-                            agent.StartTurn();
-                        }
-                    }
+                    enemyManager.StartEnemyTurn();
                 }
             }
             else if (agentType == Agent.AgentType.Hostile)

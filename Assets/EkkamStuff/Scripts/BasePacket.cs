@@ -16,7 +16,7 @@ namespace Ekkam
         }
 
         public Type type;
-        public PlayerData playerData;
+        public AgentData AgentData;
 
         protected MemoryStream wms;
         protected BinaryWriter bw;
@@ -27,13 +27,13 @@ namespace Ekkam
         public BasePacket()
         {
             this.type = Type.None;
-            this.playerData = new PlayerData();
+            this.AgentData = new AgentData();
         }
 
-        public BasePacket(Type type, PlayerData playerData)
+        public BasePacket(Type type, AgentData agentData)
         {
             this.type = type;
-            this.playerData = playerData;
+            this.AgentData = agentData;
         }
 
         public void BeginSerialize()
@@ -42,8 +42,8 @@ namespace Ekkam
             bw = new BinaryWriter(wms);
 
             bw.Write((int)type);
-            bw.Write(playerData.id);
-            bw.Write(playerData.name);
+            bw.Write(AgentData.id);
+            bw.Write(AgentData.name);
         }
 
         public byte[] EndSerialize()
@@ -57,7 +57,7 @@ namespace Ekkam
             br = new BinaryReader(rms);
 
             type = (Type)br.ReadInt32();
-            playerData = new PlayerData(br.ReadString(), br.ReadString());
+            AgentData = new AgentData(br.ReadString(), br.ReadString());
 
             return this;
         }
@@ -74,13 +74,13 @@ namespace Ekkam
         public int clientIndex;
         public int clientCount;
         
-        public GameStartPacket() : base(Type.GameStart, new PlayerData("", ""))
+        public GameStartPacket() : base(Type.GameStart, new AgentData("", ""))
         {
             this.clientIndex = 0;
             this.clientCount = 0;
         }
         
-        public GameStartPacket(Type type, PlayerData playerData, int clientIndex, int clientCount) : base(type, playerData)
+        public GameStartPacket(Type type, AgentData agentData, int clientIndex, int clientCount) : base(type, agentData)
         {
             this.clientIndex = clientIndex;
             this.clientCount = clientCount;
@@ -99,7 +99,7 @@ namespace Ekkam
             GameStartPacket packet = new GameStartPacket();
             BasePacket basePacket = packet.BaseDeserialize(data);
             packet.type = basePacket.type;
-            packet.playerData = basePacket.playerData;
+            packet.AgentData = basePacket.AgentData;
             packet.clientIndex = basePacket.br.ReadInt32();
             packet.clientCount = basePacket.br.ReadInt32();
             return packet;
@@ -111,12 +111,12 @@ namespace Ekkam
     {
         public Vector2Int targetPosition;
 
-        public GridPositionPacket() : base(Type.None, new PlayerData("", ""))
+        public GridPositionPacket() : base(Type.None, new AgentData("", ""))
         {
             this.targetPosition = Vector2Int.zero;
         }
 
-        public GridPositionPacket(Type type, PlayerData playerData, Vector2Int targetPosition) : base(type, playerData)
+        public GridPositionPacket(Type type, AgentData agentData, Vector2Int targetPosition) : base(type, agentData)
         {
             this.targetPosition = targetPosition;
         }
@@ -134,7 +134,7 @@ namespace Ekkam
             GridPositionPacket packet = new GridPositionPacket();
             BasePacket basePacket = packet.BaseDeserialize(data);
             packet.type = basePacket.type;
-            packet.playerData = basePacket.playerData;
+            packet.AgentData = basePacket.AgentData;
             packet.targetPosition = new Vector2Int(basePacket.br.ReadInt32(), basePacket.br.ReadInt32());
             return packet;
         }
@@ -142,11 +142,11 @@ namespace Ekkam
     
     public class EndTurnPacket : BasePacket
     {
-        public EndTurnPacket() : base(Type.EndTurn, new PlayerData("", ""))
+        public EndTurnPacket() : base(Type.EndTurn, new AgentData("", ""))
         {
         }
 
-        public EndTurnPacket(Type type, PlayerData playerData) : base(type, playerData)
+        public EndTurnPacket(Type type, AgentData agentData) : base(type, agentData)
         {
         }
 
@@ -161,7 +161,7 @@ namespace Ekkam
             EndTurnPacket packet = new EndTurnPacket();
             BasePacket basePacket = packet.BaseDeserialize(data);
             packet.type = basePacket.type;
-            packet.playerData = basePacket.playerData;
+            packet.AgentData = basePacket.AgentData;
             return packet;
         }
     }

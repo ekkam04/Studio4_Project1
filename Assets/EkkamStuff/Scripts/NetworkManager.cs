@@ -18,7 +18,7 @@ namespace Ekkam
         
         public GameObject playerPrefab;
         public Player myPlayer;
-        public PlayerData playerData;
+        public AgentData AgentData;
         public Dictionary<string, GameObject> players = new Dictionary<string, GameObject>();
         
         public bool spawnPlayerOnSceneLoad = true;
@@ -71,14 +71,14 @@ namespace Ekkam
             if (scene.name == "MainGame")
             {
                 Debug.Log("Spawning local player...");
-                SpawnPlayer(playerData, Vector3.zero);
+                SpawnPlayer(AgentData, Vector3.zero);
             }
         }
 
         [Command("connect")]
         public void ConnectToServer(string ipAddress = "127.0.0.1", string playerName = "Player")
         {
-            playerData = new PlayerData(Guid.NewGuid().ToString(), playerName);
+            AgentData = new AgentData(Guid.NewGuid().ToString(), playerName);
             socket.Connect(new IPEndPoint(IPAddress.Parse(ipAddress), 3000));
             socket.Blocking = false;
             Debug.Log("Connected to server.");
@@ -86,7 +86,7 @@ namespace Ekkam
             if (!spawnPlayerOnSceneLoad)
             {
                 Debug.Log("Spawning local player...");
-                SpawnPlayer(playerData, Vector3.zero);
+                SpawnPlayer(AgentData, Vector3.zero);
             }
         }
 
@@ -102,6 +102,8 @@ namespace Ekkam
             {
                 byte[] buffer = new byte[socket.Available];
                 socket.Receive(buffer);
+                
+                Agent actionableAgent;
 
                 BasePacket packet = new BasePacket().BaseDeserialize(buffer);
                 switch (packet.type)
@@ -114,96 +116,133 @@ namespace Ekkam
                         var spawnGridPosition = myPlayer.grid.GetPositionFromWorldPoint(spawnPositions[gameStartPacket.clientIndex]);
                         myPlayer.UpdateStartPosition(spawnGridPosition);
                         SendTeleportAction(spawnGridPosition);
+                        
                         var turnSystem = FindObjectOfType<TurnSystem>();
-                        // turnSystem.enabled = true;
                         turnSystem.friendlyCount = gameStartPacket.clientCount;
+
+                        if (gameStartPacket.clientIndex == 0)
+                        {
+                            var enemyManager = FindObjectOfType<EnemyManager>();
+                            enemyManager.isMasterClient = true;
+                        }
                         break;
+                    
                     case BasePacket.Type.MoveAction:
                         GridPositionPacket moveActionPacket = new GridPositionPacket().Deserialize(buffer);
-                        Debug.Log($"Received move action: {moveActionPacket.targetPosition} from {moveActionPacket.playerData.name}");
+                        Debug.Log($"Received move action: {moveActionPacket.targetPosition} from {moveActionPacket.AgentData.name}");
                         
-                        if (!players.ContainsKey(moveActionPacket.playerData.id))
+                        if (moveActionPacket.AgentData.name.Contains("Enemy"))
                         {
-                            var player = SpawnPlayer(moveActionPacket.playerData, Vector3.zero);
-                            player.grid = myPlayer.grid; // There is anyways only one grid
+                            var enemyGO = GameObject.Find(moveActionPacket.AgentData.name);
+                            if (enemyGO == null) return;
+                            actionableAgent = enemyGO.GetComponent<Agent>();
                         }
-                        players[moveActionPacket.playerData.id].GetComponent<Agent>().MoveAction(moveActionPacket.targetPosition);
+                        else
+                        {
+                            SpawnOtherPlayerIfMissing(moveActionPacket.AgentData);
+                            actionableAgent = players[moveActionPacket.AgentData.id].GetComponent<Agent>();
+                        }
+                        actionableAgent.MoveAction(moveActionPacket.targetPosition);
                         break;
-                    case BasePacket.Type.TeleportAction:
+                    
+                    case BasePacket.Type.TeleportAction: // This only works for players for now
                         GridPositionPacket teleportActionPacket = new GridPositionPacket().Deserialize(buffer);
-                        Debug.Log($"Received teleport action: {teleportActionPacket.targetPosition} from {teleportActionPacket.playerData.name}");
+                        Debug.Log($"Received teleport action: {teleportActionPacket.targetPosition} from {teleportActionPacket.AgentData.name}");
                         
-                        if (!players.ContainsKey(teleportActionPacket.playerData.id))
-                        {
-                            var player = SpawnPlayer(teleportActionPacket.playerData, Vector3.zero);
-                            player.grid = myPlayer.grid;
-                        }
+                        SpawnOtherPlayerIfMissing(teleportActionPacket.AgentData);
                         var teleportNodePosition = myPlayer.grid.GetNode(teleportActionPacket.targetPosition).transform.position;
                         var teleportPosition = new Vector3(
                             teleportNodePosition.x,
-                            players[teleportActionPacket.playerData.id].transform.position.y,
+                            players[teleportActionPacket.AgentData.id].transform.position.y,
                             teleportNodePosition.z
                         );
-                        players[teleportActionPacket.playerData.id].transform.position = teleportPosition;
-                        players[teleportActionPacket.playerData.id].GetComponent<Agent>().UpdateStartPosition(teleportActionPacket.targetPosition);
+                        players[teleportActionPacket.AgentData.id].transform.position = teleportPosition;
+                        players[teleportActionPacket.AgentData.id].GetComponent<Agent>().UpdateStartPosition(teleportActionPacket.targetPosition);
                         break;
+                    
                     case BasePacket.Type.AttackAction:
                         GridPositionPacket attackActionPacket = new GridPositionPacket().Deserialize(buffer);
-                        Debug.Log($"Received attack action: {attackActionPacket.targetPosition} from {attackActionPacket.playerData.name}");
+                        Debug.Log($"Received attack action: {attackActionPacket.targetPosition} from {attackActionPacket.AgentData.name}");
                         
-                        if (!players.ContainsKey(attackActionPacket.playerData.id))
+                        if (attackActionPacket.AgentData.name.Contains("Enemy"))
                         {
-                            var player = SpawnPlayer(attackActionPacket.playerData, Vector3.zero);
-                            player.grid = myPlayer.grid;
+                            var enemyGO = GameObject.Find(attackActionPacket.AgentData.name);
+                            if (enemyGO == null) return;
+                            actionableAgent = enemyGO.GetComponent<Agent>();
                         }
-                        players[attackActionPacket.playerData.id].GetComponent<Agent>().AttackAction(attackActionPacket.targetPosition);
+                        else
+                        {
+                            SpawnOtherPlayerIfMissing(attackActionPacket.AgentData);
+                            actionableAgent = players[attackActionPacket.AgentData.id].GetComponent<Agent>();
+                        }
+                        actionableAgent.AttackAction(attackActionPacket.targetPosition);
                         break;
+                    
                     case BasePacket.Type.EndTurn:
                         EndTurnPacket endTurnPacket = new EndTurnPacket().Deserialize(buffer);
-                        Debug.Log($"Received end turn from {endTurnPacket.playerData.name}");
+                        Debug.Log($"Received end turn from {endTurnPacket.AgentData.name}");
                         
-                        if (!players.ContainsKey(endTurnPacket.playerData.id))
+                        if (endTurnPacket.AgentData.name.Contains("Enemy"))
                         {
-                            var player = SpawnPlayer(endTurnPacket.playerData, Vector3.zero);
-                            player.grid = myPlayer.grid;
+                            var enemyGO = GameObject.Find(endTurnPacket.AgentData.name);
+                            if (enemyGO == null) return;
+                            actionableAgent = enemyGO.GetComponent<Agent>();
                         }
-                        players[endTurnPacket.playerData.id].GetComponent<Agent>().EndTurn();
+                        else
+                        {
+                            SpawnOtherPlayerIfMissing(endTurnPacket.AgentData);
+                            actionableAgent = players[endTurnPacket.AgentData.id].GetComponent<Agent>();
+                        }
+                        actionableAgent.EndTurn();
                         break;
                 }
             }
         }
         
-        public void SendMoveAction(Vector2Int targetPosition)
+        public void SendMoveAction(Vector2Int targetPosition, AgentData agentData = null)
         {
-            GridPositionPacket gridPositionPacket = new GridPositionPacket(BasePacket.Type.MoveAction, playerData, targetPosition);
+            if (agentData == null) agentData = AgentData;
+            GridPositionPacket gridPositionPacket = new GridPositionPacket(BasePacket.Type.MoveAction, agentData, targetPosition);
             SendDataToServer(gridPositionPacket);
         }
         
-        public void SendTeleportAction(Vector2Int targetPosition)
+        public void SendTeleportAction(Vector2Int targetPosition, AgentData agentData = null)
         {
-            GridPositionPacket gridPositionPacket = new GridPositionPacket(BasePacket.Type.TeleportAction, playerData, targetPosition);
+            if (agentData == null) agentData = AgentData;
+            GridPositionPacket gridPositionPacket = new GridPositionPacket(BasePacket.Type.TeleportAction, agentData, targetPosition);
             SendDataToServer(gridPositionPacket);
         }
         
-        public void SendAttackAction(Vector2Int targetPosition)
+        public void SendAttackAction(Vector2Int targetPosition, AgentData agentData = null)
         {
-            GridPositionPacket gridPositionPacket = new GridPositionPacket(BasePacket.Type.AttackAction, playerData, targetPosition);
+            if (agentData == null) agentData = AgentData;
+            GridPositionPacket gridPositionPacket = new GridPositionPacket(BasePacket.Type.AttackAction, agentData, targetPosition);
             SendDataToServer(gridPositionPacket);
         }
         
-        public void SendEndTurn()
+        public void SendEndTurn(AgentData agentData = null)
         {
-            EndTurnPacket endTurnPacket = new EndTurnPacket(BasePacket.Type.EndTurn, playerData);
+            if (agentData == null) agentData = AgentData;
+            EndTurnPacket endTurnPacket = new EndTurnPacket(BasePacket.Type.EndTurn, agentData);
             SendDataToServer(endTurnPacket);
         }
         
-        public Player SpawnPlayer(PlayerData playerData, Vector3 position)
+        private void SpawnOtherPlayerIfMissing(AgentData agentData)
+        {
+            if (!players.ContainsKey(agentData.id))
+            {
+                var player = SpawnPlayer(agentData, Vector3.zero);
+                player.grid = myPlayer.grid; // There is anyways only one grid
+            }
+        }
+        
+        public Player SpawnPlayer(AgentData agentData, Vector3 position)
         {
             GameObject playerObject = Instantiate(playerPrefab, position, Quaternion.identity);
-            players.Add(playerData.id, playerObject);
+            players.Add(agentData.id, playerObject);
             NetworkComponent networkComponent = playerObject.GetComponent<NetworkComponent>();
-            networkComponent.ownerID = playerData.id;
-            networkComponent.ownerName = playerData.name;
+            networkComponent.ownerID = agentData.id;
+            networkComponent.ownerName = agentData.name;
             
             var player = playerObject.GetComponent<Player>();
             player.enabled = true;

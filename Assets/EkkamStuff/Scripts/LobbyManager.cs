@@ -20,7 +20,7 @@ namespace Ekkam
         
         void Connect()
         {
-            NetworkManager.instance.playerData = new PlayerData(Guid.NewGuid().ToString(), nameInput.text);
+            NetworkManager.instance.AgentData = new AgentData(Guid.NewGuid().ToString(), nameInput.text);
             NetworkManager.instance.ConnectToServer("127.0.0.1", nameInput.text);
             OnConnectedToServer();
         }
