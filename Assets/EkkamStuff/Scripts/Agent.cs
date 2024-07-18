@@ -35,25 +35,32 @@ namespace Ekkam
         
         [Header("--- Agent Settings ---")] // ---------------------------
         
+        public GameObject leftHand;
+        public GameObject rightHand;
         private Animator anim;
-        public bool isTakingAction;
+        private PropManager propManager;
         
         public enum AgentType { Neutral, Friendly, Hostile }
         public AgentType agentType;
         
+        public bool isTakingAction;
         public delegate void OnTurnEnd(AgentType agentType);
         public static OnTurnEnd onTurnEnd;
+        
+        public delegate void OnEliminated(AgentType agentType);
+        public static OnEliminated onEliminated;
 
         public int movementPoints = 6;
         private int maxMovementPoints;
         public int actionPoints = 2;
         private int maxActionPoints;
-        public int shootRange = 4;
+        public int attackRange = 4;
 
         protected void Start()
         {
             grid = FindObjectOfType<PathfindingGrid>();
             anim = GetComponent<Animator>();
+            propManager = FindObjectOfType<PropManager>();
             
             maxMovementPoints = movementPoints;
             maxActionPoints = actionPoints;
@@ -244,7 +251,7 @@ namespace Ekkam
             return distanceX + distanceY;
         }
         
-        public List<PathfindingNode> GetReachableNodes(int range)
+        public List<PathfindingNode> GetReachableNodes(int range, bool filterByType = false, AgentType agentType = AgentType.Neutral)
         {
             List<PathfindingNode> reachableNodes = new List<PathfindingNode>();
             List<PathfindingNode> openNodes = new List<PathfindingNode>();
@@ -272,10 +279,29 @@ namespace Ekkam
                 }
                 currentRange++;
             }
+            if (filterByType)
+            {
+                reachableNodes.RemoveAll(node => node.Occupant == null || node.Occupant.GetComponent<Agent>().agentType != agentType);
+            }
             return reachableNodes;
         }
         
         // --- Agent ---------------------------------------------------
+
+        private void OnDestroy()
+        {
+            onEliminated?.Invoke(agentType);
+        }
+
+        public void ShowProp(string propKey)
+        {
+            propManager.ShowProp(propKey, gameObject.name, leftHand.transform);
+        }
+        
+        public void HideProp(string propKey)
+        {
+            propManager.HideProp(propKey, gameObject.name);
+        }
         
         public IEnumerator FollowPath()
         {
@@ -298,6 +324,46 @@ namespace Ekkam
             grid.GetNode(endNodePosition).Occupant = this.gameObject;
             
             UpdateStartPosition(grid.GetPositionFromWorldPoint(transform.position));
+            OnActionEnd();
+        }
+        
+        public IEnumerator Shoot(Vector2Int targetPosition, float damage)
+        {
+            var initialRotation = transform.rotation;
+            var targetPosition3D = grid.GetNode(targetPosition).transform.position;
+            var duration = 0.5f;
+            var time = 0f;
+            while (time < duration)
+            {
+                transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(targetPosition3D - transform.position), time / duration);
+                time += Time.deltaTime;
+                yield return null;
+            }
+            transform.rotation = Quaternion.LookRotation(targetPosition3D - transform.position);
+            anim.SetTrigger("shootWatergun");
+            
+            yield return new WaitForSeconds(2f);
+            
+            try
+            {
+                Agent targetAgent = grid.GetNode(targetPosition).Occupant.GetComponent<Agent>();
+                targetAgent.TakeDamage(damage);
+            }
+            catch
+            {
+                Debug.LogWarning("No agent at target position");
+            }
+            
+            yield return new WaitForSeconds(2f);
+            
+            time = 0f;
+            while (time < duration)
+            {
+                transform.rotation = Quaternion.Slerp(transform.rotation, initialRotation, time / duration);
+                time += Time.deltaTime;
+                yield return null;
+            }
+            
             OnActionEnd();
         }
         
@@ -326,17 +392,11 @@ namespace Ekkam
             findPath = true; // finds path and starts following it if path is found
         }
         
-        public async void AttackAction(Vector2Int targetPosition)
+        public void AttackAction(Vector2Int targetPosition, float damage)
         {
             OnActionStart();
             actionPoints--;
-            
-            anim.SetTrigger("teabag");
-            await Task.Delay(200);
-            anim.SetTrigger("teabag");
-            await Task.Delay(1000);
-            
-            OnActionEnd();
+            StartCoroutine(Shoot(targetPosition, damage));
         }
         
         public void EndTurn()

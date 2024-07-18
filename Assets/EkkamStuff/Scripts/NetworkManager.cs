@@ -161,7 +161,7 @@ namespace Ekkam
                         break;
                     
                     case BasePacket.Type.AttackAction:
-                        GridPositionPacket attackActionPacket = new GridPositionPacket().Deserialize(buffer);
+                        AttackActionPacket attackActionPacket = new AttackActionPacket().Deserialize(buffer);
                         Debug.Log($"Received attack action: {attackActionPacket.targetPosition} from {attackActionPacket.AgentData.name}");
                         
                         if (attackActionPacket.AgentData.name.Contains("Enemy"))
@@ -175,7 +175,7 @@ namespace Ekkam
                             SpawnOtherPlayerIfMissing(attackActionPacket.AgentData);
                             actionableAgent = players[attackActionPacket.AgentData.id].GetComponent<Agent>();
                         }
-                        actionableAgent.AttackAction(attackActionPacket.targetPosition);
+                        actionableAgent.AttackAction(attackActionPacket.targetPosition, attackActionPacket.damage);
                         break;
                     
                     case BasePacket.Type.EndTurn:
@@ -213,10 +213,10 @@ namespace Ekkam
             SendDataToServer(gridPositionPacket);
         }
         
-        public void SendAttackAction(Vector2Int targetPosition, AgentData agentData = null)
+        public void SendAttackAction(Vector2Int targetPosition, float damage, AgentData agentData = null)
         {
             if (agentData == null) agentData = AgentData;
-            GridPositionPacket gridPositionPacket = new GridPositionPacket(BasePacket.Type.AttackAction, agentData, targetPosition);
+            AttackActionPacket gridPositionPacket = new AttackActionPacket(BasePacket.Type.AttackAction, agentData, targetPosition, damage);
             SendDataToServer(gridPositionPacket);
         }
         

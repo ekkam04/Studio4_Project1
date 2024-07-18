@@ -140,6 +140,42 @@ namespace Ekkam
         }
     }
     
+    // This packet is sent when an agent damages an agent at target position
+    public class AttackActionPacket : GridPositionPacket
+    {
+        public float damage;
+
+        public AttackActionPacket() : base(Type.AttackAction, new AgentData("", ""), Vector2Int.zero)
+        {
+            this.damage = 0f;
+        }
+
+        public AttackActionPacket(Type type, AgentData agentData, Vector2Int targetPosition, float damage) : base(type, agentData, targetPosition)
+        {
+            this.damage = damage;
+        }
+
+        public override byte[] Serialize()
+        {
+            BeginSerialize();
+            bw.Write(targetPosition.x);
+            bw.Write(targetPosition.y);
+            bw.Write(damage);
+            return EndSerialize();
+        }
+
+        public AttackActionPacket Deserialize(byte[] data)
+        {
+            AttackActionPacket packet = new AttackActionPacket();
+            BasePacket basePacket = packet.BaseDeserialize(data);
+            packet.type = basePacket.type;
+            packet.AgentData = basePacket.AgentData;
+            packet.targetPosition = new Vector2Int(basePacket.br.ReadInt32(), basePacket.br.ReadInt32());
+            packet.damage = basePacket.br.ReadSingle();
+            return packet;
+        }
+    }
+    
     public class EndTurnPacket : BasePacket
     {
         public EndTurnPacket() : base(Type.EndTurn, new AgentData("", ""))
