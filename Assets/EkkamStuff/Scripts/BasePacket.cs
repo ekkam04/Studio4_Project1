@@ -8,13 +8,15 @@ namespace Ekkam
         public enum Type
         {
             None,
-            Position,
-            Rotation,
-            AnimationState
+            GameStart,
+            MoveAction,
+            TeleportAction,
+            AttackAction,
+            EndTurn
         }
 
         public Type type;
-        public PlayerData playerData;
+        public AgentData AgentData;
 
         protected MemoryStream wms;
         protected BinaryWriter bw;
@@ -25,13 +27,13 @@ namespace Ekkam
         public BasePacket()
         {
             this.type = Type.None;
-            this.playerData = new PlayerData();
+            this.AgentData = new AgentData();
         }
 
-        public BasePacket(Type type, PlayerData playerData)
+        public BasePacket(Type type, AgentData agentData)
         {
             this.type = type;
-            this.playerData = playerData;
+            this.AgentData = agentData;
         }
 
         public void BeginSerialize()
@@ -40,8 +42,8 @@ namespace Ekkam
             bw = new BinaryWriter(wms);
 
             bw.Write((int)type);
-            bw.Write(playerData.id);
-            bw.Write(playerData.name);
+            bw.Write(AgentData.id);
+            bw.Write(AgentData.name);
         }
 
         public byte[] EndSerialize()
@@ -55,7 +57,7 @@ namespace Ekkam
             br = new BinaryReader(rms);
 
             type = (Type)br.ReadInt32();
-            playerData = new PlayerData(br.ReadString(), br.ReadString());
+            AgentData = new AgentData(br.ReadString(), br.ReadString());
 
             return this;
         }
@@ -67,123 +69,135 @@ namespace Ekkam
         }
     }
     
-    public class PositionPacket : BasePacket
+    public class GameStartPacket : BasePacket
     {
-        public Vector3 position;
-
-        public PositionPacket() : base(Type.Position, new PlayerData("", ""))
+        public int clientIndex;
+        public int clientCount;
+        
+        public GameStartPacket() : base(Type.GameStart, new AgentData("", ""))
         {
-            this.position = Vector3.zero;
+            this.clientIndex = 0;
+            this.clientCount = 0;
         }
-
-        public PositionPacket(Type type, PlayerData playerData, Vector3 position) : base(type, playerData)
+        
+        public GameStartPacket(Type type, AgentData agentData, int clientIndex, int clientCount) : base(type, agentData)
         {
-            this.position = position;
+            this.clientIndex = clientIndex;
+            this.clientCount = clientCount;
         }
-
+        
         public override byte[] Serialize()
         {
             BeginSerialize();
-            bw.Write(position.x);
-            bw.Write(position.y);
-            bw.Write(position.z);
+            bw.Write(clientIndex);
+            bw.Write(clientCount);
             return EndSerialize();
         }
-
-        public PositionPacket Deserialize(byte[] data)
+        
+        public GameStartPacket Deserialize(byte[] data)
         {
-            PositionPacket packet = new PositionPacket();
+            GameStartPacket packet = new GameStartPacket();
             BasePacket basePacket = packet.BaseDeserialize(data);
             packet.type = basePacket.type;
-            packet.playerData = basePacket.playerData;
-            packet.position = new Vector3(basePacket.br.ReadSingle(), basePacket.br.ReadSingle(), basePacket.br.ReadSingle());
+            packet.AgentData = basePacket.AgentData;
+            packet.clientIndex = basePacket.br.ReadInt32();
+            packet.clientCount = basePacket.br.ReadInt32();
             return packet;
         }
     }
     
-    public class RotationYPacket : BasePacket
+    // This packet is sent with different types of actions that only require a target position (pro gamer move)
+    public class GridPositionPacket : BasePacket
     {
-        public float rotationY;
+        public Vector2Int targetPosition;
 
-        public RotationYPacket() : base(Type.Rotation, new PlayerData("", ""))
+        public GridPositionPacket() : base(Type.None, new AgentData("", ""))
         {
-            this.rotationY = 0;
+            this.targetPosition = Vector2Int.zero;
         }
 
-        public RotationYPacket(Type type, PlayerData playerData, float rotationY) : base(type, playerData)
+        public GridPositionPacket(Type type, AgentData agentData, Vector2Int targetPosition) : base(type, agentData)
         {
-            this.rotationY = rotationY;
+            this.targetPosition = targetPosition;
         }
 
         public override byte[] Serialize()
         {
             BeginSerialize();
-            bw.Write(rotationY);
+            bw.Write(targetPosition.x);
+            bw.Write(targetPosition.y);
             return EndSerialize();
         }
 
-        public RotationYPacket Deserialize(byte[] data)
+        public GridPositionPacket Deserialize(byte[] data)
         {
-            RotationYPacket packet = new RotationYPacket();
+            GridPositionPacket packet = new GridPositionPacket();
             BasePacket basePacket = packet.BaseDeserialize(data);
             packet.type = basePacket.type;
-            packet.playerData = basePacket.playerData;
-            packet.rotationY = basePacket.br.ReadSingle();
+            packet.AgentData = basePacket.AgentData;
+            packet.targetPosition = new Vector2Int(basePacket.br.ReadInt32(), basePacket.br.ReadInt32());
             return packet;
         }
     }
     
-    public class AnimationStatePacket : BasePacket
+    // This packet is sent when an agent damages an agent at target position
+    public class AttackActionPacket : GridPositionPacket
     {
-        public enum AnimationCommandType
+        public float damage;
+
+        public AttackActionPacket() : base(Type.AttackAction, new AgentData("", ""), Vector2Int.zero)
         {
-            Bool,
-            Trigger,
-            Float
+            this.damage = 0f;
         }
 
-        public AnimationCommandType commandType;
-        public string parameterName;
-        public bool boolValue;
-        public float floatValue;
-
-        public AnimationStatePacket() : base(Type.AnimationState, new PlayerData("", ""))
+        public AttackActionPacket(Type type, AgentData agentData, Vector2Int targetPosition, float damage) : base(type, agentData, targetPosition)
         {
-            this.commandType = AnimationCommandType.Bool;
-            this.parameterName = "";
-            this.boolValue = false;
-            this.floatValue = 0f;
-        }
-
-        public AnimationStatePacket(Type type, PlayerData playerData, AnimationCommandType commandType, string parameterName, bool boolValue, float floatValue) 
-            : base(type, playerData)
-        {
-            this.commandType = commandType;
-            this.parameterName = parameterName;
-            this.boolValue = boolValue;
-            this.floatValue = floatValue;
+            this.damage = damage;
         }
 
         public override byte[] Serialize()
         {
             BeginSerialize();
-            bw.Write((int)commandType);
-            bw.Write(parameterName);
-            bw.Write(boolValue);
-            bw.Write(floatValue);
+            bw.Write(targetPosition.x);
+            bw.Write(targetPosition.y);
+            bw.Write(damage);
             return EndSerialize();
         }
 
-        public AnimationStatePacket Deserialize(byte[] data)
+        public AttackActionPacket Deserialize(byte[] data)
         {
-            AnimationStatePacket packet = new AnimationStatePacket();
+            AttackActionPacket packet = new AttackActionPacket();
             BasePacket basePacket = packet.BaseDeserialize(data);
             packet.type = basePacket.type;
-            packet.playerData = basePacket.playerData;
-            packet.commandType = (AnimationCommandType)basePacket.br.ReadInt32();
-            packet.parameterName = basePacket.br.ReadString();
-            packet.boolValue = basePacket.br.ReadBoolean();
-            packet.floatValue = basePacket.br.ReadSingle();
+            packet.AgentData = basePacket.AgentData;
+            packet.targetPosition = new Vector2Int(basePacket.br.ReadInt32(), basePacket.br.ReadInt32());
+            packet.damage = basePacket.br.ReadSingle();
+            return packet;
+        }
+    }
+    
+    public class EndTurnPacket : BasePacket
+    {
+        public EndTurnPacket() : base(Type.EndTurn, new AgentData("", ""))
+        {
+        }
+
+        public EndTurnPacket(Type type, AgentData agentData) : base(type, agentData)
+        {
+        }
+
+        public override byte[] Serialize()
+        {
+            BeginSerialize();
+            return EndSerialize();
+        }
+
+        public EndTurnPacket Deserialize(byte[] data)
+        {
+            EndTurnPacket packet = new EndTurnPacket();
+            BasePacket basePacket = packet.BaseDeserialize(data);
+            packet.type = basePacket.type;
+            packet.AgentData = basePacket.AgentData;
             return packet;
         }
     }

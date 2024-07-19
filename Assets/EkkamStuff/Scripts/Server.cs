@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Net.Sockets;
 using System.Net;
-using TMPro;
+using ParrelSync;
 
 namespace Ekkam
 {
@@ -11,17 +11,25 @@ namespace Ekkam
     public class Server : MonoBehaviour
     {
         private Socket socket;
-        private List<Socket> clients = new List<Socket>();
-        // [SerializeField] private TMP_InputField inputField;
+        public List<Socket> clients = new List<Socket>();
 
         public delegate void ConnectedToServer();
 
         public event ConnectedToServer connectedToServer;
 
         public static Server instance;
+        
+        public bool acceptingNewClients = true;
+        public int maxClients = 3;
 
         void Start()
         {
+            if (ClonesManager.IsClone())
+            {
+                Destroy(gameObject);
+                return;
+            }
+            
             if (instance == null)
             {
                 instance = this;
@@ -41,13 +49,15 @@ namespace Ekkam
 
         private void OnDestroy()
         {
+            if (ClonesManager.IsClone()) return;
             socket.Close();
         }
 
         void Update()
         {
-            AcceptNewClients();
+            if (acceptingNewClients) AcceptNewClients();
             ReceiveDataFromClients();
+            if (Input.GetKeyDown(KeyCode.P)) BroadcastGameStartPacket();
         }
 
         private void AcceptNewClients()
@@ -58,6 +68,13 @@ namespace Ekkam
                 clients.Add(newClient);
                 Debug.Log("New client connected.");
                 connectedToServer?.Invoke();
+                
+                if (clients.Count == maxClients)
+                {
+                    acceptingNewClients = false;
+                    BroadcastGameStartPacket();
+                }
+                
             }
             catch
             {
@@ -75,25 +92,29 @@ namespace Ekkam
                     client.Receive(buffer);
                     
                     BasePacket packet = new BasePacket().BaseDeserialize(buffer);
+                    BroadcastData(buffer, client);
+                    
                     switch (packet.type)
                     {
-                        case BasePacket.Type.Position:
-                            PositionPacket positionPacket = new PositionPacket().Deserialize(buffer);
-                            Debug.Log($"Received position from {positionPacket.playerData.name}: {positionPacket.position}");
-                            BroadcastData(buffer, client);
+                        case BasePacket.Type.MoveAction:
+                            GridPositionPacket moveActionPacket = new GridPositionPacket().Deserialize(buffer);
+                            Debug.Log($"Server received move action from {moveActionPacket.AgentData.name}: {moveActionPacket.targetPosition}");
                             break;
-                        case BasePacket.Type.Rotation:
-                            RotationYPacket rotationYPacket = new RotationYPacket().Deserialize(buffer);
-                            Debug.Log($"Received rotation y from {rotationYPacket.playerData.name}: {rotationYPacket.rotationY}");
-                            BroadcastData(buffer, client);
-                            break;
-                        case BasePacket.Type.AnimationState:
-                            AnimationStatePacket animationStatePacket = new AnimationStatePacket().Deserialize(buffer);
-                            Debug.Log($"Received animation state from {animationStatePacket.playerData.name}: {animationStatePacket.commandType} {animationStatePacket.parameterName} {animationStatePacket.boolValue} {animationStatePacket.floatValue}");
-                            BroadcastData(buffer, client);
+                        case BasePacket.Type.AttackAction:
+                            AttackActionPacket attackActionPacket = new AttackActionPacket().Deserialize(buffer);
+                            Debug.Log($"Server received attack action from {attackActionPacket.AgentData.name}: {attackActionPacket.targetPosition} with {attackActionPacket.damage} damage");
                             break;
                     }
                 }
+            }
+        }
+        
+        public void BroadcastGameStartPacket()
+        {
+            foreach (Socket client in clients)
+            {
+                GameStartPacket packet = new GameStartPacket(BasePacket.Type.GameStart, new AgentData(), clients.IndexOf(client), clients.Count);
+                client.Send(packet.Serialize());
             }
         }
 

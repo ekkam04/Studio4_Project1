@@ -8,25 +8,33 @@ namespace Ekkam
 {
     public class LobbyManager : MonoBehaviour
     {
+        public TMP_InputField ipInput;
         public TMP_InputField nameInput;
         public Button connectButton;
+        public bool changeSceneOnConnect = true;
 
         private void Start()
         {
-            // Server.instance.connectedToServer += OnConnectedToServer;
             connectButton.onClick.AddListener(Connect);
         }
         
         void Connect()
         {
-            Client.instance.playerData = new PlayerData(Guid.NewGuid().ToString(), nameInput.text);
-            Client.instance.ConnectToServer("127.0.0.1", nameInput.text);
+            NetworkManager.instance.AgentData = new AgentData(Guid.NewGuid().ToString(), nameInput.text);
+            NetworkManager.instance.ConnectToServer("127.0.0.1", nameInput.text);
             OnConnectedToServer();
         }
 
         private void OnConnectedToServer()
         {
-            SceneManager.LoadScene("MainGame");
+            if (changeSceneOnConnect)
+            {
+                SceneManager.LoadScene("MainGame");
+            }
+            else
+            {
+                this.gameObject.SetActive(false);
+            }
         }
     }
 }
