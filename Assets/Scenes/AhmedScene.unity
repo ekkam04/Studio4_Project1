@@ -789,7 +789,7 @@ PrefabInstance:
     - target: {fileID: 6564234910364107903, guid: aac6f79ad717d0643afb8ea045d5db3e,
         type: 3}
       propertyPath: m_Name
-      value: Black smith_1
+      value: Apothecary
       objectReference: {fileID: 0}
     - target: {fileID: 7732712808580196157, guid: aac6f79ad717d0643afb8ea045d5db3e,
         type: 3}
@@ -2469,7 +2469,7 @@ PrefabInstance:
     - target: {fileID: 6564234910364107903, guid: aac6f79ad717d0643afb8ea045d5db3e,
         type: 3}
       propertyPath: m_Name
-      value: Black smith_2
+      value: Cultist Tower
       objectReference: {fileID: 0}
     - target: {fileID: 7732712808580196157, guid: aac6f79ad717d0643afb8ea045d5db3e,
         type: 3}
@@ -3047,7 +3047,7 @@ PrefabInstance:
     - target: {fileID: 6564234910364107903, guid: aac6f79ad717d0643afb8ea045d5db3e,
         type: 3}
       propertyPath: m_Name
-      value: Black smith_3
+      value: Farmer
       objectReference: {fileID: 0}
     - target: {fileID: 7732712808580196157, guid: aac6f79ad717d0643afb8ea045d5db3e,
         type: 3}
