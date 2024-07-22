@@ -73,7 +73,7 @@ namespace Ekkam
         }
         public PathfindingNode Parent;
         
-        private GameObject occupant;
+        [SerializeField] private GameObject occupant;
         private string occupantName;
         public TMP_Text occupantText;
         public GameObject Occupant

@@ -8,7 +8,7 @@ namespace Ekkam
         public int friendlyCount = Int32.MaxValue;
         public int friendlyTurnsCompleted;
         
-        public int hostileCount;
+        public int hostileCount = Int32.MaxValue;
         public int hostileTurnsCompleted;
         
         public Agent.AgentType currentTurn;
@@ -18,24 +18,23 @@ namespace Ekkam
         private void OnEnable()
         {
             Agent.onTurnEnd += OnTurnEnd;
+            Agent.onEliminated += OnEliminated;
+            
             enemyManager = FindObjectOfType<EnemyManager>();
-            foreach (var agent in FindObjectsOfType<Agent>())
-            {
-                if (agent.agentType == Agent.AgentType.Hostile)
-                {
-                    hostileCount++;
-                }
-            }
         }
         
         private void OnDisable()
         {
             Agent.onTurnEnd -= OnTurnEnd;
+            Agent.onEliminated -= OnEliminated;
         }
         
         private void OnTurnEnd(Agent.AgentType agentType)
         {
             Debug.Log("Turn ended");
+            hostileCount = CalculateHostileCount();
+            CheckForEndGame();
+            
             if (agentType == Agent.AgentType.Friendly)
             {
                 friendlyTurnsCompleted++;
@@ -61,6 +60,42 @@ namespace Ekkam
                         }
                     }
                 }
+            }
+        }
+        
+        private int CalculateHostileCount()
+        {
+            int count = 0;
+            foreach (var agent in FindObjectsOfType<Agent>())
+            {
+                if (agent.agentType == Agent.AgentType.Hostile)
+                {
+                    count++;
+                }
+            }
+            return count;
+        }
+
+        private void OnEliminated(Agent.AgentType agentType)
+        {
+            // Friendly agents are only recalculated if they are eliminated
+            if (agentType == Agent.AgentType.Friendly)
+            {
+                friendlyCount--;
+            }
+
+            CheckForEndGame();
+        }
+        
+        private void CheckForEndGame()
+        {
+            if (friendlyCount == 0)
+            {
+                Debug.LogWarning("Hostiles win!");
+            }
+            else if (hostileCount == 0)
+            {
+                Debug.LogWarning("Friendlies win!");
             }
         }
     }

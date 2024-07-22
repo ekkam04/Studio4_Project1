@@ -9,11 +9,6 @@ namespace Ekkam
     {
         public bool isMasterClient;
         
-        private void Start()
-        {
-            print("EnemyManager is ready on master client");
-        }
-        
         public void StartEnemyTurn()
         {
             if (!isMasterClient) return;

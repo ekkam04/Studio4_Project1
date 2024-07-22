@@ -101,8 +101,8 @@ namespace Ekkam
                             Debug.Log($"Server received move action from {moveActionPacket.AgentData.name}: {moveActionPacket.targetPosition}");
                             break;
                         case BasePacket.Type.AttackAction:
-                            GridPositionPacket attackActionPacket = new GridPositionPacket().Deserialize(buffer);
-                            Debug.Log($"Server received attack action from {attackActionPacket.AgentData.name}: {attackActionPacket.targetPosition}");
+                            AttackActionPacket attackActionPacket = new AttackActionPacket().Deserialize(buffer);
+                            Debug.Log($"Server received attack action from {attackActionPacket.AgentData.name}: {attackActionPacket.targetPosition} with {attackActionPacket.damage} damage");
                             break;
                     }
                 }

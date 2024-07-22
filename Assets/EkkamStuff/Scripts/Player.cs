@@ -16,7 +16,15 @@ namespace Ekkam
         public List<PathfindingNode> reachableNodes = new List<PathfindingNode>();
         
         public PathfindingNode lastSelectedNode;
-        public bool selectingTarget;
+        // public bool selectingTarget;
+        
+        public enum SelectingTarget
+        {
+            None,
+            Move,
+            Attack
+        }
+        public SelectingTarget selectingTarget;
         
         private NetworkComponent networkComponent;
 
@@ -48,41 +56,63 @@ namespace Ekkam
             )
             {
                 var selectedNode = grid.GetNode(mousePositionOnGrid);
-
-                if (!selectingTarget)
+                
+                if (selectedNode.Occupant == this.gameObject)
                 {
-                    UnselectAction();
-                    
-                    print("Occupant: " + selectedNode.occupantText.text);
-                    if (selectedNode.Occupant == null) return;
-
-                    if (selectedNode.Occupant == this.gameObject)
+                    if (selectingTarget == SelectingTarget.None) // Select player and show actions
                     {
                         print("Selected self");
                         selectedNode.SetActionable(false, PathfindingNode.VisualType.Selected);
                         lastSelectedNode = selectedNode;
                         uiManager.playerActionsUI.SetActive(true);
                     }
-                }
-                else
-                {
-                    if (selectedNode.Occupant == this.gameObject)
+                    else // Cancel action
                     {
                         print("Selected self while selecting target");
                         selectedNode.SetActionable(false);
                         UnselectAction();
                         return;
                     }
-                    
-                    if (!selectedNode.pathVisual.activeSelf)
-                    {
-                        print("Target is unreachable");
-                        return;
-                    }
+                }
 
-                    // Move action
-                    MoveAction(mousePositionOnGrid);
-                    NetworkManager.instance.SendMoveAction(mousePositionOnGrid);
+                switch (selectingTarget)
+                {
+                    case SelectingTarget.Move:
+                        
+                        if (!selectedNode.pathVisual.activeSelf)
+                        {
+                            print("Target is unreachable");
+                            return;
+                        }
+                        
+                        MoveAction(mousePositionOnGrid);
+                        NetworkManager.instance.SendMoveAction(mousePositionOnGrid);
+                        break;
+                    
+                    case SelectingTarget.Attack:
+                        
+                        if (!selectedNode.enemyVisual.activeSelf)
+                        {
+                            print("Target does not have an enemy");
+                            return;
+                        }
+                        
+                        float damage = 0f;
+                        try
+                        {
+                            Agent targetAgent = grid.GetNode(mousePositionOnGrid).Occupant.GetComponent<Agent>();
+                            damage = targetAgent.CalculateDamage(90f, 50f);
+                        }
+                        catch
+                        {
+                            Debug.LogWarning("No agent at target position");
+                            OnActionEnd();
+                            return;
+                        }
+                        
+                        AttackAction(mousePositionOnGrid, damage);
+                        NetworkManager.instance.SendAttackAction(mousePositionOnGrid, damage);
+                        break;
                 }
             }
         }
@@ -95,7 +125,8 @@ namespace Ekkam
             {
                 node.SetActionable(false);
             }
-            selectingTarget = false;
+
+            selectingTarget = SelectingTarget.None;
         }
 
         public override void StartTurn()
@@ -144,16 +175,37 @@ namespace Ekkam
             {
                 node.SetActionable(true, PathfindingNode.VisualType.Path);
             }
-            selectingTarget = true;
+            
+            if (reachableNodes.Count > 0)
+            {
+                selectingTarget = SelectingTarget.Move;
+            }
+            else
+            {
+                Debug.LogWarning("No reachable nodes");
+                UnselectAction();
+            }
         }
         
         public void AttackButton()
         {
             if (actionPoints <= 0) Debug.LogWarning("Not enough action points");
             
-            // Placeholder for attack action
-            AttackAction(Vector2Int.zero);
-            NetworkManager.instance.SendAttackAction(Vector2Int.zero);
+            reachableNodes = GetReachableNodes(attackRange, true, AgentType.Hostile);
+            foreach (var node in reachableNodes)
+            {
+                node.SetActionable(true, PathfindingNode.VisualType.Enemy);
+            }
+
+            if (reachableNodes.Count > 0)
+            {
+                selectingTarget = SelectingTarget.Attack;
+            }
+            else
+            {
+                Debug.LogWarning("No enemies in range");
+                UnselectAction();
+            }
         }
     }
 }

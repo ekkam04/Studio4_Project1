@@ -927,6 +927,8 @@ MonoBehaviour:
   health: 100
   armor: 0
   evasion: 0
+  coveredPercentage: 0
+  skinnedMeshRenderer: {fileID: 5732285691431406034}
   startNodePosition: {x: 0, y: 0}
   endNodePosition: {x: 0, y: 0}
   grid: {fileID: 0}
@@ -938,10 +940,13 @@ MonoBehaviour:
   closedNodes: []
   pathNodes: []
   findPath: 0
+  leftHand: {fileID: 8342296193573279981}
+  rightHand: {fileID: 3978308335651146441}
   agentType: 1
+  isTakingAction: 0
   movementPoints: 4
   actionPoints: 2
-  shootRange: 4
+  attackRange: 4
   mousePosition3DPrefab: {fileID: 6247423640985755484, guid: 20e8461a506c9354c9d87839c45baa95,
     type: 3}
   reachableNodes: []
