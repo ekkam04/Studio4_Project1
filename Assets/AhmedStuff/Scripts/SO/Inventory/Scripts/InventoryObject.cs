@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 [CreateAssetMenu(fileName = "new inventory object", menuName = "Inventory System/Inventroy")]
 public class InventoryObject : ScriptableObject
@@ -29,21 +30,4 @@ public class InventoryObject : ScriptableObject
         }
     }
     
-}
-[System.Serializable]
-public class InventorySlot
-{
-    public ItemObject item;
-    public int amount;
-
-    public InventorySlot(ItemObject item, int amount)
-    {
-        this.item = item;
-        this.amount = amount;
-    }
-
-    public void AddAmount(int value)
-    {
-        amount += value;
-    }
 }

@@ -22,16 +22,16 @@ public class DisplayInventory : MonoBehaviour
                 {
                     switch(player.playerInventory.container[i].item.itemType)
                     {
-                        case ItemType.Ore:
+                        case ItemType.Defualt:
                             texts[0].text = "Amount : " + player.playerInventory.container[i].amount;
                             break;
-                        case ItemType.Herb:
+                        case ItemType.Crystal:
                             texts[1].text = "Amount : " + player.playerInventory.container[i].amount;
                             break;
-                        case ItemType.Crystal:
+                        case ItemType.Food:
                             texts[2].text = "Amount : " + player.playerInventory.container[i].amount;
                             break;
-                        case ItemType.Wheat:
+                        case ItemType.Equipment:
                             texts[3].text = "Amount : " + player.playerInventory.container[i].amount;
                             break;
                     }
