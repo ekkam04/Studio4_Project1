@@ -5,13 +5,14 @@ using UnityEngine;
 
 public enum ItemType
 {
-   Defualt,
+   Default,
    Food,
    Crystal,
    Equipment
 }
 public class ItemObject : ScriptableObject
 {
+    public Sprite sprite;
     public GameObject prefab;
     public ItemType itemType;
     public string itemKey;

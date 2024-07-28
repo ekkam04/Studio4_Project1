@@ -7,7 +7,7 @@ using TMPro;
 public class DisplayInventory : MonoBehaviour
 {
     public List<TextMeshProUGUI> texts = new List<TextMeshProUGUI>();
-    public InventoryObject playerInventory;
+    public InventoryManager inventoryManager;
     public PlayerPickUpItems player;
     
 
@@ -15,24 +15,24 @@ public class DisplayInventory : MonoBehaviour
     {
         if (player.pickedUp)
         {
-            int count = player.playerInventory.container.Count;
+            int count = player.inventoryManager.playerInventory.Length;
             for (int i = 0; i < texts.Count; i++)
             {
                 if (i < count)
                 {
-                    switch(player.playerInventory.container[i].item.itemType)
+                    switch(player.inventoryManager.playerInventory[i].item.itemType)
                     {
-                        case ItemType.Defualt:
-                            texts[0].text = "Amount : " + player.playerInventory.container[i].amount;
+                        case ItemType.Default:
+                            texts[0].text = "Amount : " + player.inventoryManager.playerInventory[i].amount;
                             break;
                         case ItemType.Crystal:
-                            texts[1].text = "Amount : " + player.playerInventory.container[i].amount;
+                            texts[1].text = "Amount : " + player.inventoryManager.playerInventory[i].amount;
                             break;
                         case ItemType.Food:
-                            texts[2].text = "Amount : " + player.playerInventory.container[i].amount;
+                            texts[2].text = "Amount : " + player.inventoryManager.playerInventory[i].amount;
                             break;
                         case ItemType.Equipment:
-                            texts[3].text = "Amount : " + player.playerInventory.container[i].amount;
+                            texts[3].text = "Amount : " + player.inventoryManager.playerInventory[i].amount;
                             break;
                     }
                 }

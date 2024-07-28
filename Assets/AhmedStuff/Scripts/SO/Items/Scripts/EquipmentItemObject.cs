@@ -4,7 +4,7 @@ using UnityEngine;
 
 
 [CreateAssetMenu(fileName = "Equipment Item",menuName = "Inventory System/Items/Equipment")]
-public class EquipmentItemObject : MonoBehaviour
+public class EquipmentItemObject : ItemObject
 {
     public int attackValue;
     public int armorValue;

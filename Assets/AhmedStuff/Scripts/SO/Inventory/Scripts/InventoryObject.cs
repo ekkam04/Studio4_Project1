@@ -2,32 +2,33 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.Serialization;
 
 [CreateAssetMenu(fileName = "new inventory object", menuName = "Inventory System/Inventroy")]
 public class InventoryObject : ScriptableObject
 {
-    public List<InventorySlot> container = new List<InventorySlot>();
+    public GameObject inventroyItemPrefab;
+    public InventorySlot[] inventorySlots;
 
-    public void AddItem(ItemObject _item, int _amount)
+    public void AddItem(ItemObject item)
     {
-        bool hasItem = false;
-        for (int i = 0; i < container.Count; i++)
+        for (int i = 0; i < inventorySlots.Length; i++)
         {
-            if (container[i].item == _item)
+            InventorySlot slot = inventorySlots[i];
+            InventoryItem itemInSlot = slot.GetComponentInChildren<InventoryItem>();
+            if (itemInSlot == null)
             {
-                if (container[i].item.stackble)
-                {
-                    container[i].AddAmount(_amount);
-                }
-                hasItem = true;
-                break;
+                SpawnNewItem(item, slot);
+                return;
             }
         }
+    }
 
-        if (_item.stackble == false || !hasItem)
-        {
-            container.Add(new InventorySlot(_item, _amount));
-        }
+    void SpawnNewItem(ItemObject item, InventorySlot slot)
+    {
+        GameObject go = Instantiate(inventroyItemPrefab, slot.transform);
+        InventoryItem inventoryItem = go.GetComponent<InventoryItem>();
+        inventoryItem.InitializeItem(item);
     }
     
 }

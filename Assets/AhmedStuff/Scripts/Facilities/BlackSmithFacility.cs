@@ -10,7 +10,7 @@ public class BlackSmithFacility : Facility
 
     public override void CheckForReward()
     {
-        foreach (InventorySlot slot in playerInventory.container)
+        foreach (InventorySlot slot in playerInventory.inventorySlots)
         {
             if (slot.item.itemType == itemType && slot.amount >= reward)
             {

@@ -1,17 +1,38 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
+using TMPro;
 
-public class DraggbleItem : MonoBehaviour, IBeginDragHandler,IDragHandler,IEndDragHandler
+public class InventoryItem : MonoBehaviour, IBeginDragHandler,IDragHandler,IEndDragHandler
 {
+    
     public Image image;
+    public TextMeshProUGUI countText;
+    
+    [HideInInspector] public ItemObject item;
+    [HideInInspector] public int count = 1;
     [HideInInspector] public Transform parentAfterDrag;
+
+   
+    public void InitializeItem(ItemObject item)
+    {
+        this.item = item;
+        image.sprite = item.sprite;
+        RefreshCount();
+    }
+
+    public void RefreshCount()
+    {
+        countText.text = count.ToString();
+        bool textActive = count > 1;
+        countText.gameObject.SetActive(textActive);
+    }
     public void OnBeginDrag(PointerEventData eventData)
     {
-        Debug.Log("Start Dragging");
         parentAfterDrag = transform.parent;
         transform.SetParent(transform.root);
         transform.SetAsLastSibling();
@@ -20,13 +41,11 @@ public class DraggbleItem : MonoBehaviour, IBeginDragHandler,IDragHandler,IEndDr
 
     public void OnDrag(PointerEventData eventData)
     {
-        Debug.Log("Dragging");
         transform.position = Input.mousePosition;
     }
 
     public void OnEndDrag(PointerEventData eventData)
     {
-        Debug.Log("End Dragging");
         transform.SetParent(parentAfterDrag);
         //transform.SetAsFirstSibling();
         image.raycastTarget = true;
