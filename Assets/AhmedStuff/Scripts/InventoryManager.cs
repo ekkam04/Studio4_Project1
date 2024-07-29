@@ -11,6 +11,11 @@ public class InventoryManager : MonoBehaviour
     public InventorySlot[] playerInventory;
     public InventorySlot[] playerHotBar;
     public InventorySlot[] playerEquipmentInventory;
+    public CraftingSlot[] craftingSlots;
+    public InventorySlot rewardSlot;
+    public ItemObject craftedObject;
+    public CraftingRecipe[] craftingRecipes;
+    
     // Start is called before the first frame update
     public bool AddItem(ItemObject item)
     {
@@ -19,9 +24,9 @@ public class InventoryManager : MonoBehaviour
         {
             InventorySlot slot = playerInventory[i];
             InventoryItem itemInSlot = slot.GetComponentInChildren<InventoryItem>();
-            if (itemInSlot != null&&
-                itemInSlot.item == item&&
-                itemInSlot.count < maxStackItems&&
+            if (itemInSlot != null &&
+                itemInSlot.item == item &&
+                itemInSlot.count < maxStackItems &&
                 itemInSlot.item.stackble == true)
             {
                 itemInSlot.count++;
@@ -50,5 +55,27 @@ public class InventoryManager : MonoBehaviour
         InventoryItem inventoryItem = go.GetComponent<InventoryItem>();
         inventoryItem.InitializeItem(item);
     }
+    
+    public void CheckCrafting()
+    {
+        InventoryItem item1 = craftingSlots[0].GetComponentInChildren<InventoryItem>();
+        InventoryItem item2 = craftingSlots[1].GetComponentInChildren<InventoryItem>();
 
+        if (item1 != null && item2 != null)
+        {
+            foreach (CraftingRecipe recipe in craftingRecipes)
+            {
+                if ((item1.item == recipe.item1 && item2.item == recipe.item2) ||
+                    (item1.item == recipe.item2 && item2.item == recipe.item1))
+                {
+                    SpawnNewItem(recipe.result, rewardSlot);
+
+                    Destroy(item1.gameObject);
+                    Destroy(item2.gameObject);
+
+                    break;
+                }
+            }
+        }
+    }
 }

@@ -5,22 +5,10 @@ using UnityEngine.EventSystems;
 
 public class InventorySlot : MonoBehaviour, IDropHandler
 {
-    [HideInInspector] public ItemObject item;
-    [HideInInspector] public int amount;
-
-    public InventorySlot(ItemObject item, int amount)
+    public bool isRewardSlot = false;
+    public virtual void OnDrop(PointerEventData eventData)
     {
-        this.item = item;
-        this.amount = amount;
-    }
-
-    public void AddAmount(int value)
-    {
-        amount += value;
-    }
-
-    public void OnDrop(PointerEventData eventData)
-    {
+        if(isRewardSlot)return;
         if (transform.childCount == 0)
         {
             GameObject dropped = eventData.pointerDrag;

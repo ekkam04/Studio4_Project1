@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
-
+/*
 public class DisplayInventory : MonoBehaviour
 {
     public List<TextMeshProUGUI> texts = new List<TextMeshProUGUI>();
@@ -44,4 +44,4 @@ public class DisplayInventory : MonoBehaviour
             player.pickedUp = false;
         }
     }
-}
+}*/

@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BlackSmithFacility : Facility
+/*public class BlackSmithFacility : Facility
 {
     [SerializeField] int reward;
     [SerializeField] private int nextRewardIncrement;
@@ -21,4 +21,4 @@ public class BlackSmithFacility : Facility
         }
         Debug.Log("No reward for " + facilityType);
     }
-}
+}*/

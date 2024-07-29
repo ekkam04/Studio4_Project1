@@ -37,6 +37,7 @@ public class InventoryItem : MonoBehaviour, IBeginDragHandler,IDragHandler,IEndD
         transform.SetParent(transform.root);
         transform.SetAsLastSibling();
         image.raycastTarget = false;
+        countText.raycastTarget = false;
     }
 
     public void OnDrag(PointerEventData eventData)
