@@ -195,6 +195,33 @@ namespace Ekkam
                         }
                         actionableAgent.EndTurn();
                         break;
+                    case BasePacket.Type.ItemPickup:
+                        ItemPacket itemPacket = new ItemPacket().Deserialize(buffer);
+                        Debug.Log($"Received item pickup from {itemPacket.AgentData.name}: {itemPacket.itemKey}");
+
+                        if (itemPacket.AgentData.name.Contains("Enemy"))
+                        {
+                            var enemyGO = GameObject.Find(itemPacket.AgentData.name);
+                            if (enemyGO == null) return;
+                            actionableAgent = enemyGO.GetComponent<Agent>();
+                        }
+                        else
+                        {
+                            SpawnOtherPlayerIfMissing(itemPacket.AgentData);
+                            actionableAgent = players[itemPacket.AgentData.id].GetComponent<Agent>();
+                        }
+                        
+                        var allItems = FindObjectsOfType<Item>();
+                        foreach (var item in allItems)
+                        {
+                            if (item.item.itemKey == itemPacket.itemKey)
+                            {
+                                Destroy(item.gameObject);
+                                break;
+                            }
+                        }
+                        
+                        break;
                 }
             }
         }
@@ -225,6 +252,13 @@ namespace Ekkam
             if (agentData == null) agentData = AgentData;
             EndTurnPacket endTurnPacket = new EndTurnPacket(BasePacket.Type.EndTurn, agentData);
             SendDataToServer(endTurnPacket);
+        }
+
+        public void SendItemPacket(string itemKey, AgentData agentData = null)
+        {
+            if (agentData == null) agentData = AgentData;
+            ItemPacket itemPacket = new ItemPacket(BasePacket.Type.ItemPickup, agentData, itemKey);
+            SendDataToServer(itemPacket);
         }
         
         private void SpawnOtherPlayerIfMissing(AgentData agentData)

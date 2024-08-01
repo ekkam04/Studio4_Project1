@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Ekkam;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -20,7 +21,8 @@ public class PlayerPickUpItems : MonoBehaviour
             if (result == true)
             {
                 inventoryItem.InitializeItem(item.item);
-                Destroy(other.gameObject); 
+                NetworkManager.instance.SendItemPacket(item.item.itemKey);
+                Destroy(other.gameObject);
             }
             else
             {

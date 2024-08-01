@@ -12,7 +12,8 @@ namespace Ekkam
             MoveAction,
             TeleportAction,
             AttackAction,
-            EndTurn
+            EndTurn,
+            ItemPickup
         }
 
         public Type type;
