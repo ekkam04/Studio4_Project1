@@ -844,6 +844,8 @@ GameObject:
   - component: {fileID: 8498496592407031496}
   - component: {fileID: 4630042644973553332}
   - component: {fileID: -1348554247054621393}
+  - component: {fileID: -1566488376184331900}
+  - component: {fileID: -5162418566169313983}
   m_Layer: 6
   m_Name: Player
   m_TagString: Player
@@ -946,7 +948,10 @@ MonoBehaviour:
   isTakingAction: 0
   movementPoints: 4
   actionPoints: 2
+  manaPoints: 4
+  maxManaPoints: 0
   attackRange: 4
+  attacks: []
   mousePosition3DPrefab: {fileID: 6247423640985755484, guid: 20e8461a506c9354c9d87839c45baa95,
     type: 3}
   reachableNodes: []
@@ -966,6 +971,49 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ownerID: 
   ownerName: 
+--- !u!114 &-1566488376184331900
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2558620899690012287}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe38c17db7126f049bd6df2f207cecee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  inventoryItem: {fileID: 1623038423901205431, guid: d090836da7d23a342860d9450f3d416b,
+    type: 3}
+  inventoryManager: {fileID: 0}
+  pickedUp: 0
+--- !u!54 &-5162418566169313983
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2558620899690012287}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &2572337922948916857
 GameObject:
   m_ObjectHideFlags: 0
