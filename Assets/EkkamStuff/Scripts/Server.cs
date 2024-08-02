@@ -104,6 +104,10 @@ namespace Ekkam
                             AttackActionPacket attackActionPacket = new AttackActionPacket().Deserialize(buffer);
                             Debug.Log($"Server received attack action from {attackActionPacket.AgentData.name}: {attackActionPacket.targetPosition} with {attackActionPacket.damage} damage");
                             break;
+                        case BasePacket.Type.ItemPickup:
+                            ItemPacket itemPacket = new ItemPacket().Deserialize(buffer);
+                            Debug.Log($"Server received item pickup from {itemPacket.AgentData.name}: {itemPacket.itemKey}");
+                            break;
                     }
                 }
             }

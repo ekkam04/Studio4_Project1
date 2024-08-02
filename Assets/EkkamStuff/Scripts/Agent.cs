@@ -52,10 +52,16 @@ namespace Ekkam
 
         public int movementPoints = 6;
         private int maxMovementPoints;
+        
         public int actionPoints = 2;
         private int maxActionPoints;
+        
+        public int manaPoints = 4;
+        public int maxManaPoints;
+        
         public int attackRange = 4;
-
+        public List<Attack> attacks = new List<Attack>();
+        
         protected void Start()
         {
             grid = FindObjectOfType<PathfindingGrid>();
@@ -406,4 +412,20 @@ namespace Ekkam
             onTurnEnd?.Invoke(agentType);
         }
     }
+    
+    // [System.Serializable]
+    // public class AttackRange
+    // {
+    //     public string key;
+    //     
+    //     [Header("Forward Attack Range")]
+    //     public bool[] frontLeft = new bool[] {};
+    //     public bool[] frontMiddle = new bool[] {true, true};
+    //     public bool[] frontRight = new bool[] {};
+    //     
+    //     [Header("Mirror")]
+    //     public bool mirrorToRight = true;
+    //     public bool mirrorToLeft = true;
+    //     public bool mirrorToBack = true;
+    // }
 }

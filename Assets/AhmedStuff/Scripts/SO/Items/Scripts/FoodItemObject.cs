@@ -6,5 +6,6 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "Food Item",menuName = "Inventory System/Items/Food")]
 public class FoodItemObject : ItemObject
 {
-    
+    public int healthValue;
+    public int manaValue;
 }
