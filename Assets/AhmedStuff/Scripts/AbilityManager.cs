@@ -24,7 +24,6 @@ public class AbilityManager : MonoBehaviour
     {
         for (int i = 0; i < abilityInventory.Length; i++)
         { 
-            Debug.Log("working");
             AbilitySlot slot = abilityInventory[i];
             InventoryItem itemInSlot = slot.GetComponentInChildren<InventoryItem>();
             if (itemInSlot == null)

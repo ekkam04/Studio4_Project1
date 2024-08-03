@@ -7,7 +7,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using TMPro;
 
-public class InventoryItem : MonoBehaviour, IBeginDragHandler,IDragHandler,IEndDragHandler
+public class InventoryItem : MonoBehaviour, IBeginDragHandler,IDragHandler,IEndDragHandler, IPointerEnterHandler, IPointerExitHandler,IPointerMoveHandler
 {
     
     public Image image;
@@ -17,7 +17,13 @@ public class InventoryItem : MonoBehaviour, IBeginDragHandler,IDragHandler,IEndD
     [HideInInspector] public int count = 1;
     [HideInInspector] public Transform parentAfterDrag;
 
-   
+    public ItemDescriptionUI itemDescriptionUI;
+
+    private void Start()
+    {
+        itemDescriptionUI = FindObjectOfType<ItemDescriptionUI>().GetComponent<ItemDescriptionUI>();
+    }
+
     public void InitializeItem(ItemObject item)
     {
         this.item = item;
@@ -50,5 +56,22 @@ public class InventoryItem : MonoBehaviour, IBeginDragHandler,IDragHandler,IEndD
         transform.SetParent(parentAfterDrag);
         //transform.SetAsFirstSibling();
         image.raycastTarget = true;
+    }
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        itemDescriptionUI.ShowDescription(item.description);
+        Vector3 position = Input.mousePosition + new Vector3(-80,80,0);
+        itemDescriptionUI.UpdatePosition(position);
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        itemDescriptionUI.HideDescription();
+    }
+
+    public void OnPointerMove(PointerEventData eventData)
+    {
+        Vector3 position = Input.mousePosition + new Vector3(-80,80,0);
+        itemDescriptionUI.UpdatePosition(position);
     }
 }
