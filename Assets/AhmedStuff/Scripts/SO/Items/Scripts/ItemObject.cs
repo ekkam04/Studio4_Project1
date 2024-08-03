@@ -8,7 +8,8 @@ public enum ItemType
    Default,
    Food,
    Crystal,
-   Equipment
+   Equipment,
+   Ability
 }
 public class ItemObject : ScriptableObject
 {

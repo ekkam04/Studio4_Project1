@@ -11,8 +11,8 @@ GameObject:
   - component: {fileID: 3653531852336100198}
   - component: {fileID: 3853105590362380984}
   - component: {fileID: 477153982118422770}
-  - component: {fileID: 3820841446976507343}
   - component: {fileID: 1835154285395226557}
+  - component: {fileID: 360741700235860958}
   m_Layer: 5
   m_Name: WeponSlot
   m_TagString: Untagged
@@ -77,20 +77,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &3820841446976507343
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 67535568854918807}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 985fe1d25d1c4f649851808dd75a4075, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  item: {fileID: 0}
-  amount: 0
 --- !u!114 &1835154285395226557
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -115,6 +101,20 @@ MonoBehaviour:
   m_Spacing: {x: 0, y: 0}
   m_Constraint: 0
   m_ConstraintCount: 2
+--- !u!114 &360741700235860958
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 67535568854918807}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3242f7a527e615145b7c440e10076928, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isRewardSlot: 0
+  inventoryManager: {fileID: 0}
 --- !u!1 &131694152540440482
 GameObject:
   m_ObjectHideFlags: 0
@@ -126,8 +126,8 @@ GameObject:
   - component: {fileID: 4573665621236762408}
   - component: {fileID: 7822238681305936070}
   - component: {fileID: 282230122931895071}
-  - component: {fileID: 3689549020356327081}
   - component: {fileID: 7345629196588853431}
+  - component: {fileID: 1759014001026259282}
   m_Layer: 5
   m_Name: ArmorSlot
   m_TagString: Untagged
@@ -192,20 +192,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &3689549020356327081
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 131694152540440482}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 985fe1d25d1c4f649851808dd75a4075, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  item: {fileID: 0}
-  amount: 0
 --- !u!114 &7345629196588853431
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -230,6 +216,20 @@ MonoBehaviour:
   m_Spacing: {x: 0, y: 0}
   m_Constraint: 0
   m_ConstraintCount: 2
+--- !u!114 &1759014001026259282
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 131694152540440482}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3242f7a527e615145b7c440e10076928, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isRewardSlot: 0
+  inventoryManager: {fileID: 0}
 --- !u!1 &3111712472321896584
 GameObject:
   m_ObjectHideFlags: 0
@@ -316,8 +316,8 @@ GameObject:
   - component: {fileID: 5337439627740074986}
   - component: {fileID: 5251460727600746687}
   - component: {fileID: 967637560934775416}
-  - component: {fileID: 7891824770003376823}
   - component: {fileID: 3299689798730621400}
+  - component: {fileID: 2843415373489780218}
   m_Layer: 5
   m_Name: BootsSlot
   m_TagString: Untagged
@@ -382,20 +382,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &7891824770003376823
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5638344083741508738}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 985fe1d25d1c4f649851808dd75a4075, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  item: {fileID: 0}
-  amount: 0
 --- !u!114 &3299689798730621400
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -420,6 +406,20 @@ MonoBehaviour:
   m_Spacing: {x: 0, y: 0}
   m_Constraint: 0
   m_ConstraintCount: 2
+--- !u!114 &2843415373489780218
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5638344083741508738}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3242f7a527e615145b7c440e10076928, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isRewardSlot: 0
+  inventoryManager: {fileID: 0}
 --- !u!1 &7634976659725824976
 GameObject:
   m_ObjectHideFlags: 0
@@ -547,8 +547,8 @@ GameObject:
   - component: {fileID: 4745908703322565651}
   - component: {fileID: 710735701273709045}
   - component: {fileID: 7797648635302064383}
-  - component: {fileID: 6886974358780157078}
   - component: {fileID: 1313946778958111698}
+  - component: {fileID: 2918395155830833084}
   m_Layer: 5
   m_Name: ShieldSlot
   m_TagString: Untagged
@@ -613,20 +613,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &6886974358780157078
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9141548184969184770}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 985fe1d25d1c4f649851808dd75a4075, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  item: {fileID: 0}
-  amount: 0
 --- !u!114 &1313946778958111698
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -651,3 +637,17 @@ MonoBehaviour:
   m_Spacing: {x: 0, y: 0}
   m_Constraint: 0
   m_ConstraintCount: 2
+--- !u!114 &2918395155830833084
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9141548184969184770}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3242f7a527e615145b7c440e10076928, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isRewardSlot: 0
+  inventoryManager: {fileID: 0}

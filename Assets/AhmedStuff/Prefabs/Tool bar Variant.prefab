@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 7210019804131924708}
   - component: {fileID: 1029715070452010130}
   - component: {fileID: 4552254404097438201}
-  - component: {fileID: 2862635193952390131}
+  - component: {fileID: 2085414063186506499}
   m_Layer: 5
   m_Name: InventorySlot_3
   m_TagString: Untagged
@@ -101,7 +101,7 @@ MonoBehaviour:
   m_Spacing: {x: 0, y: 0}
   m_Constraint: 0
   m_ConstraintCount: 2
---- !u!114 &2862635193952390131
+--- !u!114 &2085414063186506499
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -110,11 +110,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 1745635365085046629}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 985fe1d25d1c4f649851808dd75a4075, type: 3}
+  m_Script: {fileID: 11500000, guid: 94d777ddbf4b7a9478af19c39233acfe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  item: {fileID: 0}
-  amount: 0
+  isRewardSlot: 0
+  inventoryManager: {fileID: 0}
+  keyCode: 101
 --- !u!1 &1747236507235595295
 GameObject:
   m_ObjectHideFlags: 0
@@ -127,7 +128,7 @@ GameObject:
   - component: {fileID: 5714040324780880732}
   - component: {fileID: 3482506206280911656}
   - component: {fileID: 2620378140625120077}
-  - component: {fileID: 840461505298304991}
+  - component: {fileID: 1708596123562762076}
   m_Layer: 5
   m_Name: InventorySlot_4
   m_TagString: Untagged
@@ -216,7 +217,7 @@ MonoBehaviour:
   m_Spacing: {x: 0, y: 0}
   m_Constraint: 0
   m_ConstraintCount: 2
---- !u!114 &840461505298304991
+--- !u!114 &1708596123562762076
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -225,11 +226,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 1747236507235595295}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 985fe1d25d1c4f649851808dd75a4075, type: 3}
+  m_Script: {fileID: 11500000, guid: 94d777ddbf4b7a9478af19c39233acfe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  item: {fileID: 0}
-  amount: 0
+  isRewardSlot: 0
+  inventoryManager: {fileID: 0}
+  keyCode: 114
 --- !u!1 &9112560718225003078
 GameObject:
   m_ObjectHideFlags: 0
@@ -242,7 +244,7 @@ GameObject:
   - component: {fileID: 1439110762480871238}
   - component: {fileID: 1484994216353843638}
   - component: {fileID: 6995669758188560615}
-  - component: {fileID: 6630988990982220053}
+  - component: {fileID: 4979272583281843038}
   m_Layer: 5
   m_Name: InventorySlot_2
   m_TagString: Untagged
@@ -331,7 +333,7 @@ MonoBehaviour:
   m_Spacing: {x: 0, y: 0}
   m_Constraint: 0
   m_ConstraintCount: 2
---- !u!114 &6630988990982220053
+--- !u!114 &4979272583281843038
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -340,11 +342,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 9112560718225003078}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 985fe1d25d1c4f649851808dd75a4075, type: 3}
+  m_Script: {fileID: 11500000, guid: 94d777ddbf4b7a9478af19c39233acfe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  item: {fileID: 0}
-  amount: 0
+  isRewardSlot: 0
+  inventoryManager: {fileID: 0}
+  keyCode: 119
 --- !u!1001 &8670764100688616794
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -530,7 +533,7 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 908486938625378346, guid: b13fbe28d63aa6d45acf624168414c6a,
         type: 3}
       insertIndex: -1
-      addedObject: {fileID: 6497592722605347915}
+      addedObject: {fileID: 2839700036572001714}
   m_SourcePrefab: {fileID: 100100000, guid: b13fbe28d63aa6d45acf624168414c6a, type: 3}
 --- !u!224 &4529298607891277476 stripped
 RectTransform:
@@ -598,7 +601,7 @@ MonoBehaviour:
   m_Spacing: {x: 0, y: 0}
   m_Constraint: 0
   m_ConstraintCount: 2
---- !u!114 &6497592722605347915
+--- !u!114 &2839700036572001714
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -607,8 +610,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 8416988062148990320}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 985fe1d25d1c4f649851808dd75a4075, type: 3}
+  m_Script: {fileID: 11500000, guid: 94d777ddbf4b7a9478af19c39233acfe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  item: {fileID: 0}
-  amount: 0
+  isRewardSlot: 0
+  inventoryManager: {fileID: 0}
+  keyCode: 113

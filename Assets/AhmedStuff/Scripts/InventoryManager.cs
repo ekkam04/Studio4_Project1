@@ -10,11 +10,12 @@ public class InventoryManager : MonoBehaviour
     public GameObject inventroyItemPrefab;
     public InventorySlot[] playerInventory;
     public InventorySlot[] playerHotBar;
-    public InventorySlot[] playerEquipmentInventory;
+    public InventorySlot[] playerEquipmentSlots;
     public CraftingSlot[] craftingSlots;
     public InventorySlot rewardSlot;
     public ItemObject craftedObject;
     public CraftingRecipe[] craftingRecipes;
+    public AgentStats agentStats;
     
     // Start is called before the first frame update
     public bool AddItem(ItemObject item)
@@ -75,6 +76,19 @@ public class InventoryManager : MonoBehaviour
 
                     break;
                 }
+            }
+        }
+    }
+
+    public void UpdatePlayerStats()
+    {
+        foreach (InventorySlot slot in playerEquipmentSlots)
+        {
+            InventoryItem itemInSlot = slot.GetComponentInChildren<InventoryItem>();
+            if (itemInSlot != null && itemInSlot.item.itemType == ItemType.Equipment)
+            {
+                EquipmentItemObject equipmentItem = itemInSlot.item as EquipmentItemObject;
+                 agentStats.AddStats(equipmentItem.attackValue, equipmentItem.armorValue, equipmentItem.evasionValue);
             }
         }
     }
