@@ -131,50 +131,47 @@ namespace Ekkam
                         GridPositionPacket moveActionPacket = new GridPositionPacket().Deserialize(buffer);
                         Debug.Log($"Received move action: {moveActionPacket.targetPosition} from {moveActionPacket.AgentData.name}");
                         
-                        if (moveActionPacket.AgentData.name.Contains("Enemy"))
-                        {
-                            var enemyGO = GameObject.Find(moveActionPacket.AgentData.name);
-                            if (enemyGO == null) return;
-                            actionableAgent = enemyGO.GetComponent<Agent>();
-                        }
-                        else
-                        {
-                            SpawnOtherPlayerIfMissing(moveActionPacket.AgentData);
-                            actionableAgent = players[moveActionPacket.AgentData.id].GetComponent<Agent>();
-                        }
+                        // if (moveActionPacket.AgentData.name.Contains("Enemy"))
+                        // {
+                        //     var enemyGO = GameObject.Find(moveActionPacket.AgentData.name);
+                        //     if (enemyGO == null) return;
+                        //     actionableAgent = enemyGO.GetComponent<Agent>();
+                        // }
+                        // else
+                        // {
+                        //     SpawnOtherPlayerIfMissing(moveActionPacket.AgentData);
+                        //     actionableAgent = players[moveActionPacket.AgentData.id].GetComponent<Agent>();
+                        // }
+                        actionableAgent = GetActionableAgent(moveActionPacket.AgentData);
+                        if (actionableAgent == null) return;
+                        
                         actionableAgent.MoveAction(moveActionPacket.targetPosition);
                         break;
                     
-                    case BasePacket.Type.TeleportAction: // This only works for players for now
+                    case BasePacket.Type.TeleportAction:
                         GridPositionPacket teleportActionPacket = new GridPositionPacket().Deserialize(buffer);
                         Debug.Log($"Received teleport action: {teleportActionPacket.targetPosition} from {teleportActionPacket.AgentData.name}");
                         
-                        SpawnOtherPlayerIfMissing(teleportActionPacket.AgentData);
-                        var teleportNodePosition = myPlayer.grid.GetNode(teleportActionPacket.targetPosition).transform.position;
+                        actionableAgent = GetActionableAgent(teleportActionPacket.AgentData);
+                        if (actionableAgent == null) return;
+                        
+                        var teleportNodePosition = actionableAgent.grid.GetNode(teleportActionPacket.targetPosition).transform.position;
                         var teleportPosition = new Vector3(
                             teleportNodePosition.x,
-                            players[teleportActionPacket.AgentData.id].transform.position.y,
+                            actionableAgent.transform.position.y,
                             teleportNodePosition.z
                         );
-                        players[teleportActionPacket.AgentData.id].transform.position = teleportPosition;
-                        players[teleportActionPacket.AgentData.id].GetComponent<Agent>().UpdateStartPosition(teleportActionPacket.targetPosition);
+                        actionableAgent.transform.position = teleportPosition;
+                        actionableAgent.UpdateStartPosition(teleportActionPacket.targetPosition);
                         break;
                     
                     case BasePacket.Type.AttackAction:
                         AttackActionPacket attackActionPacket = new AttackActionPacket().Deserialize(buffer);
                         Debug.Log($"Received attack action: {attackActionPacket.targetPosition} from {attackActionPacket.AgentData.name}");
                         
-                        if (attackActionPacket.AgentData.name.Contains("Enemy"))
-                        {
-                            var enemyGO = GameObject.Find(attackActionPacket.AgentData.name);
-                            if (enemyGO == null) return;
-                            actionableAgent = enemyGO.GetComponent<Agent>();
-                        }
-                        else
-                        {
-                            SpawnOtherPlayerIfMissing(attackActionPacket.AgentData);
-                            actionableAgent = players[attackActionPacket.AgentData.id].GetComponent<Agent>();
-                        }
+                        actionableAgent = GetActionableAgent(attackActionPacket.AgentData);
+                        if (actionableAgent == null) return;
+                        
                         actionableAgent.AttackAction(attackActionPacket.targetPosition, attackActionPacket.damage);
                         break;
                     
@@ -182,34 +179,19 @@ namespace Ekkam
                         EndTurnPacket endTurnPacket = new EndTurnPacket().Deserialize(buffer);
                         Debug.Log($"Received end turn from {endTurnPacket.AgentData.name}");
                         
-                        if (endTurnPacket.AgentData.name.Contains("Enemy"))
-                        {
-                            var enemyGO = GameObject.Find(endTurnPacket.AgentData.name);
-                            if (enemyGO == null) return;
-                            actionableAgent = enemyGO.GetComponent<Agent>();
-                        }
-                        else
-                        {
-                            SpawnOtherPlayerIfMissing(endTurnPacket.AgentData);
-                            actionableAgent = players[endTurnPacket.AgentData.id].GetComponent<Agent>();
-                        }
+                        actionableAgent = GetActionableAgent(endTurnPacket.AgentData);
+                        if (actionableAgent == null) return;
+                        
                         actionableAgent.EndTurn();
                         break;
+                    
                     case BasePacket.Type.ItemPickup:
                         ItemPacket itemPacket = new ItemPacket().Deserialize(buffer);
                         Debug.Log($"Received item pickup from {itemPacket.AgentData.name}: {itemPacket.itemKey}");
-
-                        if (itemPacket.AgentData.name.Contains("Enemy"))
-                        {
-                            var enemyGO = GameObject.Find(itemPacket.AgentData.name);
-                            if (enemyGO == null) return;
-                            actionableAgent = enemyGO.GetComponent<Agent>();
-                        }
-                        else
-                        {
-                            SpawnOtherPlayerIfMissing(itemPacket.AgentData);
-                            actionableAgent = players[itemPacket.AgentData.id].GetComponent<Agent>();
-                        }
+                        
+                        // We don't need to get the actionable agent for item pickup yet. Maybe later on for item pickup animations
+                        // actionableAgent = GetActionableAgent(itemPacket.AgentData);
+                        // if (actionableAgent == null) return;
                         
                         var allItems = FindObjectsOfType<Item>();
                         foreach (var item in allItems)
@@ -226,9 +208,25 @@ namespace Ekkam
             }
         }
         
+        private Agent GetActionableAgent(AgentData agentData)
+        {
+            if (agentData.name.Contains("Enemy"))
+            {
+                var enemyGO = GameObject.Find(agentData.name);
+                if (enemyGO == null) return null;
+                return enemyGO.GetComponent<Agent>();
+            }
+            else
+            {
+                SpawnOtherPlayerIfMissing(agentData);
+                return players[agentData.id].GetComponent<Agent>();
+            }
+        }
+        
+        // -------------- Packet sending methods ----------------------------------------------------------------------------------------------------
         public void SendMoveAction(Vector2Int targetPosition, AgentData agentData = null)
         {
-            if (agentData == null) agentData = AgentData;
+            if (agentData == null) agentData = AgentData; // If agentData is null, use the local player's agent data
             GridPositionPacket gridPositionPacket = new GridPositionPacket(BasePacket.Type.MoveAction, agentData, targetPosition);
             SendDataToServer(gridPositionPacket);
         }
@@ -260,6 +258,7 @@ namespace Ekkam
             ItemPacket itemPacket = new ItemPacket(BasePacket.Type.ItemPickup, agentData, itemKey);
             SendDataToServer(itemPacket);
         }
+        // ------------------------------------------------------------------------------------------------------------------------------------------
         
         private void SpawnOtherPlayerIfMissing(AgentData agentData)
         {

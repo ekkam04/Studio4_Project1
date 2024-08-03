@@ -39,6 +39,9 @@ namespace Ekkam
             
             uiManager = GameObject.FindObjectOfType<UIManager>();
             uiManager.AssignPlayerActions(this);
+            
+            var pickupSystem = GetComponent<PlayerPickUpItems>();
+            pickupSystem.inventoryManager = GameObject.FindObjectOfType<InventoryManager>();
         }
 
         private new void Update()
