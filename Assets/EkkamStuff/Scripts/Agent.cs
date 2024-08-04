@@ -360,6 +360,7 @@ namespace Ekkam
                 Debug.LogWarning("No agent at target position");
             }
             
+            NetworkManager.instance.HideActionCam();
             yield return new WaitForSeconds(2f);
             
             time = 0f;
@@ -402,6 +403,7 @@ namespace Ekkam
         {
             OnActionStart();
             actionPoints--;
+            NetworkManager.instance.ShowActionCam(this);
             StartCoroutine(Shoot(targetPosition, damage));
         }
         

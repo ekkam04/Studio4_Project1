@@ -1266,9 +1266,12 @@ MonoBehaviour:
   rightHand: {fileID: 2914279754929190648}
   agentType: 2
   isTakingAction: 0
-  movementPoints: 4
-  actionPoints: 2
-  attackRange: 4
+  movementPoints: 3
+  actionPoints: 1
+  manaPoints: 4
+  maxManaPoints: 0
+  attackRange: 3
+  attacks: []
   enemyRank: 0
   isTakingTurn: 0
 --- !u!1 &2857552695682635824

@@ -21,6 +21,9 @@ namespace Ekkam
         public AgentData AgentData;
         public Dictionary<string, GameObject> players = new Dictionary<string, GameObject>();
         
+        public CinemachineVirtualCamera playerVCam;
+        public CinemachineVirtualCamera actionVCam;
+        
         public bool spawnPlayerOnSceneLoad = true;
 
         public Vector3[] spawnPositions = new Vector3[]
@@ -279,9 +282,32 @@ namespace Ekkam
             
             var player = playerObject.GetComponent<Player>();
             player.enabled = true;
-            if (networkComponent.IsMine()) myPlayer = player;
+            if (networkComponent.IsMine())
+            {
+                myPlayer = player;
+                
+                playerVCam = GameObject.Find("PlayerVCam").GetComponent<CinemachineVirtualCamera>();
+                playerVCam.Follow = player.transform;
+                playerVCam.LookAt = player.transform;
+                playerVCam.gameObject.SetActive(true);
+                
+                actionVCam = GameObject.Find("ActionVCam").GetComponent<CinemachineVirtualCamera>();
+                actionVCam.gameObject.SetActive(false);
+            }
             
             return player;
+        }
+        
+        public void ShowActionCam(Agent agent)
+        {
+            actionVCam.Follow = agent.transform;
+            actionVCam.LookAt = agent.transform;
+            actionVCam.gameObject.SetActive(true);
+        }
+        
+        public void HideActionCam()
+        {
+            actionVCam.gameObject.SetActive(false);
         }
     }
 }
