@@ -57,7 +57,7 @@ namespace Ekkam
             {
                 var node = nodes[i];
                 if (node == null) continue;
-                int mask = ~LayerMask.GetMask(LayerMask.LayerToName(6), LayerMask.LayerToName(7)); // Player and Enemy layers
+                int mask = ~LayerMask.GetMask(LayerMask.LayerToName(6), LayerMask.LayerToName(7), LayerMask.LayerToName(8)); // Player, Enemy and Item layers
                 bool isBlocked = Physics.CheckBox(node.transform.position + new Vector3(0, 0.5f, 0), new Vector3(0.5f, 0.5f, 0.5f), Quaternion.identity, mask);
                 node.isBlocked = isBlocked;
                 if (isBlocked)
