@@ -73,6 +73,14 @@ namespace Ekkam
         }
         public PathfindingNode Parent;
         
+        public enum CoverType
+        {
+            None,
+            Half,
+            Full
+        }
+        public CoverType cover;
+        
         [SerializeField] private GameObject occupant;
         private string occupantName;
         public TMP_Text occupantText;
@@ -84,6 +92,34 @@ namespace Ekkam
             }
             set
             {
+                // Damagable moved away from this node so reset evasion
+                if (value == null && occupant != null && occupant.GetComponent<Damagable>() != null)
+                {
+                    Damagable damagable = occupant.GetComponent<Damagable>();
+                    damagable.evasion = 0;
+                    damagable.coverImage.texture = damagable.coverTextures[0];
+                }
+                // Damagable moved to this node so set evasion based on cover
+                else if (value != null && value.GetComponent<Damagable>() != null)
+                {
+                    Damagable damagable = value.GetComponent<Damagable>();
+                    switch (cover)
+                    {
+                        case CoverType.None:
+                            damagable.evasion = 0;
+                            damagable.coverImage.texture = damagable.coverTextures[0];
+                            break;
+                        case CoverType.Half:
+                            damagable.evasion = 50;
+                            damagable.coverImage.texture = damagable.coverTextures[1];
+                            break;
+                        case CoverType.Full:
+                            damagable.evasion = 100;
+                            damagable.coverImage.texture = damagable.coverTextures[2];
+                            break;
+                    }
+                }
+                
                 occupant = value;
                 if (occupant != null)
                 {

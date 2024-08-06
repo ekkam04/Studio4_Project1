@@ -1,15 +1,20 @@
 ﻿using System.Collections;
+using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Ekkam
 {
     public class Damagable : MonoBehaviour
     {
         [Header("--- Damagable Settings ---")]
+        public Slider healthSlider;
         [Range(0f, 100f)] public float health = 100;
         [Range(0f, 100f)] public float armor = 0;
         [Range(0f, 100f)] public float evasion;
-        [Range(0f, 100f)] public float coveredPercentage;
+        
+        public Texture2D[] coverTextures; // 0 = no cover, 1 = half cover, 2 = full cover
+        public RawImage coverImage;
         
         public SkinnedMeshRenderer skinnedMeshRenderer;
 
@@ -21,11 +26,14 @@ namespace Ekkam
             return damageTaken;
         }
         
-        public void TakeDamage(float damage)
+        public async void TakeDamage(float damage)
         {
             print(gameObject.name + " took " + damage + " damage");
             health -= damage;
+            healthSlider.value = health;
             StartCoroutine(PulseRed());
+
+            await Task.Delay(300);
             if (health <= 0) Eliminate();
         }
         
@@ -47,6 +55,8 @@ namespace Ekkam
         public void Heal(float amount)
         {
             health += amount;
+            if (health > 100) health = 100;
+            healthSlider.value = health;
         }
     }
 }

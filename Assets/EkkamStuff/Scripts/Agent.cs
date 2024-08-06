@@ -5,7 +5,9 @@ using UnityEditor.ShaderGraph;
 using UnityEngine;
 using System.Threading.Tasks;
 using QFSW.QC;
+using TMPro;
 using Unity.VisualScripting;
+using UnityEngine.Animations;
 
 namespace Ekkam
 {
@@ -49,13 +51,18 @@ namespace Ekkam
         
         public delegate void OnEliminated(AgentType agentType);
         public static OnEliminated onEliminated;
-
+        
+        public GameObject agentStatsUI;
+        
+        public TMP_Text movementPointsText;
         public int movementPoints = 6;
         private int maxMovementPoints;
         
+        public TMP_Text actionPointsText;
         public int actionPoints = 2;
         private int maxActionPoints;
         
+        public TMP_Text manaPointsText;
         public int manaPoints = 4;
         public int maxManaPoints;
         
@@ -68,6 +75,9 @@ namespace Ekkam
             anim = GetComponent<Animator>();
             propManager = FindObjectOfType<PropManager>();
             
+            var mainCamera = Camera.main;
+            agentStatsUI.GetComponent<RotationConstraint>().AddSource(new ConstraintSource {sourceTransform = mainCamera.transform, weight = 1});
+            
             maxMovementPoints = movementPoints;
             maxActionPoints = actionPoints;
         }
@@ -75,6 +85,10 @@ namespace Ekkam
         protected void Update()
         {
             if (findPath) FindPath();
+            
+            movementPointsText.text = movementPoints.ToString();
+            actionPointsText.text = actionPoints.ToString();
+            manaPointsText.text = manaPoints.ToString();
         }
 
         // --- Pathfinding ---------------------------------------------------
@@ -360,6 +374,7 @@ namespace Ekkam
                 Debug.LogWarning("No agent at target position");
             }
             
+            NetworkManager.instance.HideActionCam();
             yield return new WaitForSeconds(2f);
             
             time = 0f;
@@ -402,6 +417,7 @@ namespace Ekkam
         {
             OnActionStart();
             actionPoints--;
+            NetworkManager.instance.ShowActionCam(this);
             StartCoroutine(Shoot(targetPosition, damage));
         }
         
