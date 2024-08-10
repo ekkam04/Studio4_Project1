@@ -110,11 +110,11 @@ namespace Ekkam
                             damagable.coverImage.texture = damagable.coverTextures[0];
                             break;
                         case CoverType.Half:
-                            damagable.evasion = 50;
+                            damagable.evasion = 25;
                             damagable.coverImage.texture = damagable.coverTextures[1];
                             break;
                         case CoverType.Full:
-                            damagable.evasion = 100;
+                            damagable.evasion = 40;
                             damagable.coverImage.texture = damagable.coverTextures[2];
                             break;
                     }
