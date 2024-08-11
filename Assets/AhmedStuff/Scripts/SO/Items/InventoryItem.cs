@@ -7,7 +7,8 @@ using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using TMPro;
 
-public class InventoryItem : MonoBehaviour, IBeginDragHandler,IDragHandler,IEndDragHandler, IPointerEnterHandler, IPointerExitHandler,IPointerMoveHandler
+public class InventoryItem : MonoBehaviour, IBeginDragHandler,IDragHandler,IEndDragHandler,
+    IPointerEnterHandler, IPointerExitHandler,IPointerMoveHandler,IPointerClickHandler
 {
     
     public Image image;
@@ -18,10 +19,12 @@ public class InventoryItem : MonoBehaviour, IBeginDragHandler,IDragHandler,IEndD
     [HideInInspector] public Transform parentAfterDrag;
 
     public ItemDescriptionUI itemDescriptionUI;
+    private InventoryManager inventoryManager;
 
     private void Start()
     {
         itemDescriptionUI = FindObjectOfType<ItemDescriptionUI>().GetComponent<ItemDescriptionUI>();
+        inventoryManager = FindObjectOfType<InventoryManager>();
     }
 
     public void InitializeItem(ItemObject item)
@@ -73,5 +76,34 @@ public class InventoryItem : MonoBehaviour, IBeginDragHandler,IDragHandler,IEndD
     {
         Vector3 position = Input.mousePosition + new Vector3(-80,80,0);
         itemDescriptionUI.UpdatePosition(position);
+    }
+
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        if (eventData.button == PointerEventData.InputButton.Right)
+        {
+            if (item.itemType == ItemType.Food)
+            {
+                UseItem();
+            }
+        }
+    }
+
+    private void UseItem()
+    {
+        
+        Debug.Log("Using item: " + item.name);
+        count--;
+        if (count <= 0)
+        {
+            itemDescriptionUI.HideDescription();
+            Destroy(gameObject);
+        }
+        else
+        {
+            RefreshCount();
+        }
+        
+        inventoryManager.ApplyItemEffects(item);
     }
 }

@@ -19,4 +19,9 @@ public class AgentStats : MonoBehaviour
         damagable.armor -= armorBounus;
         damagable.evasion -= evasionBounus;
     }
+
+    public void RestoreHealth(int healthValue)
+    {
+        damagable.health += healthValue;
+    }
 }

@@ -92,4 +92,12 @@ public class InventoryManager : MonoBehaviour
             }
         }
     }
+    public void ApplyItemEffects(ItemObject item)
+    {
+        if (item.itemType == ItemType.Food)
+        {
+            FoodItemObject food = (FoodItemObject)item;
+            agentStats.RestoreHealth(food.healthValue);
+        }
+    }
 }
