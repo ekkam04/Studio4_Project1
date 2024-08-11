@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Net.Sockets;
 using System.Net;
+using System.Threading.Tasks;
 using ParrelSync;
 
 namespace Ekkam
@@ -113,12 +114,14 @@ namespace Ekkam
             }
         }
         
-        public void BroadcastGameStartPacket()
+        public async void BroadcastGameStartPacket()
         {
+            await Task.Delay(1000);
             foreach (Socket client in clients)
             {
                 GameStartPacket packet = new GameStartPacket(BasePacket.Type.GameStart, new AgentData(), clients.IndexOf(client), clients.Count);
                 client.Send(packet.Serialize());
+                await Task.Delay(200);
             }
         }
 

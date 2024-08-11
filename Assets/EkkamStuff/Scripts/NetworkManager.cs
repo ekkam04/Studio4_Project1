@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Net.Sockets;
 using System.Net;
+using System.Threading.Tasks;
 using Cinemachine;
 using TMPro;
 using QFSW.QC;
@@ -25,6 +26,8 @@ namespace Ekkam
         public CinemachineVirtualCamera actionVCam;
         
         public bool spawnPlayerOnSceneLoad = true;
+        public bool localPlayerLoaded = false;
+        private GameStartPacket gameStartPacket;
 
         public Vector3[] spawnPositions = new Vector3[]
         {
@@ -32,6 +35,13 @@ namespace Ekkam
             new Vector3(0.5f, 0, 1f),
             new Vector3(-1f, 0, 0.5f)
         };
+        
+        // public Vector3[] spawnPositions = new Vector3[]
+        // {
+        //     new Vector3(36.75f,0.38f,-3),
+        //     new Vector3(36.75f,0.38f,-3),
+        //     new Vector3(36.75f,0.38f,-3)
+        // };
 
         void Start()
         {
@@ -51,11 +61,13 @@ namespace Ekkam
         private void OnEnable()
         {
             SceneManager.sceneLoaded += OnSceneLoaded;
+            Player.onLocalPlayerLoaded += OnLocalPlayerLoaded;
         }
 
         private void OnDisable()
         {
             SceneManager.sceneLoaded -= OnSceneLoaded;
+            Player.onLocalPlayerLoaded -= OnLocalPlayerLoaded;
         }
         
         void OnDestroy()
@@ -71,10 +83,33 @@ namespace Ekkam
         private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
             if (!spawnPlayerOnSceneLoad) return;
-            if (scene.name == "MainGame")
+            if (scene.name != "Lobby")
             {
                 Debug.Log("Spawning local player...");
                 SpawnPlayer(AgentData, Vector3.zero);
+            }
+        }
+        
+        private void OnLocalPlayerLoaded()
+        {
+            localPlayerLoaded = true;
+            if (!spawnPlayerOnSceneLoad) return;
+            if (gameStartPacket == null) return;
+            print("Setting local player spawn position and syncing for all clients...");
+
+            myPlayer.transform.position = spawnPositions[gameStartPacket.clientIndex];
+            var spawnGridPosition = myPlayer.grid.GetPositionFromWorldPoint(spawnPositions[gameStartPacket.clientIndex]);
+            myPlayer.UpdateStartPosition(spawnGridPosition);
+            SendTeleportAction(spawnGridPosition);
+                        
+            var turnSystem = FindObjectOfType<TurnSystem>();
+            turnSystem.friendlyCount = gameStartPacket.clientCount;
+
+            if (gameStartPacket.clientIndex == 0)
+            {
+                // var enemyManager = FindObjectOfType<EnemyManager>();
+                // enemyManager.isMasterClient = true;
+                turnSystem.isMasterClient = true;
             }
         }
 
@@ -115,36 +150,15 @@ namespace Ekkam
                         GameStartPacket gameStartPacket = new GameStartPacket().Deserialize(buffer);
                         Debug.Log($"Received game start packet - client index: {gameStartPacket.clientIndex} - client count: {gameStartPacket.clientCount}");
                         
-                        myPlayer.transform.position = spawnPositions[gameStartPacket.clientIndex];
-                        var spawnGridPosition = myPlayer.grid.GetPositionFromWorldPoint(spawnPositions[gameStartPacket.clientIndex]);
-                        myPlayer.UpdateStartPosition(spawnGridPosition);
-                        SendTeleportAction(spawnGridPosition);
+                        this.gameStartPacket = gameStartPacket;
+                        if (localPlayerLoaded) OnLocalPlayerLoaded(); // If local player is already loaded, call OnLocalPlayerLoaded again
                         
-                        var turnSystem = FindObjectOfType<TurnSystem>();
-                        turnSystem.friendlyCount = gameStartPacket.clientCount;
-
-                        if (gameStartPacket.clientIndex == 0)
-                        {
-                            var enemyManager = FindObjectOfType<EnemyManager>();
-                            enemyManager.isMasterClient = true;
-                        }
                         break;
                     
                     case BasePacket.Type.MoveAction:
                         GridPositionPacket moveActionPacket = new GridPositionPacket().Deserialize(buffer);
                         Debug.Log($"Received move action: {moveActionPacket.targetPosition} from {moveActionPacket.AgentData.name}");
                         
-                        // if (moveActionPacket.AgentData.name.Contains("Enemy"))
-                        // {
-                        //     var enemyGO = GameObject.Find(moveActionPacket.AgentData.name);
-                        //     if (enemyGO == null) return;
-                        //     actionableAgent = enemyGO.GetComponent<Agent>();
-                        // }
-                        // else
-                        // {
-                        //     SpawnOtherPlayerIfMissing(moveActionPacket.AgentData);
-                        //     actionableAgent = players[moveActionPacket.AgentData.id].GetComponent<Agent>();
-                        // }
                         actionableAgent = GetActionableAgent(moveActionPacket.AgentData);
                         if (actionableAgent == null) return;
                         
@@ -176,6 +190,16 @@ namespace Ekkam
                         if (actionableAgent == null) return;
                         
                         actionableAgent.AttackAction(attackActionPacket.targetPosition, attackActionPacket.damage);
+                        break;
+                    
+                    case BasePacket.Type.StartTurn:
+                        StartTurnPacket startTurnPacket = new StartTurnPacket().Deserialize(buffer);
+                        Debug.Log($"Received start turn from {startTurnPacket.AgentData.name}");
+                        
+                        actionableAgent = players[startTurnPacket.agentID].GetComponent<Agent>();
+                        if (actionableAgent == null) return;
+                        
+                        actionableAgent.StartTurn();
                         break;
                     
                     case BasePacket.Type.EndTurn:
@@ -246,6 +270,13 @@ namespace Ekkam
             if (agentData == null) agentData = AgentData;
             AttackActionPacket gridPositionPacket = new AttackActionPacket(BasePacket.Type.AttackAction, agentData, targetPosition, damage);
             SendDataToServer(gridPositionPacket);
+        }
+        
+        public void SendStartTurn(string agentID, AgentData agentData = null)
+        {
+            if (agentData == null) agentData = AgentData;
+            StartTurnPacket startTurnPacket = new StartTurnPacket(BasePacket.Type.StartTurn, agentData, agentID);
+            SendDataToServer(startTurnPacket);
         }
         
         public void SendEndTurn(AgentData agentData = null)

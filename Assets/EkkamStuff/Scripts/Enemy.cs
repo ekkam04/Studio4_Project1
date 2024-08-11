@@ -14,12 +14,13 @@ namespace Ekkam
         }
         public EnemyRank enemyRank;
         
-        public bool isTakingTurn;
+        // public bool isTakingTurn;
         
         private new void Start()
         {
             base.Start();
             agentData = new AgentData(gameObject.name, gameObject.name);
+            nameText.text = gameObject.name;
             UpdateStartPosition(grid.GetPositionFromWorldPoint(transform.position));
         }
         
@@ -31,14 +32,14 @@ namespace Ekkam
         public override void StartTurn()
         {
             base.StartTurn();
-            isTakingTurn = true;
+            // isTakingTurn = true;
             StartCoroutine(SimulateTurn());
         }
         
         IEnumerator SimulateTurn()
         {
             yield return new WaitForSeconds(1f);
-            var reachableNodes = GetReachableNodes(attackRange, true, AgentType.Friendly);
+            var reachableNodes = GetReachableNodes(attackRange, true, new AgentType[] {AgentType.Friendly});
             if (reachableNodes.Count > 0)
             {
                 var targetNode = reachableNodes[Random.Range(0, reachableNodes.Count)];
@@ -84,7 +85,7 @@ namespace Ekkam
                 }
             }
             
-            isTakingTurn = false;
+            // isTakingTurn = false;
             EndTurn();
             NetworkManager.instance.SendEndTurn(agentData);
         }

@@ -37,6 +37,8 @@ namespace Ekkam
         
         [Header("--- Agent Settings ---")] // ---------------------------
         
+        public bool isTakingTurn;
+        
         public GameObject leftHand;
         public GameObject rightHand;
         private Animator anim;
@@ -53,6 +55,7 @@ namespace Ekkam
         public static OnEliminated onEliminated;
         
         public GameObject agentStatsUI;
+        public TMP_Text nameText;
         
         public TMP_Text movementPointsText;
         public int movementPoints = 6;
@@ -162,7 +165,7 @@ namespace Ekkam
         public void UpdateStartPosition(Vector2Int newStartPosition)
         {
             #if PATHFINDING_DEBUG
-                grid.GetNode(startNodePosition).ResetColor();
+                if (grid.GetNode(startNodePosition) != null) grid.GetNode(startNodePosition).ResetColor();
             #endif
 
             #if PATHFINDING_DEBUG
@@ -191,7 +194,7 @@ namespace Ekkam
         public void UpdateTargetPosition(Vector2Int newTargetPosition)
         {
             #if PATHFINDING_DEBUG
-                grid.GetNode(endNodePosition).ResetColor();
+                if (grid.GetNode(endNodePosition) != null) grid.GetNode(endNodePosition).ResetColor();
             #endif
 
             endNodePosition = newTargetPosition;
@@ -271,7 +274,7 @@ namespace Ekkam
             return distanceX + distanceY;
         }
         
-        public List<PathfindingNode> GetReachableNodes(int range, bool filterByType = false, AgentType agentType = AgentType.Neutral)
+        public List<PathfindingNode> GetReachableNodes(int range, bool filterByType = false, AgentType[] agentTypes = null)
         {
             List<PathfindingNode> reachableNodes = new List<PathfindingNode>();
             List<PathfindingNode> openNodes = new List<PathfindingNode>();
@@ -301,7 +304,8 @@ namespace Ekkam
             }
             if (filterByType)
             {
-                reachableNodes.RemoveAll(node => node.Occupant == null || node.Occupant.GetComponent<Agent>().agentType != agentType);
+                // reachableNodes.RemoveAll(node => node.Occupant == null || node.Occupant.GetComponent<Agent>().agentType != agentType);
+                reachableNodes.RemoveAll(node => node.Occupant == null || Array.IndexOf(agentTypes, node.Occupant.GetComponent<Agent>().agentType) == -1);
             }
             return reachableNodes;
         }
@@ -392,6 +396,7 @@ namespace Ekkam
         
         public virtual void StartTurn()
         {
+            isTakingTurn = true;
             movementPoints = maxMovementPoints;
             actionPoints = maxActionPoints;
         }
@@ -423,6 +428,7 @@ namespace Ekkam
         
         public void EndTurn()
         {
+            isTakingTurn = false;
             movementPoints = 0;
             actionPoints = 0;
             onTurnEnd?.Invoke(agentType);

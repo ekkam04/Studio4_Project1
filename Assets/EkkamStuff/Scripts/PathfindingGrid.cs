@@ -12,8 +12,8 @@ namespace Ekkam
     public class PathfindingGrid : MonoBehaviour
     {
         public PathfindingNode[] nodes;
-        public int gridCellCountX;
-        public int gridCellCountZ;
+        public int gridCellCountX = 100;
+        public int gridCellCountZ = 100;
         private int gridCellCount;
         public Vector3 startingPosition;
         
@@ -24,9 +24,9 @@ namespace Ekkam
         void Start()
         {
             nodes = GetComponentsInChildren<PathfindingNode>();
-            gridCellCountX = Mathf.RoundToInt(Mathf.Sqrt(nodes.Length));
-            gridCellCountZ = gridCellCountX;
-            gridCellCount = nodes.Length;
+            // gridCellCountX = Mathf.RoundToInt(Mathf.Sqrt(nodes.Length));
+            // gridCellCountZ = gridCellCountX;
+            // gridCellCount = nodes.Length;
             foreach (var node in nodes)
             {
                 var nodePosition = grid.WorldToCell(node.transform.position);

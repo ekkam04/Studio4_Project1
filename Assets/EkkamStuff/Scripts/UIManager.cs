@@ -19,6 +19,7 @@ namespace Ekkam
         
         public TMP_Text actionPointsText;
         public TMP_Text movementPointsText;
+        public TMP_Text waitingText;
         public TMP_Text turnText;
         
         private Player player;
@@ -44,6 +45,8 @@ namespace Ekkam
                 
                 moveButton.interactable = player.movementPoints > 0;
                 attackButton.interactable = player.actionPoints > 0;
+                
+                waitingText.gameObject.SetActive(player.isTakingAction);
             }
         }
         

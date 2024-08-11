@@ -12,6 +12,7 @@ namespace Ekkam
             MoveAction,
             TeleportAction,
             AttackAction,
+            StartTurn,
             EndTurn,
             ItemPickup
         }
@@ -173,6 +174,38 @@ namespace Ekkam
             packet.AgentData = basePacket.AgentData;
             packet.targetPosition = new Vector2Int(basePacket.br.ReadInt32(), basePacket.br.ReadInt32());
             packet.damage = basePacket.br.ReadSingle();
+            return packet;
+        }
+    }
+    
+    public class StartTurnPacket : BasePacket
+    {
+        public string agentID;
+        
+        public StartTurnPacket() : base(Type.StartTurn, new AgentData("", ""))
+        {
+            this.agentID = "";
+        }
+        
+        public StartTurnPacket(Type type, AgentData agentData, string agentID) : base(type, agentData)
+        {
+            this.agentID = agentID;
+        }
+        
+        public override byte[] Serialize()
+        {
+            BeginSerialize();
+            bw.Write(agentID);
+            return EndSerialize();
+        }
+        
+        public StartTurnPacket Deserialize(byte[] data)
+        {
+            StartTurnPacket packet = new StartTurnPacket();
+            BasePacket basePacket = packet.BaseDeserialize(data);
+            packet.type = basePacket.type;
+            packet.AgentData = basePacket.AgentData;
+            packet.agentID = basePacket.br.ReadString();
             return packet;
         }
     }

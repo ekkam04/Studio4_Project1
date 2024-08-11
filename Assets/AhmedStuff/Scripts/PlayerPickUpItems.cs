@@ -11,9 +11,17 @@ public class PlayerPickUpItems : MonoBehaviour
     public InventoryItem inventoryItem;
     public InventoryManager inventoryManager;
     [HideInInspector] public bool pickedUp;
+    
+    private NetworkComponent networkComponent;
+    
+    void Start()
+    {
+        networkComponent = GetComponent<NetworkComponent>();
+    }
 
     private void OnTriggerEnter(Collider other)
     {
+        if (!networkComponent.IsMine()) return;
         Item item = other.GetComponent<Item>();
         if (item != null)
         {

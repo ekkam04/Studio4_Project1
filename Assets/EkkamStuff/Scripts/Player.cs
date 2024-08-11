@@ -7,6 +7,9 @@ namespace Ekkam
 {
     public class Player : Agent
     {
+        public delegate void OnLocalPlayerLoaded();
+        public static event OnLocalPlayerLoaded onLocalPlayerLoaded;
+        
         [Header("--- Player Settings ---")]
         
         public GameObject mousePosition3DPrefab;
@@ -32,6 +35,7 @@ namespace Ekkam
         {
             base.Start();
             networkComponent = GetComponent<NetworkComponent>();
+            nameText.text = networkComponent.ownerName;
             if (!networkComponent.IsMine()) return;
             
             networkComponent = GetComponent<NetworkComponent>();
@@ -42,6 +46,8 @@ namespace Ekkam
             
             var pickupSystem = GetComponent<PlayerPickUpItems>();
             pickupSystem.inventoryManager = GameObject.FindObjectOfType<InventoryManager>();
+            
+            if (networkComponent.IsMine()) onLocalPlayerLoaded?.Invoke();
         }
 
         private new void Update()
@@ -194,7 +200,7 @@ namespace Ekkam
         {
             if (actionPoints <= 0) Debug.LogWarning("Not enough action points");
             
-            reachableNodes = GetReachableNodes(attackRange, true, AgentType.Hostile);
+            reachableNodes = GetReachableNodes(attackRange, true, new AgentType[] {AgentType.Hostile, AgentType.Friendly});
             foreach (var node in reachableNodes)
             {
                 node.SetActionable(true, PathfindingNode.VisualType.Enemy);
