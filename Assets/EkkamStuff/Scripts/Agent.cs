@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEditor.ShaderGraph;
 using UnityEngine;
 using System.Threading.Tasks;
@@ -34,6 +35,8 @@ namespace Ekkam
         private PathfindingNode[] allNodes;
 
         public bool findPath;
+        private bool isPathfindingJobRunning;
+        private bool startFollowingPath = false;
         
         [Header("--- Agent Settings ---")] // ---------------------------
         
@@ -87,7 +90,16 @@ namespace Ekkam
 
         protected void Update()
         {
-            if (findPath) FindPath();
+            if (findPath && !isPathfindingJobRunning)
+            {
+                StartFindPathJob();
+            }
+            
+            if (startFollowingPath)
+            {
+                StartCoroutine(FollowPath());
+                startFollowingPath = false;
+            }
             
             movementPointsText.text = movementPoints.ToString();
             actionPointsText.text = actionPoints.ToString();
@@ -96,25 +108,22 @@ namespace Ekkam
 
         // --- Pathfinding ---------------------------------------------------
         
-        void FindPath()
+        void StartFindPathJob()
         {
-            if (pathNodes.Count > 0)
+            if (isPathfindingJobRunning) return;
+
+            isPathfindingJobRunning = true;
+            JobManager.instance.EnqueueJob(new Job(FindPathJob, OnPathFindingComplete));
+            Debug.Log("Pathfinding job queued");
+        }
+        
+        void FindPathJob()
+        {
+            if (pathNodes.Count > 0 || openNodes.Count < 1)
             {
-                Debug.LogWarning("Path already found");
-                findPath = false;
-                OnActionEnd();
-                state = PathfindingState.Success;
                 return;
             }
 
-            if (openNodes.Count < 1)
-            {
-                Debug.LogWarning("No path found");
-                findPath = false;
-                OnActionEnd();
-                state = PathfindingState.Failure;
-                return;
-            }
             var currentNode = openNodes[0];
             foreach (var node in openNodes)
             {
@@ -125,28 +134,23 @@ namespace Ekkam
             }
             openNodes.Remove(currentNode);
             closedNodes.Add(currentNode);
-            
+
             if (currentNode == grid.GetNode(endNodePosition))
             {
-                print("Path found");
-                findPath = false;
                 SetPathNodes();
-                StartCoroutine(FollowPath());
-                state = PathfindingState.Success;
                 return;
             }
-            
+
             var currentNeighbours = GetNeighbours(currentNode, currentNode.gridPosition);
             foreach (var neighbour in currentNeighbours)
             {
                 if (neighbour == null) continue;
-                
-                // check if it is in blocked positions or closed nodes
+
                 if (neighbour.isBlocked || closedNodes.Contains(neighbour))
                 {
                     continue;
                 }
-                // check if new path to neighbour is shorter or neighbour is not in openNodes
+
                 var newMovementCostToNeighbour = currentNode.GCost + GetDistance(currentNode, neighbour);
                 if (newMovementCostToNeighbour < neighbour.GCost || !openNodes.Contains(neighbour))
                 {
@@ -159,22 +163,45 @@ namespace Ekkam
                     }
                 }
             }
-            state = PathfindingState.Running;
+        }
+        
+        void OnPathFindingComplete()
+        {
+            Debug.Log("Pathfinding job complete");
+            isPathfindingJobRunning = false;
+            
+            if (pathNodes.Count > 0)
+            {
+                findPath = false;
+                // StartCoroutine(FollowPath()); // this doesn't work anymore because I can't start a coroutine from a job callback for some reason
+                startFollowingPath = true; // this is a good workaround
+                state = PathfindingState.Success;
+            }
+            else if (openNodes.Count < 1)
+            {
+                findPath = false;
+                OnActionEnd();
+                state = PathfindingState.Failure;
+            }
+            else
+            {
+                state = PathfindingState.Running;
+            }
         }
 
         public void UpdateStartPosition(Vector2Int newStartPosition)
         {
-            #if PATHFINDING_DEBUG
-                if (grid.GetNode(startNodePosition) != null) grid.GetNode(startNodePosition).ResetColor();
-            #endif
+            // #if PATHFINDING_DEBUG
+            //     if (grid.GetNode(startNodePosition) != null) grid.GetNode(startNodePosition).ResetColor();
+            // #endif
 
-            #if PATHFINDING_DEBUG
-                foreach (var node in pathNodesColored)
-                {
-                    node.ResetColor();
-                }
-                pathNodesColored.Clear();
-            #endif
+            // #if PATHFINDING_DEBUG
+            //     foreach (var node in pathNodesColored)
+            //     {
+            //         node.ResetColor();
+            //     }
+            //     pathNodesColored.Clear();
+            // #endif
             
             pathNodes.Clear();
 
@@ -182,9 +209,9 @@ namespace Ekkam
             openNodes.Clear();
             closedNodes.Clear();
 
-            #if PATHFINDING_DEBUG
-                grid.GetNode(startNodePosition).SetColor(startNodeColor);
-            #endif
+            // #if PATHFINDING_DEBUG
+            //     grid.GetNode(startNodePosition).SetColor(startNodeColor);
+            // #endif
 
             PathfindingNode startingNode = grid.GetNode(startNodePosition);
             startingNode.Occupant = gameObject;
@@ -193,17 +220,17 @@ namespace Ekkam
         
         public void UpdateTargetPosition(Vector2Int newTargetPosition)
         {
-            #if PATHFINDING_DEBUG
-                if (grid.GetNode(endNodePosition) != null) grid.GetNode(endNodePosition).ResetColor();
-            #endif
+            // #if PATHFINDING_DEBUG
+            //     if (grid.GetNode(endNodePosition) != null) grid.GetNode(endNodePosition).ResetColor();
+            // #endif
 
             endNodePosition = newTargetPosition;
             openNodes.Clear();
             closedNodes.Clear();
 
-            #if PATHFINDING_DEBUG
-                grid.GetNode(endNodePosition).SetColor(endNodeColor);
-            #endif
+            // #if PATHFINDING_DEBUG
+            //     grid.GetNode(endNodePosition).SetColor(endNodeColor);
+            // #endif
 
             UpdateStartPosition(grid.GetPositionFromWorldPoint(transform.position));
 
@@ -222,10 +249,10 @@ namespace Ekkam
             {
                 if (currentNode != grid.GetNode(endNodePosition)) {
                     pathNodes.Add(currentNode);
-                    #if PATHFINDING_DEBUG
-                        currentNode.SetPathColor(pathNodeColor);
-                        pathNodesColored.Add(currentNode);
-                    #endif
+                    // #if PATHFINDING_DEBUG
+                    //     currentNode.SetPathColor(pathNodeColor);
+                    //     pathNodesColored.Add(currentNode);
+                    // #endif
                 }
                 currentNode = currentNode.Parent;
             }
