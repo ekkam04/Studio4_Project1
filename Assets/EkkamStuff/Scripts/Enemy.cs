@@ -74,6 +74,7 @@ namespace Ekkam
                             if (Vector2Int.Distance(node.gridPosition, closestFriendlyNode.gridPosition) <
                                 Vector2Int.Distance(targetNode.gridPosition, closestFriendlyNode.gridPosition))
                             {
+                                if (node.Occupant != null) continue;
                                 targetNode = node;
                             }
                         }

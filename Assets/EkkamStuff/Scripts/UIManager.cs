@@ -11,6 +11,8 @@ namespace Ekkam
     {
         public GameObject gameUI;
         public GameObject playerActionsUI;
+        public Button openInventoryButton;
+        public Button closeInventoryButton;
         
         public Button moveButton;
         public Button attackButton;
@@ -23,6 +25,16 @@ namespace Ekkam
         public TMP_Text turnText;
         
         private Player player;
+        
+        private DialogueController dialogueController;
+        public GameObject endTurnButtonGO;
+        public GameObject moveButtonGO;
+        public GameObject shootButtonGO;
+        
+        private void Start()
+        {
+            dialogueController = FindObjectOfType<DialogueController>();
+        }
         
         public void AssignPlayerActions(Player player)
         {
@@ -47,6 +59,19 @@ namespace Ekkam
                 attackButton.interactable = player.actionPoints > 0;
                 
                 waitingText.gameObject.SetActive(player.isTakingAction);
+            }
+
+            if (Input.GetKeyDown(KeyCode.I))
+            {
+                if (openInventoryButton.gameObject.activeSelf)
+                {
+                    openInventoryButton.onClick.Invoke();
+                }
+                else
+                {
+                    closeInventoryButton.onClick.Invoke();
+                
+                }
             }
         }
         

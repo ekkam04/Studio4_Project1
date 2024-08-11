@@ -13,6 +13,8 @@ public class PlayerPickUpItems : MonoBehaviour
     [HideInInspector] public bool pickedUp;
     
     private NetworkComponent networkComponent;
+    public delegate void OnItemPickedUp(string itemKey);
+    public static event OnItemPickedUp onItemPickedUp;
     
     void Start()
     {
@@ -30,6 +32,7 @@ public class PlayerPickUpItems : MonoBehaviour
             {
                 inventoryItem.InitializeItem(item.item);
                 NetworkManager.instance.SendItemPacket(item.item.itemKey);
+                onItemPickedUp?.Invoke(item.item.itemKey);
                 Destroy(other.gameObject);
             }
             else

@@ -48,7 +48,7 @@ namespace Ekkam
             return null;
         }
         
-        async void UpdateBlockedNodes()
+        public async void UpdateBlockedNodes()
         {
             print("Updating blocked nodes...");
             await Task.Delay(100);
@@ -57,7 +57,7 @@ namespace Ekkam
             {
                 var node = nodes[i];
                 if (node == null) continue;
-                int mask = ~LayerMask.GetMask(LayerMask.LayerToName(6), LayerMask.LayerToName(7), LayerMask.LayerToName(8)); // Player, Enemy and Item layers
+                int mask = ~LayerMask.GetMask(LayerMask.LayerToName(6), LayerMask.LayerToName(7), LayerMask.LayerToName(8), LayerMask.LayerToName(9)); // Player, Enemy, Item, Environment layers
                 bool isBlocked = Physics.CheckBox(node.transform.position + new Vector3(0, 0.5f, 0), new Vector3(0.5f, 0.5f, 0.5f), Quaternion.identity, mask);
                 node.isBlocked = isBlocked;
                 if (isBlocked)

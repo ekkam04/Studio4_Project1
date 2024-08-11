@@ -1355,7 +1355,7 @@ PrefabInstance:
     - target: {fileID: 224130951485110974, guid: 9ed2a051c32b4fe47a5e4fb95c20b03f,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -0.0000076293945
+      value: -0.000091552734
       objectReference: {fileID: 0}
     - target: {fileID: 224166536479716514, guid: 9ed2a051c32b4fe47a5e4fb95c20b03f,
         type: 3}
@@ -13249,7 +13249,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1067762236}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.5071279, y: -0.000000009371357, z: 0.0000000055141403, w: 0.8618708}
+  m_LocalRotation: {x: 0.5071279, y: -0.000000009371357, z: 0.0000000055141407, w: 0.8618708}
   m_LocalPosition: {x: 38.481804, y: 353.75464, z: -605.586}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -18853,7 +18853,7 @@ GameObject:
   - component: {fileID: 1504027937}
   - component: {fileID: 1504027936}
   m_Layer: 5
-  m_Name: Canvas
+  m_Name: InventoryCanvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -22651,6 +22651,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameUI: {fileID: 741822784}
   playerActionsUI: {fileID: 240175373}
+  inventoryUI: {fileID: 1504027934}
   moveButton: {fileID: 1613290274}
   attackButton: {fileID: 753386190}
   endTurnButton: {fileID: 2031318691}
