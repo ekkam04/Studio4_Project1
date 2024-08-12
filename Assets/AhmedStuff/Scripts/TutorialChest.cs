@@ -5,42 +5,27 @@ using UnityEngine;
 
 public class TutorialChest : MonoBehaviour, IInteractable
 {
-    public ItemObject[] possibleItems;
-    public GameObject selectionUIPrefab;
-    private GameObject selectionUIInstance;
+    public ItemObject[] weapons; // Array of weapons the player can choose from
+    public GameObject weaponSelectionUI; // Reference to the selection UI GameObject in the canvas
+    public Transform player;
+    public float interactDistance;
 
-    public void Interact()
-    {
-        if (selectionUIInstance == null)
-        {
-            ShowItemSelectionUI();
-        }
-    }
 
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.E))
         {
-            Interact();
+            float distance = Vector3.Distance(player.position, this.transform.position);
+            if (distance <= interactDistance)
+            {
+                Interact();
+            }
         }
     }
 
-    private void ShowItemSelectionUI()
+    public void Interact()
     {
-        
-        selectionUIInstance = Instantiate(selectionUIPrefab, transform.position, Quaternion.identity);
-        
-        TutorialItemSelectionUI selectionUI = selectionUIInstance.GetComponent<TutorialItemSelectionUI>();
-        selectionUI.Initialize(possibleItems, OnItemSelected);
-    }
-
-    private void OnItemSelected(ItemObject selectedItem)
-    {
-        
-        InventoryManager inventoryManager = FindObjectOfType<InventoryManager>();
-        inventoryManager.AddItem(selectedItem);
-        
-        Destroy(selectionUIInstance);
+        weaponSelectionUI.SetActive(true);
     }
 }
 

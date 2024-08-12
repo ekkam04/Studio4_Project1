@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -5,32 +6,25 @@ using UnityEngine.UI;
 
 public class TutorialItemSelectionUI : MonoBehaviour
 {
-    public Button[] itemButtons;
-    private ItemObject[] items;
-    private System.Action<ItemObject> onItemSelected;
+   private TutorialChest chest;
+   public InventoryManager inventoryManager;
 
-    public void Initialize(ItemObject[] items, System.Action<ItemObject> onItemSelected)
-    {
-        this.items = items;
-        this.onItemSelected = onItemSelected;
-
-        for (int i = 0; i < itemButtons.Length; i++)
-        {
-            if (i < items.Length)
-            {
-                ItemObject item = items[i];
-                itemButtons[i].GetComponentInChildren<Text>().text = item.name;
-                itemButtons[i].onClick.AddListener(() => SelectItem(item));
-            }
-            else
-            {
-                itemButtons[i].gameObject.SetActive(false);
-            }
-        }
-    }
-
-    private void SelectItem(ItemObject selectedItem)
-    {
-        onItemSelected?.Invoke(selectedItem);
-    }
+   public void AddAssaultRifle()
+   {
+      chest = FindObjectOfType<TutorialChest>();
+      inventoryManager.AddItem(chest.weapons[0]);
+      Destroy(chest.gameObject);
+   }
+   public void AddSniper()
+   {
+      chest = FindObjectOfType<TutorialChest>();
+      inventoryManager.AddItem(chest.weapons[1]);
+      Destroy(chest.gameObject);
+   }
+   public void AddShotgun()
+   {
+      chest = FindObjectOfType<TutorialChest>();
+      inventoryManager.AddItem(chest.weapons[2]);
+      Destroy(chest.gameObject);
+   }
 }
