@@ -134,6 +134,8 @@ MonoBehaviour:
   hCostText: {fileID: 2439481447107123904}
   fCostText: {fileID: 3101213096479851518}
   Parent: {fileID: 0}
+  cover: 0
+  occupant: {fileID: 0}
   occupantText: {fileID: 2266950623777954721}
 --- !u!1 &1412688766781241253
 GameObject:
@@ -813,7 +815,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &2199251502086846085
 RectTransform:
   m_ObjectHideFlags: 0
