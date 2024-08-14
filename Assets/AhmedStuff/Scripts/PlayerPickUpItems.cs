@@ -9,6 +9,7 @@ using UnityEngine.Serialization;
 public class PlayerPickUpItems : MonoBehaviour
 {
     public InventoryItem inventoryItem;
+    public AbilityManager abilityManager;
     public InventoryManager inventoryManager;
     [HideInInspector] public bool pickedUp;
     
@@ -27,26 +28,50 @@ public class PlayerPickUpItems : MonoBehaviour
         Item item = other.GetComponent<Item>();
         if (item != null)
         {
-            bool result = inventoryManager.AddItem(item.item);
-            if (result == true)
+            if (item.item.itemType != ItemType.Ability&& item.item.itemType != ItemType.Equipment)
             {
+                bool result = inventoryManager.AddItem(item.item);
+                if (result)
+                {
+                    inventoryItem.InitializeItem(item.item);
+                    NetworkManager.instance.SendItemPacket(item.item.itemKey);
+                    Destroy(other.gameObject);
+
+                }
+            }
+
+            if (item.item.itemType == ItemType.Ability)
+            {
+                abilityManager.AddAbility((AbilityItemObject)item.item);
                 inventoryItem.InitializeItem(item.item);
                 NetworkManager.instance.SendItemPacket(item.item.itemKey);
                 onItemPickedUp?.Invoke(item.item.itemKey);
                 Destroy(other.gameObject);
             }
-            else
+            else if (item.item.itemType == ItemType.Equipment)
             {
-                Debug.Log("Inventory Full");
+                inventoryManager.AddItem(item.item);
+                EquipmentItemObject equipmentItem = (EquipmentItemObject)item.item;
+                if (equipmentItem.ability != null && equipmentItem.ability is AbilityItemObject)
+                {
+                    
+                    abilityManager.AddAbility((AbilityItemObject)equipmentItem.ability);
+                    inventoryItem.InitializeItem(item.item);
+                    NetworkManager.instance.SendItemPacket(item.item.itemKey);
+                    Destroy(other.gameObject);
+                }
             }
-            
-        }
 
-        pickedUp = true;
+            pickedUp = true;
+        }
+        else
+        {
+            Debug.Log("Inventory Full");
+        }
+        
     }
-   /* void OnApplicationQuit()
-    {
-        playerInventory.inventorySlots.Clear();
-    }*/
- 
+        /* void OnApplicationQuit()
+         {
+             playerInventory.inventorySlots.Clear();
+         }*/
 }
