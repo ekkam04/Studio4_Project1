@@ -8,4 +8,5 @@ public class FoodItemObject : ItemObject
 {
     public int healthValue;
     public int manaValue;
+    
 }

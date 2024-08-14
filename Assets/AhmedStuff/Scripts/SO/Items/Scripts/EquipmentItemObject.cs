@@ -7,9 +7,12 @@ using UnityEngine;
 public class EquipmentItemObject : ItemObject
 {
     public EquipmentType equipmentType;
+    public ItemObject ability;
     public int attackValue;
     public int armorValue;
     public int speedValue;
+    public int evasionValue;
+    public int movementPoints;
 }
 
 public enum EquipmentType
