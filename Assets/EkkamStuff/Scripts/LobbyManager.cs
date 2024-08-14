@@ -10,26 +10,29 @@ namespace Ekkam
     {
         public TMP_InputField ipInput;
         public TMP_InputField nameInput;
-        public Button connectButton;
+        public Button testAreaButton;
+        public Button tutorialButton;
         public bool changeSceneOnConnect = true;
 
         private void Start()
         {
-            connectButton.onClick.AddListener(Connect);
+            testAreaButton.onClick.AddListener(() => Connect("MainGame"));
+            tutorialButton.onClick.AddListener(() => Connect("Tutorial"));
         }
         
-        void Connect()
+        void Connect(string sceneName)
         {
             NetworkManager.instance.AgentData = new AgentData(Guid.NewGuid().ToString(), nameInput.text);
             NetworkManager.instance.ConnectToServer("127.0.0.1", nameInput.text);
-            OnConnectedToServer();
+            print("Connected to server");
+            OnConnectedToServer(sceneName);
         }
 
-        private void OnConnectedToServer()
+        private void OnConnectedToServer(string sceneName)
         {
             if (changeSceneOnConnect)
             {
-                SceneManager.LoadScene("MainGame");
+                SceneManager.LoadScene(sceneName);
             }
             else
             {

@@ -27,10 +27,13 @@ namespace Ekkam
         private int gCost;
         public TMP_Text gCostText;
         private Color initialColor;
+        
+        private MeshRenderer meshRenderer;
 
         void Awake()
         {
-            initialColor = GetComponent<MeshRenderer>().material.color;
+            meshRenderer = GetComponent<MeshRenderer>();
+            initialColor = meshRenderer.material.color;
         }
         public int GCost
         {
@@ -41,9 +44,9 @@ namespace Ekkam
             set
             {
                 gCost = value;
-                gCostText.text = gCost.ToString();
+                // gCostText.text = gCost.ToString();
                 fCost = gCost + hCost;
-                fCostText.text = fCost.ToString();
+                // fCostText.text = fCost.ToString();
             }
         }
         private int hCost;
@@ -57,9 +60,9 @@ namespace Ekkam
             set
             {
                 hCost = value;
-                hCostText.text = hCost.ToString();
+                // hCostText.text = hCost.ToString();
                 fCost = gCost + hCost;
-                fCostText.text = fCost.ToString();
+                // fCostText.text = fCost.ToString();
             }
         }
         private int fCost;
@@ -136,19 +139,21 @@ namespace Ekkam
         
         public void SetColor(Color color)
         {
-            if (GetComponent<MeshRenderer>().material.color == initialColor)
+            if (meshRenderer.material.color == initialColor)
             {
-                GetComponent<MeshRenderer>().material.color = color;
+                meshRenderer.material.color = color;
             }
         }    
         public void SetPathColor(Color color)
         {
-            GetComponent<MeshRenderer>().material.color = color;
+            return;
+            meshRenderer.material.color = color;
         }
         
         public void ResetColor()
         {
-            GetComponent<MeshRenderer>().material.color = initialColor;
+            return;
+            meshRenderer.material.color = initialColor;
         }
         
         public void SetActionable(bool actionable, VisualType visualType = VisualType.None)

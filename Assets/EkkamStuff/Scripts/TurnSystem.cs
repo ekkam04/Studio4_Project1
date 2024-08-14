@@ -1,10 +1,14 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Ekkam
 {
     public class TurnSystem : MonoBehaviour
     {
+        public bool isMasterClient;
+        
         public int friendlyCount = Int32.MaxValue;
         public int friendlyTurnsCompleted;
         
@@ -13,14 +17,10 @@ namespace Ekkam
         
         public Agent.AgentType currentTurn;
         
-        EnemyManager enemyManager;
-        
         private void OnEnable()
         {
             Agent.onTurnEnd += OnTurnEnd;
             Agent.onEliminated += OnEliminated;
-            
-            enemyManager = FindObjectOfType<EnemyManager>();
         }
         
         private void OnDisable()
@@ -42,7 +42,7 @@ namespace Ekkam
                 {
                     friendlyTurnsCompleted = 0;
                     currentTurn = Agent.AgentType.Hostile;
-                    enemyManager.StartEnemyTurn();
+                    StartEnemyTurn();
                 }
             }
             else if (agentType == Agent.AgentType.Hostile)
@@ -52,14 +52,74 @@ namespace Ekkam
                 {
                     hostileTurnsCompleted = 0;
                     currentTurn = Agent.AgentType.Friendly;
-                    foreach (var agent in FindObjectsOfType<Agent>())
-                    {
-                        if (agent.agentType == Agent.AgentType.Friendly)
-                        {
-                            agent.StartTurn();
-                        }
-                    }
+                    // foreach (var agent in FindObjectsOfType<Agent>())
+                    // {
+                    //     if (agent.agentType == Agent.AgentType.Friendly)
+                    //     {
+                    //         agent.StartTurn();
+                    //     }
+                    // }
+                    StartFriendlyTurn();
                 }
+            }
+        }
+        
+        public void StartEnemyTurn()
+        {
+            if (!isMasterClient) return;
+            
+            List<Enemy> enemies = new List<Enemy>();
+            foreach (var agent in FindObjectsOfType<Agent>())
+            {
+                if (agent.agentType == Agent.AgentType.Hostile && agent.GetComponent<Enemy>())
+                {
+                    enemies.Add(agent.GetComponent<Enemy>());
+                }
+            }
+            
+            enemies.Sort((a, b) =>
+            {
+                if (a.enemyRank == b.enemyRank)
+                {
+                    return UnityEngine.Random.Range(-1, 1);
+                }
+                return a.enemyRank.CompareTo(b.enemyRank);
+            });
+            
+            List<Agent> enemyAgents = enemies.ConvertAll(x => (Agent)x);
+            StopCoroutine(ExecuteTurns());
+            StartCoroutine(ExecuteTurns(enemyAgents));
+        }
+        
+        public void StartFriendlyTurn()
+        {
+            if (!isMasterClient) return;
+            
+            List<Agent> friendlyAgents = new List<Agent>();
+            foreach (var agent in FindObjectsOfType<Agent>())
+            {
+                if (agent.agentType == Agent.AgentType.Friendly)
+                {
+                    friendlyAgents.Add(agent);
+                }
+            }
+            StopCoroutine(ExecuteTurns());
+            StartCoroutine(ExecuteTurns(friendlyAgents));
+        }
+        
+        IEnumerator ExecuteTurns(List<Agent> agents = null)
+        {
+            foreach (var agent in agents)
+            {
+                if (agent.GetComponent<Player>())
+                {
+                    string agentID = agent.GetComponent<NetworkComponent>().ownerID;
+                    NetworkManager.instance.SendStartTurn(agentID);
+                }
+                
+                agent.StartTurn();
+                
+                yield return new WaitUntil(() => agent.isTakingTurn == false);
             }
         }
         

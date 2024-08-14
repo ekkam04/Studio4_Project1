@@ -12,9 +12,19 @@ public class PlayerPickUpItems : MonoBehaviour
     public AbilityManager abilityManager;
     public InventoryManager inventoryManager;
     [HideInInspector] public bool pickedUp;
+    
+    private NetworkComponent networkComponent;
+    public delegate void OnItemPickedUp(string itemKey);
+    public static event OnItemPickedUp onItemPickedUp;
+    
+    void Start()
+    {
+        networkComponent = GetComponent<NetworkComponent>();
+    }
 
     private void OnTriggerEnter(Collider other)
     {
+        if (!networkComponent.IsMine()) return;
         Item item = other.GetComponent<Item>();
         if (item != null)
         {
@@ -35,6 +45,7 @@ public class PlayerPickUpItems : MonoBehaviour
                 abilityManager.AddAbility((AbilityItemObject)item.item);
                 inventoryItem.InitializeItem(item.item);
                 NetworkManager.instance.SendItemPacket(item.item.itemKey);
+                onItemPickedUp?.Invoke(item.item.itemKey);
                 Destroy(other.gameObject);
             }
             else if (item.item.itemType == ItemType.Equipment)
