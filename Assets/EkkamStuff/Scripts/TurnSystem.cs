@@ -16,6 +16,7 @@ namespace Ekkam
         public int hostileTurnsCompleted;
         
         public Agent.AgentType currentTurn;
+        public bool playersInCombat = false;
         
         private void OnEnable()
         {
@@ -52,13 +53,6 @@ namespace Ekkam
                 {
                     hostileTurnsCompleted = 0;
                     currentTurn = Agent.AgentType.Friendly;
-                    // foreach (var agent in FindObjectsOfType<Agent>())
-                    // {
-                    //     if (agent.agentType == Agent.AgentType.Friendly)
-                    //     {
-                    //         agent.StartTurn();
-                    //     }
-                    // }
                     StartFriendlyTurn();
                 }
             }
@@ -68,6 +62,7 @@ namespace Ekkam
         {
             if (!isMasterClient) return;
             
+            // Get all enemies
             List<Enemy> enemies = new List<Enemy>();
             foreach (var agent in FindObjectsOfType<Agent>())
             {
@@ -77,6 +72,46 @@ namespace Ekkam
                 }
             }
             
+            // Despawn any enemies that don't have a player within a certain range
+            int despawnRange = 15;
+            List<Enemy> enemiesToRemove = new List<Enemy>();
+            foreach (var enemy in enemies)
+            {
+                bool playerInRange = false;
+                foreach (var player in FindObjectsOfType<Player>())
+                {
+                    var distance = Vector3.Distance(enemy.transform.position, player.transform.position);
+                    if (distance < despawnRange)
+                    {
+                        playerInRange = true;
+                        break;
+                    }
+                    else
+                    {
+                        Debug.Log("No player in range. Distance to nearest: " + distance);
+                    }
+                }
+                if (!playerInRange)
+                {
+                    enemiesToRemove.Add(enemy);
+                }
+            }
+            foreach (var enemy in enemiesToRemove)
+            {
+                enemies.Remove(enemy);
+                Destroy(enemy.gameObject);
+                hostileCount--;
+            }
+            
+            // If there are no enemies left, end the turn
+            if (enemies.Count == 0)
+            {
+                Debug.LogWarning("No enemies to take turn.");
+                OnTurnEnd(Agent.AgentType.Hostile);
+                return;
+            }
+            
+            // Sort enemies by rank
             enemies.Sort((a, b) =>
             {
                 if (a.enemyRank == b.enemyRank)
@@ -86,6 +121,7 @@ namespace Ekkam
                 return a.enemyRank.CompareTo(b.enemyRank);
             });
             
+            // Convert enemies to agents and start their turns
             List<Agent> enemyAgents = enemies.ConvertAll(x => (Agent)x);
             StopCoroutine(ExecuteTurns());
             StartCoroutine(ExecuteTurns(enemyAgents));

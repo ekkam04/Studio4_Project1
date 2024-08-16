@@ -9,8 +9,9 @@ namespace Ekkam
         {
             None,
             GameStart,
-            MoveAction,
-            TeleportAction,
+            MoveAction, // is a GridPositionPacket
+            TeleportAction, // is a GridPositionPacket
+            DestroyAgentAction, // is a GridPositionPacket
             AttackAction,
             StartTurn,
             EndTurn,

@@ -46,6 +46,7 @@ namespace Ekkam
         public GameObject rightHand;
         private Animator anim;
         private PropManager propManager;
+        private TurnSystem turnSystem;
         
         public enum AgentType { Neutral, Friendly, Hostile }
         public AgentType agentType;
@@ -58,19 +59,21 @@ namespace Ekkam
         public static OnEliminated onEliminated;
         
         public GameObject agentStatsUI;
+        public GameObject agentStatsUIPoints;
+        public bool showPoints = true;
         public TMP_Text nameText;
         
         public TMP_Text movementPointsText;
         public int movementPoints = 6;
-        private int maxMovementPoints;
+        protected int maxMovementPoints;
         
         public TMP_Text actionPointsText;
         public int actionPoints = 2;
-        private int maxActionPoints;
+        protected int maxActionPoints;
         
         public TMP_Text manaPointsText;
         public int manaPoints = 4;
-        public int maxManaPoints;
+        protected int maxManaPoints;
         
         public int attackRange = 4;
         public List<Attack> attacks = new List<Attack>();
@@ -80,6 +83,7 @@ namespace Ekkam
             grid = FindObjectOfType<PathfindingGrid>();
             anim = GetComponent<Animator>();
             propManager = FindObjectOfType<PropManager>();
+            turnSystem = FindObjectOfType<TurnSystem>();
             
             var mainCamera = Camera.main;
             agentStatsUI.GetComponent<RotationConstraint>().AddSource(new ConstraintSource {sourceTransform = mainCamera.transform, weight = 1});
@@ -104,6 +108,17 @@ namespace Ekkam
             movementPointsText.text = movementPoints.ToString();
             actionPointsText.text = actionPoints.ToString();
             manaPointsText.text = manaPoints.ToString();
+            agentStatsUIPoints.SetActive(showPoints);
+            
+            // If no hostiles, set movement points to 99
+            if (turnSystem.hostileCount == 0 && movementPoints != 99)
+            {
+                movementPoints = 99;
+            }
+            else if (turnSystem.hostileCount > 0 && movementPoints == 99)
+            {
+                movementPoints = maxMovementPoints;
+            }
         }
 
         // --- Pathfinding ---------------------------------------------------
@@ -368,7 +383,7 @@ namespace Ekkam
                     transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(targetPosition - transform.position), 10f * Time.deltaTime);
                     yield return null;
                 }
-                movementPoints--;
+                if (turnSystem.hostileCount > 0) movementPoints--;
             }
             
             anim.SetBool("isMoving", false);

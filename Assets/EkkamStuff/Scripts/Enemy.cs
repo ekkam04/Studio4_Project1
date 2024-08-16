@@ -1,5 +1,7 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace Ekkam
 {
@@ -14,10 +16,13 @@ namespace Ekkam
         }
         public EnemyRank enemyRank;
         
-        // public bool isTakingTurn;
-        
+        public static int enemyID = 0;
+
         private new void Start()
         {
+            enemyID++;
+            gameObject.name = "Enemy_" + enemyID;
+            
             base.Start();
             agentData = new AgentData(gameObject.name, gameObject.name);
             nameText.text = gameObject.name;
@@ -77,6 +82,13 @@ namespace Ekkam
                                 if (node.Occupant != null) continue;
                                 targetNode = node;
                             }
+                        }
+                        if (targetNode.Occupant != null)
+                        {
+                            Debug.LogWarning("Target node is occupied");
+                            EndTurn();
+                            NetworkManager.instance.SendEndTurn(agentData);
+                            yield break;
                         }
 
                         MoveAction(targetNode.gridPosition);

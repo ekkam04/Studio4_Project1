@@ -23,7 +23,13 @@ namespace Ekkam
         
         public Vector2Int gridPosition;
         public List<PathfindingNode> neighbours = new List<PathfindingNode>();
+        
         public bool isBlocked;
+        public bool isBlockedFromTopEdge;
+        public bool isBlockedFromBottomEdge;
+        public bool isBlockedFromLeftEdge;
+        public bool isBlockedFromRightEdge;
+        
         private int gCost;
         public TMP_Text gCostText;
         private Color initialColor;

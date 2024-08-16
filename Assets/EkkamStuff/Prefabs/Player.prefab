@@ -846,6 +846,7 @@ GameObject:
   - component: {fileID: -1348554247054621393}
   - component: {fileID: -1566488376184331900}
   - component: {fileID: -5162418566169313983}
+  - component: {fileID: 7369895774646289098}
   m_Layer: 6
   m_Name: Player
   m_TagString: Player
@@ -954,6 +955,8 @@ MonoBehaviour:
   agentType: 1
   isTakingAction: 0
   agentStatsUI: {fileID: 388934776528005367}
+  agentStatsUIPoints: {fileID: 7697409542273062520}
+  showPoints: 1
   nameText: {fileID: 4963693160530726467}
   movementPointsText: {fileID: 1034247920936320645}
   movementPoints: 4
@@ -961,7 +964,6 @@ MonoBehaviour:
   actionPoints: 2
   manaPointsText: {fileID: 4932687611501427819}
   manaPoints: 4
-  maxManaPoints: 0
   attackRange: 4
   attacks: []
   mousePosition3DPrefab: {fileID: 6247423640985755484, guid: 20e8461a506c9354c9d87839c45baa95,
@@ -969,6 +971,7 @@ MonoBehaviour:
   reachableNodes: []
   lastSelectedNode: {fileID: 0}
   selectingTarget: 0
+  playerCamera: {fileID: 0}
 --- !u!114 &-1348554247054621393
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -997,6 +1000,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   inventoryItem: {fileID: 1623038423901205431, guid: d090836da7d23a342860d9450f3d416b,
     type: 3}
+  abilityManager: {fileID: 0}
   inventoryManager: {fileID: 0}
   pickedUp: 0
 --- !u!54 &-5162418566169313983
@@ -1026,6 +1030,65 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &7369895774646289098
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2558620899690012287}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62899f850307741f2a39c98a8b639597, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Actions: {fileID: -944628639613478452, guid: 4d859954152e8ee4ab60afe51289c319,
+    type: 3}
+  m_NotificationBehavior: 2
+  m_UIInputModule: {fileID: 0}
+  m_DeviceLostEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_DeviceRegainedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_ControlsChangedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_ActionEvents:
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 0c028f76-ef9e-4b6f-8547-462d623a41ae
+    m_ActionName: Gameplay/Movement[/Keyboard/w,/Keyboard/s,/Keyboard/a,/Keyboard/d]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 7d85673f-d68b-4cfa-9293-ec6dc5df674f
+    m_ActionName: Gameplay/Jump[/Keyboard/space]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: b789a13a-f44d-4e2e-b6bb-3e4445458083
+    m_ActionName: Gameplay/Look[/Mouse/delta]
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 4630042644973553332}
+        m_TargetAssemblyTypeName: Ekkam.Player, Assembly-CSharp
+        m_MethodName: OnCameraMovePressed
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 1db3e528-7362-4ff0-a1da-23657764cbf2
+    m_ActionName: Gameplay/MoveCamera[/Mouse/rightButton]
+  m_NeverAutoSwitchControlSchemes: 0
+  m_DefaultControlScheme: 
+  m_DefaultActionMap: Gameplay
+  m_SplitScreenIndex: -1
+  m_Camera: {fileID: 0}
 --- !u!1 &2572337922948916857
 GameObject:
   m_ObjectHideFlags: 0
@@ -4633,3 +4696,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 67db9e8f0e2ae9c40bc1e2b64352a6b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &7697409542273062520 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 271281213512757632, guid: 5e47157ff9363554e9afeb9c72c9909b,
+    type: 3}
+  m_PrefabInstance: {fileID: 7570966459020044280}
+  m_PrefabAsset: {fileID: 0}

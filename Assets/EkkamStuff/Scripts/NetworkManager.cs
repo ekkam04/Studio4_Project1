@@ -35,13 +35,6 @@ namespace Ekkam
             new Vector3(0.5f, 0, 1f),
             new Vector3(-1f, 0, 0.5f)
         };
-        
-        // public Vector3[] spawnPositions = new Vector3[]
-        // {
-        //     new Vector3(36.75f,0.38f,-3),
-        //     new Vector3(36.75f,0.38f,-3),
-        //     new Vector3(36.75f,0.38f,-3)
-        // };
 
         void Start()
         {
@@ -321,6 +314,7 @@ namespace Ekkam
                 playerVCam.Follow = player.transform;
                 playerVCam.LookAt = player.transform;
                 playerVCam.gameObject.SetActive(true);
+                player.playerCamera = playerVCam;
                 
                 actionVCam = GameObject.Find("ActionVCam").GetComponent<CinemachineVirtualCamera>();
                 actionVCam.gameObject.SetActive(false);

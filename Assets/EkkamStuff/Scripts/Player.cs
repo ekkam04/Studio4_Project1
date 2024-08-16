@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using Cinemachine;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace Ekkam
 {
@@ -30,6 +32,8 @@ namespace Ekkam
         public SelectingTarget selectingTarget;
         
         private NetworkComponent networkComponent;
+        
+        public CinemachineVirtualCamera playerCamera;
 
         private new void Start()
         {
@@ -123,6 +127,21 @@ namespace Ekkam
                         NetworkManager.instance.SendAttackAction(mousePositionOnGrid, damage);
                         break;
                 }
+            }
+        }
+        
+        public void OnCameraMovePressed(InputAction.CallbackContext context)
+        {
+            if (playerCamera == null) return;
+            Debug.Log("Camera move pressed");
+            
+            if (context.performed)
+            {
+                playerCamera.GetCinemachineComponent<CinemachineOrbitalTransposer>().m_XAxis.m_MaxSpeed = 200;
+            }
+            else if (context.canceled)
+            {
+                playerCamera.GetCinemachineComponent<CinemachineOrbitalTransposer>().m_XAxis.m_MaxSpeed = 0;
             }
         }
         

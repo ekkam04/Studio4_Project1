@@ -26,14 +26,14 @@ namespace Ekkam
         
         private Player player;
         
-        private DialogueController dialogueController;
+        private TurnSystem turnSystem;
         public GameObject endTurnButtonGO;
         public GameObject moveButtonGO;
         public GameObject shootButtonGO;
         
         private void Start()
         {
-            dialogueController = FindObjectOfType<DialogueController>();
+            turnSystem = FindObjectOfType<TurnSystem>();
         }
         
         public void AssignPlayerActions(Player player)
@@ -72,6 +72,17 @@ namespace Ekkam
                     closeInventoryButton.onClick.Invoke();
                 
                 }
+            }
+
+            if (turnSystem.hostileCount == 0)
+            {
+                endTurnButtonGO.SetActive(false);
+                player.showPoints = false;
+            }
+            else
+            {
+                endTurnButtonGO.SetActive(true);
+                player.showPoints = true;
             }
         }
         
