@@ -6,7 +6,7 @@ namespace Ekkam
     public class Attack : ScriptableObject
     {
         [Header("Attack Settings")]
-        public string name;
+        public string attackName;
         public float damage;
         public string animationToPlay;
         
@@ -14,10 +14,5 @@ namespace Ekkam
         public bool[] frontLeft = new bool[] {};
         public bool[] frontMiddle = new bool[] {};
         public bool[] frontRight = new bool[] {};
-        
-        [Header("Mirror")]
-        public bool mirrorToRight = true;
-        public bool mirrorToLeft = true;
-        public bool mirrorToBack = true;
     }
 }

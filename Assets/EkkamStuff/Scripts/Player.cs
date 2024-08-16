@@ -20,6 +20,14 @@ namespace Ekkam
         private MousePosition3D mousePosition3D;
         public List<PathfindingNode> reachableNodes = new List<PathfindingNode>();
         
+        public List<PathfindingNode> attackableNodes = new List<PathfindingNode>();
+        public List<PathfindingNode> attackableNodesNorth = new List<PathfindingNode>();
+        public List<PathfindingNode> attackableNodesEast = new List<PathfindingNode>();
+        public List<PathfindingNode> attackableNodesSouth = new List<PathfindingNode>();
+        public List<PathfindingNode> attackableNodesWest = new List<PathfindingNode>();
+
+        public AttackDirection currentAttackDirection;
+        
         public PathfindingNode lastSelectedNode;
         // public bool selectingTarget;
         
@@ -27,7 +35,8 @@ namespace Ekkam
         {
             None,
             Move,
-            Attack
+            Attack,
+            Ability
         }
         public SelectingTarget selectingTarget;
         
@@ -62,6 +71,90 @@ namespace Ekkam
             if (isTakingAction) return;
             
             Vector2Int mousePositionOnGrid = grid.GetPositionFromWorldPoint(mousePosition3D.transform.position);
+            
+            // Test ability
+            if (Input.GetKeyDown(KeyCode.E))
+            {
+                AbilityButton();
+            }
+
+            // Update current attack direction when selecting target for ability
+            if (selectingTarget == SelectingTarget.Ability)
+            {
+                Vector3 mouseWorldPosition = mousePosition3D.transform.position;
+                Vector3 directionToMouse = (mouseWorldPosition - transform.position).normalized;
+                
+                if (Mathf.Abs(directionToMouse.x) > Mathf.Abs(directionToMouse.z))
+                {
+                    if (directionToMouse.x > 0) // East
+                    {
+                        if (currentAttackDirection != AttackDirection.East)
+                        {
+                            foreach (var node in attackableNodes)
+                            {
+                                node.SetActionable(false);
+                                node.SetActionable(false, PathfindingNode.VisualType.Outline);
+                            }
+                            foreach (var node in attackableNodesEast)
+                            {
+                                node.SetActionable(true, PathfindingNode.VisualType.Enemy);
+                            }
+                        }
+                        currentAttackDirection = AttackDirection.East;
+                    }
+                    else // West
+                    {
+                        if (currentAttackDirection != AttackDirection.West)
+                        {
+                            foreach (var node in attackableNodes)
+                            {
+                                node.SetActionable(false);
+                                node.SetActionable(false, PathfindingNode.VisualType.Outline);
+                            }
+                            foreach (var node in attackableNodesWest)
+                            {
+                                node.SetActionable(true, PathfindingNode.VisualType.Enemy);
+                            }
+                        }
+                        currentAttackDirection = AttackDirection.West;
+                    }
+                }
+                else
+                {
+                    if (directionToMouse.z > 0) // North
+                    {
+                        if (currentAttackDirection != AttackDirection.North)
+                        {
+                            foreach (var node in attackableNodes)
+                            {
+                                node.SetActionable(false);
+                                node.SetActionable(false, PathfindingNode.VisualType.Outline);
+                            }
+                            foreach (var node in attackableNodesNorth)
+                            {
+                                node.SetActionable(true, PathfindingNode.VisualType.Enemy);
+                            }
+                        }
+                        currentAttackDirection = AttackDirection.North;
+                    }
+                    else // South
+                    {
+                        if (currentAttackDirection != AttackDirection.South)
+                        {
+                            foreach (var node in attackableNodes)
+                            {
+                                node.SetActionable(false);
+                                node.SetActionable(false, PathfindingNode.VisualType.Outline);
+                            }
+                            foreach (var node in attackableNodesSouth)
+                            {
+                                node.SetActionable(true, PathfindingNode.VisualType.Enemy);
+                            }
+                        }
+                        currentAttackDirection = AttackDirection.South;
+                    }
+                }
+            }
             
             if (
                 Input.GetMouseButtonDown(0)
@@ -110,11 +203,11 @@ namespace Ekkam
                             return;
                         }
                         
-                        float damage = 0f;
+                        float damage;
                         try
                         {
                             Agent targetAgent = grid.GetNode(mousePositionOnGrid).Occupant.GetComponent<Agent>();
-                            damage = targetAgent.CalculateDamage(90f, 50f);
+                            damage = targetAgent.CalculateDamage(100 - targetAgent.evasion, 50f);
                         }
                         catch
                         {
@@ -125,6 +218,18 @@ namespace Ekkam
                         
                         AttackAction(mousePositionOnGrid, damage);
                         NetworkManager.instance.SendAttackAction(mousePositionOnGrid, damage);
+                        break;
+                    
+                    case SelectingTarget.Ability:
+                        
+                        if (!selectedNode.enemyVisual.activeSelf)
+                        {
+                            print("Target does not have an enemy");
+                            return;
+                        }
+                        
+                        print("Using ability in direction: " + currentAttackDirection);
+                        
                         break;
                 }
             }
@@ -150,6 +255,10 @@ namespace Ekkam
             lastSelectedNode?.SetActionable(false);
             uiManager.playerActionsUI.SetActive(false);
             foreach (var node in reachableNodes)
+            {
+                node.SetActionable(false);
+            }
+            foreach (var node in attackableNodes)
             {
                 node.SetActionable(false);
             }
@@ -232,6 +341,37 @@ namespace Ekkam
             else
             {
                 Debug.LogWarning("No enemies in range");
+                UnselectAction();
+            }
+        }
+        
+        public void AbilityButton()
+        {
+            if (actionPoints <= 0) Debug.LogWarning("Not enough action points");
+
+            attackableNodesNorth = GetAllAttackNodes("Sword Base Attack", AttackDirection.North);
+            attackableNodesEast = GetAllAttackNodes("Sword Base Attack", AttackDirection.East);
+            attackableNodesSouth = GetAllAttackNodes("Sword Base Attack", AttackDirection.South);
+            attackableNodesWest = GetAllAttackNodes("Sword Base Attack", AttackDirection.West);
+            
+            attackableNodes = new List<PathfindingNode>();
+            attackableNodes.AddRange(attackableNodesNorth);
+            attackableNodes.AddRange(attackableNodesEast);
+            attackableNodes.AddRange(attackableNodesSouth);
+            attackableNodes.AddRange(attackableNodesWest);
+
+            foreach (var node in attackableNodes)
+            {
+                node.SetActionable(false, PathfindingNode.VisualType.Outline);
+            }
+            
+            if (attackableNodes.Count > 0)
+            {
+                selectingTarget = SelectingTarget.Ability;
+            }
+            else
+            {
+                Debug.LogWarning("No spaces to use ability");
                 UnselectAction();
             }
         }

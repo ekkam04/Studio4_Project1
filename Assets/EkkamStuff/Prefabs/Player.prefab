@@ -965,7 +965,8 @@ MonoBehaviour:
   manaPointsText: {fileID: 4932687611501427819}
   manaPoints: 4
   attackRange: 4
-  attacks: []
+  attacks:
+  - {fileID: 11400000, guid: 46a2a6760c45115499f13f2ce7d89e38, type: 2}
   mousePosition3DPrefab: {fileID: 6247423640985755484, guid: 20e8461a506c9354c9d87839c45baa95,
     type: 3}
   reachableNodes: []

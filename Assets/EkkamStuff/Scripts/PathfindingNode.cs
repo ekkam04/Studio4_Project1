@@ -13,13 +13,15 @@ namespace Ekkam
             None,
             Selected,
             Path,
-            Enemy
+            Enemy,
+            Outline
         }
         public VisualType visualType;
         
         public GameObject selectedVisual;
         public GameObject pathVisual;
         public GameObject enemyVisual;
+        public GameObject outlineVisual;
         
         public Vector2Int gridPosition;
         public List<PathfindingNode> neighbours = new List<PathfindingNode>();
@@ -172,6 +174,7 @@ namespace Ekkam
                     selectedVisual.SetActive(false);
                     pathVisual.SetActive(false);
                     enemyVisual.SetActive(false);
+                    outlineVisual.SetActive(false);
                     break;
                 case VisualType.Selected:
                     selectedVisual.SetActive(true);
@@ -181,6 +184,9 @@ namespace Ekkam
                     break;
                 case VisualType.Enemy:
                     enemyVisual.SetActive(true);
+                    break;
+                case VisualType.Outline:
+                    outlineVisual.SetActive(true);
                     break;
             }
         }

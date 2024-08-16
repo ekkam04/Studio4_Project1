@@ -77,6 +77,13 @@ namespace Ekkam
         
         public int attackRange = 4;
         public List<Attack> attacks = new List<Attack>();
+        public enum AttackDirection
+        {
+            North,
+            South,
+            East,
+            West
+        }
         
         protected void Start()
         {
@@ -118,6 +125,24 @@ namespace Ekkam
             else if (turnSystem.hostileCount > 0 && movementPoints == 99)
             {
                 movementPoints = maxMovementPoints;
+            }
+            
+            // Test attack
+            if (Input.GetKeyDown(KeyCode.T))
+            {
+                GetAllAttackNodes("Sword Base Attack", AttackDirection.North);
+            }
+            else if (Input.GetKeyDown(KeyCode.Y))
+            {
+                GetAllAttackNodes("Sword Base Attack", AttackDirection.East);
+            }
+            else if (Input.GetKeyDown(KeyCode.U))
+            {
+                GetAllAttackNodes("Sword Base Attack", AttackDirection.South);
+            }
+            else if (Input.GetKeyDown(KeyCode.I))
+            {
+                GetAllAttackNodes("Sword Base Attack", AttackDirection.West);
             }
         }
 
@@ -432,6 +457,65 @@ namespace Ekkam
             }
             
             OnActionEnd();
+        }
+        
+        public List<PathfindingNode> GetAllAttackNodes(string attackName, AttackDirection direction)
+        {
+            Attack attack = attacks.Find(x => x.name == attackName);
+            
+            Vector2Int playerPosition = startNodePosition;
+            List<PathfindingNode> affectedNodes = new List<PathfindingNode>();
+
+            switch (direction)
+            {
+                case AttackDirection.North:
+                    affectedNodes.AddRange(GetAttackNodes(playerPosition, attack.frontLeft, -1, 1));
+                    affectedNodes.AddRange(GetAttackNodes(playerPosition, attack.frontMiddle, 0, 1));
+                    affectedNodes.AddRange(GetAttackNodes(playerPosition, attack.frontRight, 1, 1));
+                    break;
+                case AttackDirection.South:
+                    affectedNodes.AddRange(GetAttackNodes(playerPosition, attack.frontLeft, 1, -1));
+                    affectedNodes.AddRange(GetAttackNodes(playerPosition, attack.frontMiddle, 0, -1));
+                    affectedNodes.AddRange(GetAttackNodes(playerPosition, attack.frontRight, -1, -1));
+                    break;
+                case AttackDirection.East:
+                    affectedNodes.AddRange(GetAttackNodes(playerPosition, attack.frontLeft, 1, 1));
+                    affectedNodes.AddRange(GetAttackNodes(playerPosition, attack.frontMiddle, 1, 0));
+                    affectedNodes.AddRange(GetAttackNodes(playerPosition, attack.frontRight, 1, -1));
+                    break;
+                case AttackDirection.West:
+                    affectedNodes.AddRange(GetAttackNodes(playerPosition, attack.frontLeft, -1, -1));
+                    affectedNodes.AddRange(GetAttackNodes(playerPosition, attack.frontMiddle, -1, 0));
+                    affectedNodes.AddRange(GetAttackNodes(playerPosition, attack.frontRight, -1, 1));
+                    break;
+            }
+
+            return affectedNodes;
+            
+        }
+        
+        private List<PathfindingNode> GetAttackNodes(Vector2Int playerPosition, bool[] pattern, int xOffset, int yOffset)
+        {
+            List<PathfindingNode> nodes = new List<PathfindingNode>();
+
+            for (int i = 0; i < pattern.Length; i++)
+            {
+                if (pattern[i])
+                {
+                    Vector2Int targetPosition = new Vector2Int(
+                        playerPosition.x + xOffset * (i + 1),
+                        playerPosition.y + yOffset * (i + 1)
+                    );
+
+                    PathfindingNode targetNode = grid.GetNode(targetPosition);
+                    if (targetNode != null && !targetNode.isBlocked)
+                    {
+                        nodes.Add(targetNode);
+                    }
+                }
+            }
+
+            return nodes;
         }
         
         // --- Actions ---------------------------------------------------

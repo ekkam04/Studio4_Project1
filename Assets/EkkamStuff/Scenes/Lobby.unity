@@ -407,7 +407,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   acceptingNewClients: 1
-  maxClients: 2
+  maxClients: 1
 --- !u!4 &167936622
 Transform:
   m_ObjectHideFlags: 0
