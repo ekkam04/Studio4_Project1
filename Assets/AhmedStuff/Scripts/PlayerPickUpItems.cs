@@ -34,7 +34,7 @@ public class PlayerPickUpItems : MonoBehaviour
                 if (result)
                 {
                     inventoryItem.InitializeItem(item.item);
-                    NetworkManager.instance.SendItemPacket(item.item.itemKey);
+                   // NetworkManager.instance.SendItemPacket(item.item.itemKey);
                     Destroy(other.gameObject);
 
                 }
@@ -44,7 +44,7 @@ public class PlayerPickUpItems : MonoBehaviour
             {
                 abilityManager.AddAbility((AbilityItemObject)item.item);
                 inventoryItem.InitializeItem(item.item);
-                NetworkManager.instance.SendItemPacket(item.item.itemKey);
+              //  NetworkManager.instance.SendItemPacket(item.item.itemKey);
                 onItemPickedUp?.Invoke(item.item.itemKey);
                 Destroy(other.gameObject);
             }
@@ -57,7 +57,7 @@ public class PlayerPickUpItems : MonoBehaviour
                     
                     abilityManager.AddAbility((AbilityItemObject)equipmentItem.ability);
                     inventoryItem.InitializeItem(item.item);
-                    NetworkManager.instance.SendItemPacket(item.item.itemKey);
+                    //NetworkManager.instance.SendItemPacket(item.item.itemKey);
                     Destroy(other.gameObject);
                 }
             }
