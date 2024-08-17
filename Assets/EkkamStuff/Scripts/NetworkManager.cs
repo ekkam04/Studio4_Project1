@@ -185,6 +185,16 @@ namespace Ekkam
                         actionableAgent.AttackAction(attackActionPacket.targetPosition, attackActionPacket.damage);
                         break;
                     
+                    case BasePacket.Type.AbilityAction:
+                        AbilityActionPacket abilityActionPacket = new AbilityActionPacket().Deserialize(buffer);
+                        Debug.Log($"Received ability action: {abilityActionPacket.attackName} from {abilityActionPacket.AgentData.name}");
+                        
+                        actionableAgent = GetActionableAgent(abilityActionPacket.AgentData);
+                        if (actionableAgent == null) return;
+                        
+                        actionableAgent.AbilityAction(abilityActionPacket.attackName, abilityActionPacket.direction);
+                        break;
+                    
                     case BasePacket.Type.StartTurn:
                         StartTurnPacket startTurnPacket = new StartTurnPacket().Deserialize(buffer);
                         Debug.Log($"Received start turn from {startTurnPacket.AgentData.name}");
@@ -263,6 +273,13 @@ namespace Ekkam
             if (agentData == null) agentData = AgentData;
             AttackActionPacket gridPositionPacket = new AttackActionPacket(BasePacket.Type.AttackAction, agentData, targetPosition, damage);
             SendDataToServer(gridPositionPacket);
+        }
+        
+        public void SendAbilityAction(string attackName, Agent.AttackDirection direction, AgentData agentData = null)
+        {
+            if (agentData == null) agentData = AgentData;
+            AbilityActionPacket abilityActionPacket = new AbilityActionPacket(BasePacket.Type.AbilityAction, agentData, attackName, direction);
+            SendDataToServer(abilityActionPacket);
         }
         
         public void SendStartTurn(string agentID, AgentData agentData = null)

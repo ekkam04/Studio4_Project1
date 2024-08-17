@@ -9,6 +9,9 @@ namespace Ekkam
         public string attackName;
         public float damage;
         public string animationToPlay;
+        public GameObject vfxPrefab;
+        public float damageDelay;
+        public float vfxDelay = 1f;
         
         [Header("Forward Attack Pattern")]
         public bool[] frontLeft = new bool[] {};

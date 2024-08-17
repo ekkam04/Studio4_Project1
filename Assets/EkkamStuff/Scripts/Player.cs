@@ -27,6 +27,7 @@ namespace Ekkam
         public List<PathfindingNode> attackableNodesWest = new List<PathfindingNode>();
 
         public AttackDirection currentAttackDirection;
+        public Attack currentAttack;
         
         public PathfindingNode lastSelectedNode;
         // public bool selectingTarget;
@@ -75,7 +76,7 @@ namespace Ekkam
             // Test ability
             if (Input.GetKeyDown(KeyCode.E))
             {
-                AbilityButton();
+                AbilityButton("Dragons Breath");
             }
 
             // Update current attack direction when selecting target for ability
@@ -229,7 +230,8 @@ namespace Ekkam
                         }
                         
                         print("Using ability in direction: " + currentAttackDirection);
-                        
+                        AbilityAction(currentAttack.attackName, currentAttackDirection);
+                        NetworkManager.instance.SendAbilityAction(currentAttack.attackName, currentAttackDirection);
                         break;
                 }
             }
@@ -305,7 +307,11 @@ namespace Ekkam
 
         public void MoveButton()
         {
-            if (movementPoints <= 0) Debug.LogWarning("Not enough movement points");
+            if (movementPoints <= 0)
+            {
+                Debug.LogWarning("Not enough movement points");
+                return;
+            }
             
             reachableNodes = GetReachableNodes(movementPoints);
             foreach (var node in reachableNodes)
@@ -326,7 +332,11 @@ namespace Ekkam
         
         public void AttackButton()
         {
-            if (actionPoints <= 0) Debug.LogWarning("Not enough action points");
+            if (actionPoints <= 0)
+            {
+                Debug.LogWarning("Not enough action points");
+                return;
+            }
             
             reachableNodes = GetReachableNodes(attackRange, true, new AgentType[] {AgentType.Hostile, AgentType.Friendly});
             foreach (var node in reachableNodes)
@@ -345,14 +355,26 @@ namespace Ekkam
             }
         }
         
-        public void AbilityButton()
+        public void AbilityButton(string attackName)
         {
-            if (actionPoints <= 0) Debug.LogWarning("Not enough action points");
+            if (actionPoints <= 0)
+            {
+                Debug.LogWarning("Not enough action points");
+                return;
+            }
+            
+            Attack attack = attacks.Find(x => x.name == attackName);
+            if (attack == null)
+            {
+                Debug.LogWarning("No attack with name: " + attackName);
+                return;
+            }
+            currentAttack = attack;
 
-            attackableNodesNorth = GetAllAttackNodes("Sword Base Attack", AttackDirection.North);
-            attackableNodesEast = GetAllAttackNodes("Sword Base Attack", AttackDirection.East);
-            attackableNodesSouth = GetAllAttackNodes("Sword Base Attack", AttackDirection.South);
-            attackableNodesWest = GetAllAttackNodes("Sword Base Attack", AttackDirection.West);
+            attackableNodesNorth = GetAllAttackNodes(attack, AttackDirection.North);
+            attackableNodesEast = GetAllAttackNodes(attack, AttackDirection.East);
+            attackableNodesSouth = GetAllAttackNodes(attack, AttackDirection.South);
+            attackableNodesWest = GetAllAttackNodes(attack, AttackDirection.West);
             
             attackableNodes = new List<PathfindingNode>();
             attackableNodes.AddRange(attackableNodesNorth);

@@ -13,6 +13,7 @@ namespace Ekkam
             TeleportAction, // is a GridPositionPacket
             DestroyAgentAction, // is a GridPositionPacket
             AttackAction,
+            AbilityAction,
             StartTurn,
             EndTurn,
             ItemPickup
@@ -175,6 +176,44 @@ namespace Ekkam
             packet.AgentData = basePacket.AgentData;
             packet.targetPosition = new Vector2Int(basePacket.br.ReadInt32(), basePacket.br.ReadInt32());
             packet.damage = basePacket.br.ReadSingle();
+            return packet;
+        }
+    }
+    
+    // This packet is sent when an agent uses an ability
+    public class AbilityActionPacket : BasePacket
+    {
+        public string attackName;
+        public Agent.AttackDirection direction;
+
+        public AbilityActionPacket() : base(Type.AbilityAction, new AgentData("", ""))
+        {
+            this.attackName = "";
+            this.direction = Agent.AttackDirection.North;
+        }
+
+        public AbilityActionPacket(Type type, AgentData agentData, string abilityName, Agent.AttackDirection direction) : base(type, agentData)
+        {
+            this.attackName = abilityName;
+            this.direction = direction;
+        }
+
+        public override byte[] Serialize()
+        {
+            BeginSerialize();
+            bw.Write(attackName);
+            bw.Write((int)direction);
+            return EndSerialize();
+        }
+
+        public AbilityActionPacket Deserialize(byte[] data)
+        {
+            AbilityActionPacket packet = new AbilityActionPacket();
+            BasePacket basePacket = packet.BaseDeserialize(data);
+            packet.type = basePacket.type;
+            packet.AgentData = basePacket.AgentData;
+            packet.attackName = basePacket.br.ReadString();
+            packet.direction = (Agent.AttackDirection)basePacket.br.ReadInt32();
             return packet;
         }
     }
