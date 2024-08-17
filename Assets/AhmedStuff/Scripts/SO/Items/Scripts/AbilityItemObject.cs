@@ -7,5 +7,6 @@ public class AbilityItemObject : ItemObject
 {
     public string abilityName;
     public float manaCost;
+    public float actionCost;
     public GameObject abilityEffect;
 }

@@ -70,9 +70,14 @@ public class InventoryManager : MonoBehaviour
                     (item1.item == recipe.item2 && item2.item == recipe.item1))
                 {
                     SpawnNewItem(recipe.result, rewardSlot);
-
-                    Destroy(item1.gameObject);
-                    Destroy(item2.gameObject);
+                    if (item1.item.itemType == ItemType.Crystal)
+                    {
+                        Destroy(item1.gameObject);
+                    }
+                    if (item2.item.itemType == ItemType.Crystal)
+                    {
+                        Destroy(item2.gameObject);
+                    }
 
                     break;
                 }

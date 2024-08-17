@@ -19,12 +19,12 @@ public class PlayerPickUpItems : MonoBehaviour
     
     void Start()
     {
-        networkComponent = GetComponent<NetworkComponent>();
+        networkComponent = FindObjectOfType<NetworkComponent>();
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (!networkComponent.IsMine()) return;
+       //if (!networkComponent.IsMine()) return;
         Item item = other.GetComponent<Item>();
         if (item != null)
         {
