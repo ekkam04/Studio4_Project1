@@ -110,52 +110,53 @@ namespace Ekkam
             
             yield return new WaitForSeconds(0.1f); // --------------------------------------------------------------------------------
             
-            if (!gunPickedUp)
-            {
-                dialogues = new Dialogue[]
-                {
-                    new Dialogue("Jeff", "There's a gun near that chest. You should pick it up.")
-                };
-                StartCoroutine(dialogueController.ShowDialogues(dialogues, false));
-                while (!gunPickedUp)
-                {
-                    player.movementPoints = 4;
-                    yield return null;
-                }
-                dialogueController.continueDialogueManual = true;
-            }
-            else
-            {
-                dialogues = new Dialogue[]
-                {
-                    new Dialogue("Jeff", "Great! Good thing you picked up that gun.")
-                };
-                StartCoroutine(dialogueController.ShowDialogues(dialogues));
-                yield return new WaitUntil(() => !dialogueController.isShowingDialogues);
-            }
-            
-            player.movementPoints = 4;
-            objectiveLight1.SetActive(false);
-            uiManager.moveButtonGO.SetActive(false);
-            yield return new WaitForSeconds(0.1f); // --------------------------------------------------------------------------------
-            
-            dialogues = new Dialogue[]
-            {
-                new Dialogue("Jeff", "Press I or click on the chest icon to open your inventory")
-            };
-            StartCoroutine(dialogueController.ShowDialogues(dialogues, false));
-            yield return new WaitUntil(() => !uiManager.openInventoryButton.gameObject.activeSelf);
-            dialogueController.continueDialogueManual = true;
+            // if (!gunPickedUp)
+            // {
+            //     dialogues = new Dialogue[]
+            //     {
+            //         new Dialogue("Jeff", "There's a gun near that chest. You should pick it up.")
+            //     };
+            //     StartCoroutine(dialogueController.ShowDialogues(dialogues, false));
+            //     while (!gunPickedUp)
+            //     {
+            //         player.movementPoints = 4;
+            //         yield return null;
+            //     }
+            //     dialogueController.continueDialogueManual = true;
+            // }
+            // else
+            // {
+            //     dialogues = new Dialogue[]
+            //     {
+            //         new Dialogue("Jeff", "Great! Good thing you picked up that gun.")
+            //     };
+            //     StartCoroutine(dialogueController.ShowDialogues(dialogues));
+            //     yield return new WaitUntil(() => !dialogueController.isShowingDialogues);
+            // }
+            //
+            // player.movementPoints = 4;
+            // objectiveLight1.SetActive(false);
+            // uiManager.moveButtonGO.SetActive(false);
             
             yield return new WaitForSeconds(0.1f); // --------------------------------------------------------------------------------
             
-            dialogues = new Dialogue[]
-            {
-                new Dialogue("Jeff", "Great! Now drag the gun to your right hand slot and close the inventory.")
-            };
-            StartCoroutine(dialogueController.ShowDialogues(dialogues, false));
-            yield return new WaitUntil(() => uiManager.openInventoryButton.gameObject.activeSelf);
-            dialogueController.continueDialogueManual = true;
+            // dialogues = new Dialogue[]
+            // {
+            //     new Dialogue("Jeff", "Press I or click on the chest icon to open your inventory")
+            // };
+            // StartCoroutine(dialogueController.ShowDialogues(dialogues, false));
+            // yield return new WaitUntil(() => !uiManager.openInventoryButton.gameObject.activeSelf);
+            // dialogueController.continueDialogueManual = true;
+            
+            yield return new WaitForSeconds(0.1f); // --------------------------------------------------------------------------------
+            
+            // dialogues = new Dialogue[]
+            // {
+            //     new Dialogue("Jeff", "Great! Now drag the gun to your right hand slot and close the inventory.")
+            // };
+            // StartCoroutine(dialogueController.ShowDialogues(dialogues, false));
+            // yield return new WaitUntil(() => uiManager.openInventoryButton.gameObject.activeSelf);
+            // dialogueController.continueDialogueManual = true;
             
             yield return new WaitForSeconds(0.1f); // --------------------------------------------------------------------------------
             

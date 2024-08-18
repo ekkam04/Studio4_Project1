@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 
 namespace Ekkam
 {
@@ -16,8 +17,19 @@ namespace Ekkam
         
         public Button moveButton;
         public Button attackButton;
+        public Button abilityButton;
         
         public Button endTurnButton;
+        
+        public Button pauseButton;
+        public Button resumeButton;
+        public Button mainMenuButton;
+        public Button qualitySettingsButton;
+        public GameObject pauseMenu;
+        public GameObject qualitySettingsMenu;
+        public Button highQualityButton;
+        public Button mediumQualityButton;
+        public Button lowQualityButton;
         
         public TMP_Text actionPointsText;
         public TMP_Text movementPointsText;
@@ -42,10 +54,60 @@ namespace Ekkam
             
             moveButton.onClick.AddListener(player.MoveButton);
             attackButton.onClick.AddListener(player.AttackButton);
+            abilityButton.onClick.AddListener(player.ActivateDragonsBreath);
             endTurnButton.onClick.AddListener(player.EndTurnButton);
+            
+            pauseButton.onClick.AddListener(Pause);
+            resumeButton.onClick.AddListener(Resume);
+            mainMenuButton.onClick.AddListener(MainMenu);
+            qualitySettingsButton.onClick.AddListener(QualitySettingsToggle);
+            highQualityButton.onClick.AddListener(SetHighQuality);
+            mediumQualityButton.onClick.AddListener(SetMediumQuality);
+            lowQualityButton.onClick.AddListener(SetLowQuality);
             
             actionPointsText.text = "Action Points: " + player.actionPoints;
             movementPointsText.text = "Movement Points: " + player.movementPoints;
+        }
+        
+        private void SetQuality(int qualityIndex)
+        {
+            QualitySettings.SetQualityLevel(qualityIndex, true);
+        }
+        
+        public void SetHighQuality()
+        {
+            SetQuality(2);
+        }
+        
+        public void SetMediumQuality()
+        {
+            SetQuality(1);
+        }
+        
+        public void SetLowQuality()
+        {
+            SetQuality(0);
+        }
+        
+        public void Pause()
+        {
+            pauseMenu.SetActive(true);
+        }
+        
+        public void Resume()
+        {
+            pauseMenu.SetActive(false);
+        }
+        
+        public void QualitySettingsToggle()
+        {
+            qualitySettingsMenu.SetActive(!qualitySettingsMenu.activeSelf);
+        }
+        
+        public void MainMenu()
+        {
+            // SceneManager.LoadScene("Lobby");
+            Application.Quit();
         }
 
         private void Update()
@@ -71,6 +133,18 @@ namespace Ekkam
                 {
                     closeInventoryButton.onClick.Invoke();
                 
+                }
+            }
+            
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                if (pauseMenu.activeSelf)
+                {
+                    pauseMenu.SetActive(false);
+                }
+                else
+                {
+                    pauseMenu.SetActive(true);
                 }
             }
 

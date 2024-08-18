@@ -106,6 +106,8 @@ namespace Ekkam
                 StartFindPathJob();
             }
             
+            // if (findPath) FindPathNonMultithreaded(); // Old non-multithreaded pathfinding
+            
             if (startFollowingPath)
             {
                 StartCoroutine(FollowPath());
@@ -129,6 +131,72 @@ namespace Ekkam
         }
 
         // --- Pathfinding ---------------------------------------------------
+        
+        void FindPathNonMultithreaded() // Old non-multithreaded pathfinding
+        {
+            if (pathNodes.Count > 0)
+            {
+                Debug.LogWarning("Path already found");
+                findPath = false;
+                OnActionEnd();
+                state = PathfindingState.Success;
+                return;
+            }
+
+            if (openNodes.Count < 1)
+            {
+                Debug.LogWarning("No path found");
+                findPath = false;
+                OnActionEnd();
+                state = PathfindingState.Failure;
+                return;
+            }
+            var currentNode = openNodes[0];
+            foreach (var node in openNodes)
+            {
+                if (node.FCost < currentNode.FCost)
+                {
+                    currentNode = node;
+                }
+            }
+            openNodes.Remove(currentNode);
+            closedNodes.Add(currentNode);
+            
+            if (currentNode == grid.GetNode(endNodePosition))
+            {
+                print("Path found");
+                findPath = false;
+                SetPathNodes();
+                StartCoroutine(FollowPath());
+                state = PathfindingState.Success;
+                return;
+            }
+            
+            var currentNeighbours = GetNeighbours(currentNode, currentNode.gridPosition);
+            foreach (var neighbour in currentNeighbours)
+            {
+                if (neighbour == null) continue;
+                
+                // check if it is in blocked positions or closed nodes
+                if (neighbour.isBlocked || closedNodes.Contains(neighbour))
+                {
+                    continue;
+                }
+                // check if new path to neighbour is shorter or neighbour is not in openNodes
+                var newMovementCostToNeighbour = currentNode.GCost + GetDistance(currentNode, neighbour);
+                if (newMovementCostToNeighbour < neighbour.GCost || !openNodes.Contains(neighbour))
+                {
+                    neighbour.GCost = newMovementCostToNeighbour;
+                    neighbour.HCost = GetDistance(neighbour, grid.GetNode(endNodePosition));
+                    neighbour.Parent = currentNode;
+                    if (!openNodes.Contains(neighbour))
+                    {
+                        openNodes.Add(neighbour);
+                    }
+                }
+            }
+            state = PathfindingState.Running;
+        }
         
         void StartFindPathJob()
         {

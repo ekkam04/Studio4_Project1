@@ -415,6 +415,11 @@ namespace Ekkam
                 UnselectAction();
             }
         }
+        
+        public void ActivateDragonsBreath()
+        {
+            AbilityButton("Dragons Breath");
+        }
 
         public async void SetCameraFocus(int delay, Transform focus = null)
         {

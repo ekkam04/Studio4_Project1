@@ -13,6 +13,7 @@ namespace Ekkam
         public Button testAreaButton;
         public Button tutorialButton;
         public Button arenaButton;
+        public Button quitButton;
         public bool changeSceneOnConnect = true;
 
         private void Start()
@@ -20,6 +21,8 @@ namespace Ekkam
             testAreaButton.onClick.AddListener(() => Connect("Test"));
             tutorialButton.onClick.AddListener(() => Connect("Tutorial"));
             arenaButton.onClick.AddListener(() => Connect("Arena"));
+            
+            quitButton.onClick.AddListener(OnQuitButtonClicked);
         }
         
         void Connect(string sceneName)
@@ -71,6 +74,11 @@ namespace Ekkam
             {
                 this.gameObject.SetActive(false);
             }
+        }
+        
+        public void OnQuitButtonClicked()
+        {
+            Application.Quit();
         }
     }
 }

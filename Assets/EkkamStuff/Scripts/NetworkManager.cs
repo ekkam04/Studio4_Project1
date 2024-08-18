@@ -15,7 +15,7 @@ namespace Ekkam
     {
         public static NetworkManager instance;
 
-        private Socket socket;
+        public Socket socket;
         
         public GameObject playerPrefab;
         public Player myPlayer;
