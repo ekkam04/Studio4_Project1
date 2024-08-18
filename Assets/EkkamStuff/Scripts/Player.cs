@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Cinemachine;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 namespace Ekkam
 {
@@ -50,7 +52,17 @@ namespace Ekkam
             base.Start();
             networkComponent = GetComponent<NetworkComponent>();
             nameText.text = networkComponent.ownerName;
-            if (!networkComponent.IsMine()) return;
+            
+            if (!networkComponent.IsMine())
+            {
+                healthSlider.fillRect.GetComponent<Image>().color = Color.yellow;
+                agentType = AgentType.Hostile;
+                return;
+            }
+            else
+            {
+                healthSlider.fillRect.GetComponent<Image>().color = Color.green;
+            }
             
             networkComponent = GetComponent<NetworkComponent>();
             mousePosition3D = Instantiate(mousePosition3DPrefab).GetComponent<MousePosition3D>();
@@ -274,6 +286,12 @@ namespace Ekkam
             if (!networkComponent.IsMine()) return;
             
             uiManager.gameUI.SetActive(true);
+            
+            // print("Auto Selected self");
+            // var selectedNode = grid.GetNode(grid.GetPositionFromWorldPoint(transform.position));
+            // selectedNode.SetActionable(false, PathfindingNode.VisualType.Selected);
+            // lastSelectedNode = selectedNode;
+            // uiManager.playerActionsUI.SetActive(true);
         }
         
         public override void OnActionStart()
@@ -395,6 +413,21 @@ namespace Ekkam
             {
                 Debug.LogWarning("No spaces to use ability");
                 UnselectAction();
+            }
+        }
+
+        public async void SetCameraFocus(int delay, Transform focus = null)
+        {
+            await Task.Delay(delay);
+            if (focus == null)
+            {
+                playerCamera.Follow = transform;
+                playerCamera.LookAt = transform;
+            }
+            else
+            {
+                playerCamera.Follow = focus;
+                playerCamera.LookAt = focus;
             }
         }
     }

@@ -21,6 +21,14 @@ namespace Ekkam
 
         private float timer;
         
+        public float blockCheckHeightOffset = 0.5f;
+        
+        public float edgeOffset = 1f;
+        public float edgeCheckSize = 0.7f;
+        public float edgeCheckWidth = 0.1f;
+        
+        public float centerCheckSize = 0.2f;
+        
         void Start()
         {
             nodes = GetComponentsInChildren<PathfindingNode>();
@@ -34,6 +42,14 @@ namespace Ekkam
             }
             
             UpdateBlockedNodes();
+        }
+
+        private void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.B))
+            {
+                UpdateBlockedNodes();
+            }
         }
 
         public PathfindingNode GetNode(Vector2Int gridPosition)
@@ -53,21 +69,71 @@ namespace Ekkam
             print("Updating blocked nodes...");
             await Task.Delay(100);
             if (nodes == null) return;
-            for (int i = 0; i < nodes.Length; i++)
+            
+            // for (int i = 0; i < nodes.Length; i++)
+            // {
+            //     var node = nodes[i];
+            //     if (node == null) continue;
+            //     int mask = ~LayerMask.GetMask(LayerMask.LayerToName(6), LayerMask.LayerToName(7), LayerMask.LayerToName(8), LayerMask.LayerToName(9)); // Player, Enemy, Item, Environment layers
+            //     bool isBlocked = Physics.CheckBox(node.transform.position + new Vector3(0, 0.5f, 0), new Vector3(0.5f, 0.5f, 0.5f), Quaternion.identity, mask);
+            //     node.isBlocked = isBlocked;
+            //     if (isBlocked)
+            //     {
+            //         node.SetColor(new Color(0f, 0f, 0f, 0));
+            //     }
+            //     else
+            //     {
+            //         node.ResetColor();
+            //     }
+            // }
+            
+            int mask = ~LayerMask.GetMask(LayerMask.LayerToName(6), LayerMask.LayerToName(7), LayerMask.LayerToName(8), LayerMask.LayerToName(9)); // Player, Enemy, Item, Environment layers
+            int edgeMask = 1 << 10; // Only detect objects on layer 10 for edge detection
+            
+            foreach (var node in nodes)
             {
-                var node = nodes[i];
                 if (node == null) continue;
-                int mask = ~LayerMask.GetMask(LayerMask.LayerToName(6), LayerMask.LayerToName(7), LayerMask.LayerToName(8), LayerMask.LayerToName(9)); // Player, Enemy, Item, Environment layers
-                bool isBlocked = Physics.CheckBox(node.transform.position + new Vector3(0, 0.5f, 0), new Vector3(0.5f, 0.5f, 0.5f), Quaternion.identity, mask);
+        
+                // Check if the entire node is blocked
+                bool isBlocked = Physics.CheckBox(node.transform.position + new Vector3(0, blockCheckHeightOffset, 0), new Vector3(centerCheckSize, centerCheckSize, centerCheckSize), Quaternion.identity, mask);
                 node.isBlocked = isBlocked;
                 if (isBlocked)
                 {
                     node.SetColor(new Color(0f, 0f, 0f, 0));
+                    node.isBlockedFromTopEdge = true;
+                    node.isBlockedFromBottomEdge = true;
+                    node.isBlockedFromLeftEdge = true;
+                    node.isBlockedFromRightEdge = true;
+                    continue;
                 }
                 else
                 {
                     node.ResetColor();
                 }
+
+                // // Top Edge
+                // node.isBlockedFromTopEdge = Physics.BoxCast(node.transform.position + new Vector3(0, blockCheckHeightOffset, edgeOffset), new Vector3(edgeCheckSize, edgeCheckSize, edgeCheckWidth), Vector3.forward, Quaternion.identity, 0.1f, edgeMask);
+                //
+                // // Bottom Edge
+                // node.isBlockedFromBottomEdge = Physics.BoxCast(node.transform.position + new Vector3(0, blockCheckHeightOffset, -edgeOffset), new Vector3(edgeCheckSize, edgeCheckSize, edgeCheckWidth), Vector3.back, Quaternion.identity, 0.1f, edgeMask);
+                //
+                // // Left Edge
+                // node.isBlockedFromLeftEdge = Physics.BoxCast(node.transform.position + new Vector3(-edgeOffset, blockCheckHeightOffset, 0), new Vector3(edgeCheckWidth, edgeCheckSize, edgeCheckSize), Vector3.left, Quaternion.identity, 0.1f, edgeMask);
+                //
+                // // Right Edge
+                // node.isBlockedFromRightEdge = Physics.BoxCast(node.transform.position + new Vector3(edgeOffset, blockCheckHeightOffset, 0), new Vector3(edgeCheckWidth, edgeCheckSize, edgeCheckSize), Vector3.right, Quaternion.identity, 0.1f, edgeMask);
+                
+                // Top Edge (Forward in world space)
+                node.isBlockedFromTopEdge = Physics.CheckBox(node.transform.position + new Vector3(0, blockCheckHeightOffset, edgeOffset), new Vector3(0.5f, 0.5f, edgeCheckWidth), Quaternion.identity, mask);
+
+                // Bottom Edge (Backward in world space)
+                node.isBlockedFromBottomEdge = Physics.CheckBox(node.transform.position + new Vector3(0, blockCheckHeightOffset, -edgeOffset), new Vector3(edgeCheckSize, edgeCheckSize, edgeCheckWidth), Quaternion.identity, mask);
+
+                // Left Edge (Left in world space)
+                node.isBlockedFromLeftEdge = Physics.CheckBox(node.transform.position + new Vector3(-edgeOffset, blockCheckHeightOffset, 0), new Vector3(edgeCheckWidth, edgeCheckSize, edgeCheckSize), Quaternion.identity, mask);
+
+                // Right Edge (Right in world space)
+                node.isBlockedFromRightEdge = Physics.CheckBox(node.transform.position + new Vector3(edgeOffset, blockCheckHeightOffset, 0), new Vector3(edgeCheckWidth, edgeCheckSize, edgeCheckSize), Quaternion.identity, mask);
             }
         }
 
@@ -89,6 +155,30 @@ namespace Ekkam
                 }
             }
             return blockedPositions.ToArray();
+        }
+
+        private void OnDrawGizmos()
+        {
+            if (nodes == null) return;
+            foreach (var node in nodes)
+            {
+                // draw gizmos for each edge box cast, red if blocked, green if not
+                Gizmos.color = node.isBlockedFromTopEdge ? Color.red : Color.green;
+                Gizmos.DrawWireCube(node.transform.position + new Vector3(0, blockCheckHeightOffset, edgeOffset), new Vector3(edgeCheckSize, edgeCheckSize, edgeCheckWidth));
+                
+                Gizmos.color = node.isBlockedFromBottomEdge ? Color.red : Color.green;
+                Gizmos.DrawWireCube(node.transform.position + new Vector3(0, blockCheckHeightOffset, -edgeOffset), new Vector3(edgeCheckSize, edgeCheckSize, edgeCheckWidth));
+                
+                Gizmos.color = node.isBlockedFromLeftEdge ? Color.red : Color.green;
+                Gizmos.DrawWireCube(node.transform.position + new Vector3(-edgeOffset, blockCheckHeightOffset, 0), new Vector3(edgeCheckWidth, edgeCheckSize, edgeCheckSize));
+                
+                Gizmos.color = node.isBlockedFromRightEdge ? Color.red : Color.green;
+                Gizmos.DrawWireCube(node.transform.position + new Vector3(edgeOffset, blockCheckHeightOffset, 0), new Vector3(edgeCheckWidth, edgeCheckSize, edgeCheckSize));
+                
+                // draw gizmo for the center boxcast
+                Gizmos.color = node.isBlocked ? Color.red : Color.green;
+                Gizmos.DrawWireCube(node.transform.position + new Vector3(0, blockCheckHeightOffset, 0), new Vector3(centerCheckSize, centerCheckSize, centerCheckSize));
+            }
         }
     }
 }

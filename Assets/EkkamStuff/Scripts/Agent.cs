@@ -118,11 +118,11 @@ namespace Ekkam
             agentStatsUIPoints.SetActive(showPoints);
             
             // If no hostiles, set movement points to 99
-            if (turnSystem.hostileCount == 0 && movementPoints != 99)
+            if (turnSystem.hostileCount == 0 && movementPoints < 99)
             {
                 movementPoints = 99;
             }
-            else if (turnSystem.hostileCount > 0 && movementPoints == 99)
+            else if (turnSystem.hostileCount > 0 && movementPoints > maxMovementPoints)
             {
                 movementPoints = maxMovementPoints;
             }
@@ -283,37 +283,56 @@ namespace Ekkam
         List<PathfindingNode> GetNeighbours(PathfindingNode node, Vector2Int nodePosition)
         {
             node.neighbours.Clear();
+
+            // Right neighbor
             Vector2Int rightNodePosition = new Vector2Int(nodePosition.x + 1, nodePosition.y);
             if (rightNodePosition.x < grid.gridCellCountX)
             {
                 PathfindingNode rightNode = grid.GetNode(rightNodePosition);
-                // rightNode.SetColor(new Color(0f, 0.25f, 0f , 1));
-                node.neighbours.Add(rightNode);
+                if (rightNode != null && !node.isBlockedFromRightEdge && !rightNode.isBlockedFromLeftEdge)
+                {
+                    node.neighbours.Add(rightNode);
+                }
             }
+
+            // Left neighbor
             Vector2Int leftNodePosition = new Vector2Int(nodePosition.x - 1, nodePosition.y);
             if (leftNodePosition.x >= -grid.gridCellCountX)
             {
                 PathfindingNode leftNode = grid.GetNode(leftNodePosition);
-                // leftNode.SetColor(new Color(0f, 0.25f, 0f , 1));
-                node.neighbours.Add(leftNode);
+                if (leftNode != null && !node.isBlockedFromLeftEdge && !leftNode.isBlockedFromRightEdge)
+                {
+                    node.neighbours.Add(leftNode);
+                }
             }
+
+            // Top neighbor
             Vector2Int upNodePosition = new Vector2Int(nodePosition.x, nodePosition.y + 1);
             if (upNodePosition.y < grid.gridCellCountZ)
             {
                 PathfindingNode upNode = grid.GetNode(upNodePosition);
-                // upNode.SetColor(new Color(0f, 0.25f, 0f , 1));
-                node.neighbours.Add(upNode);
+                if (upNode != null && !node.isBlockedFromTopEdge && !upNode.isBlockedFromBottomEdge)
+                {
+                    node.neighbours.Add(upNode);
+                    Debug.Log($"Top neighbor added: {upNode.gridPosition}");
+                }
             }
+
+            // Bottom neighbor
             Vector2Int downNodePosition = new Vector2Int(nodePosition.x, nodePosition.y - 1);
             if (downNodePosition.y >= -grid.gridCellCountZ)
             {
                 PathfindingNode downNode = grid.GetNode(downNodePosition);
-                // downNode.SetColor(new Color(0f, 0.25f, 0f , 1));
-                node.neighbours.Add(downNode);
+                if (downNode != null && !node.isBlockedFromBottomEdge && !downNode.isBlockedFromTopEdge)
+                {
+                    node.neighbours.Add(downNode);
+                    Debug.Log($"Bottom neighbor added: {downNode.gridPosition}");
+                }
             }
 
             return node.neighbours;
         }
+
         
         public int GetDistance(PathfindingNode nodeA, PathfindingNode nodeB)
         {
@@ -328,34 +347,45 @@ namespace Ekkam
             List<PathfindingNode> reachableNodes = new List<PathfindingNode>();
             List<PathfindingNode> openNodes = new List<PathfindingNode>();
             List<PathfindingNode> closedNodes = new List<PathfindingNode>();
-            openNodes.Add(grid.GetNode(startNodePosition));
-            int currentRange = 0;
             
+            PathfindingNode startNode = grid.GetNode(startNodePosition);
+            openNodes.Add(startNode);
+            reachableNodes.Add(startNode);
+            int currentRange = 0;
+
             while (currentRange < range)
             {
                 List<PathfindingNode> currentNodes = new List<PathfindingNode>(openNodes);
                 openNodes.Clear();
+
                 foreach (var node in currentNodes)
                 {
                     foreach (var neighbour in GetNeighbours(node, node.gridPosition))
                     {
                         if (neighbour == null) continue;
-                        if (neighbour.isBlocked || closedNodes.Contains(neighbour) || reachableNodes.Contains(neighbour))
+                        
+                        if (closedNodes.Contains(neighbour) || reachableNodes.Contains(neighbour))
                         {
                             continue;
                         }
-                        openNodes.Add(neighbour);
-                        reachableNodes.Add(neighbour);
+                        
+                        if (!neighbour.isBlocked)
+                        {
+                            openNodes.Add(neighbour);
+                            reachableNodes.Add(neighbour);
+                        }
                     }
                     closedNodes.Add(node);
                 }
+
                 currentRange++;
             }
+            
             if (filterByType)
             {
-                // reachableNodes.RemoveAll(node => node.Occupant == null || node.Occupant.GetComponent<Agent>().agentType != agentType);
                 reachableNodes.RemoveAll(node => node.Occupant == null || Array.IndexOf(agentTypes, node.Occupant.GetComponent<Agent>().agentType) == -1);
             }
+            
             return reachableNodes;
         }
         
@@ -567,11 +597,22 @@ namespace Ekkam
         public virtual void OnActionStart()
         {
             isTakingAction = true;
+            
+            if (agentType == AgentType.Hostile)
+            {
+                var distance = Vector3.Distance(transform.position, NetworkManager.instance.myPlayer.transform.position);
+                if (distance < turnSystem.hostilityRange)
+                {
+                    NetworkManager.instance.myPlayer.SetCameraFocus(0, this.transform);
+                }
+            }
         }
         
         public virtual void OnActionEnd()
         {
             isTakingAction = false;
+            
+            NetworkManager.instance.myPlayer.SetCameraFocus(300);
         }
 
         public void MoveAction(Vector2Int targetPosition)
@@ -607,20 +648,4 @@ namespace Ekkam
             onTurnEnd?.Invoke(agentType);
         }
     }
-    
-    // [System.Serializable]
-    // public class AttackRange
-    // {
-    //     public string key;
-    //     
-    //     [Header("Forward Attack Range")]
-    //     public bool[] frontLeft = new bool[] {};
-    //     public bool[] frontMiddle = new bool[] {true, true};
-    //     public bool[] frontRight = new bool[] {};
-    //     
-    //     [Header("Mirror")]
-    //     public bool mirrorToRight = true;
-    //     public bool mirrorToLeft = true;
-    //     public bool mirrorToBack = true;
-    // }
 }

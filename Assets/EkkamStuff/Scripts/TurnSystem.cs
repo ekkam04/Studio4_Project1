@@ -16,7 +16,7 @@ namespace Ekkam
         public int hostileTurnsCompleted;
         
         public Agent.AgentType currentTurn;
-        public bool playersInCombat = false;
+        public float hostilityRange = 15;
         
         private void OnEnable()
         {
@@ -33,7 +33,7 @@ namespace Ekkam
         private void OnTurnEnd(Agent.AgentType agentType)
         {
             Debug.Log("Turn ended");
-            hostileCount = CalculateHostileCount();
+            hostileCount = GetEnemiesInRange().Count;
             CheckForEndGame();
             
             if (agentType == Agent.AgentType.Friendly)
@@ -63,50 +63,13 @@ namespace Ekkam
             if (!isMasterClient) return;
             
             // Get all enemies
-            List<Enemy> enemies = new List<Enemy>();
-            foreach (var agent in FindObjectsOfType<Agent>())
-            {
-                if (agent.agentType == Agent.AgentType.Hostile && agent.GetComponent<Enemy>())
-                {
-                    enemies.Add(agent.GetComponent<Enemy>());
-                }
-            }
-            
-            // Despawn any enemies that don't have a player within a certain range
-            int despawnRange = 15;
-            List<Enemy> enemiesToRemove = new List<Enemy>();
-            foreach (var enemy in enemies)
-            {
-                bool playerInRange = false;
-                foreach (var player in FindObjectsOfType<Player>())
-                {
-                    var distance = Vector3.Distance(enemy.transform.position, player.transform.position);
-                    if (distance < despawnRange)
-                    {
-                        playerInRange = true;
-                        break;
-                    }
-                    else
-                    {
-                        Debug.Log("No player in range. Distance to nearest: " + distance);
-                    }
-                }
-                if (!playerInRange)
-                {
-                    enemiesToRemove.Add(enemy);
-                }
-            }
-            foreach (var enemy in enemiesToRemove)
-            {
-                enemies.Remove(enemy);
-                Destroy(enemy.gameObject);
-                hostileCount--;
-            }
+            List<Enemy> enemies = GetEnemiesInRange();
             
             // If there are no enemies left, end the turn
             if (enemies.Count == 0)
             {
                 Debug.LogWarning("No enemies to take turn.");
+                hostileCount = 0;
                 OnTurnEnd(Agent.AgentType.Hostile);
                 return;
             }
@@ -159,18 +122,84 @@ namespace Ekkam
             }
         }
         
-        private int CalculateHostileCount()
+        public List<Enemy> GetEnemiesInRange()
         {
-            int count = 0;
+            List<Enemy> enemies = new List<Enemy>();
+            foreach (var agent in FindObjectsOfType<Agent>())
+            {
+                if (agent.agentType == Agent.AgentType.Hostile && agent.GetComponent<Enemy>())
+                {
+                    enemies.Add(agent.GetComponent<Enemy>());
+                }
+            }
+            
+            List<Enemy> enemiesInRange = new List<Enemy>();
+            foreach (var enemy in enemies)
+            {
+                bool playerInRange = false;
+                foreach (var player in FindObjectsOfType<Player>())
+                {
+                    var distance = Vector3.Distance(enemy.transform.position, player.transform.position);
+                    if (distance < hostilityRange)
+                    {
+                        playerInRange = true;
+                        break;
+                    }
+                }
+                if (playerInRange)
+                {
+                    enemiesInRange.Add(enemy);
+                }
+            }
+            
+            return enemiesInRange;
+        }
+        
+        public List<Agent> GetHostilesInRange()
+        {
+            List<Agent> hostiles = new List<Agent>();
             foreach (var agent in FindObjectsOfType<Agent>())
             {
                 if (agent.agentType == Agent.AgentType.Hostile)
                 {
-                    count++;
+                    hostiles.Add(agent);
                 }
             }
-            return count;
+            
+            List<Agent> hostilesInRange = new List<Agent>();
+            foreach (var hostile in hostiles)
+            {
+                bool playerInRange = false;
+                foreach (var player in FindObjectsOfType<Player>())
+                {
+                    var distance = Vector3.Distance(hostile.transform.position, player.transform.position);
+                    if (distance < hostilityRange)
+                    {
+                        playerInRange = true;
+                        break;
+                    }
+                }
+                if (playerInRange)
+                {
+                    hostilesInRange.Add(hostile);
+                }
+            }
+            
+            return hostilesInRange;
         }
+        
+        // private int CalculateHostileCountNearMe()
+        // {
+        //     int count = 0;
+        //     foreach (var agent in FindObjectsOfType<Agent>())
+        //     {
+        //         if (agent.agentType == Agent.AgentType.Hostile)
+        //         {
+        //             count++;
+        //         }
+        //     }
+        //     return count;
+        // }
 
         private void OnEliminated(Agent.AgentType agentType)
         {

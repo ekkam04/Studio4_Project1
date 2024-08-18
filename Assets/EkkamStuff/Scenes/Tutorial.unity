@@ -7026,6 +7026,11 @@ MonoBehaviour:
   gridCellCountZ: 100
   startingPosition: {x: 0, y: 0, z: 0}
   grid: {fileID: 429309951}
+  blockCheckHeightOffset: 0.6
+  edgeOffset: 1.05
+  edgeCheckSize: 0.2
+  edgeCheckWidth: 0.8
+  centerCheckSize: 0.2
 --- !u!156049354 &429309951
 Grid:
   m_ObjectHideFlags: 0
@@ -14076,7 +14081,7 @@ MonoBehaviour:
   hostileCount: 0
   hostileTurnsCompleted: 0
   currentTurn: 0
-  playersInCombat: 0
+  hostilityRange: 15
 --- !u!4 &805828789
 Transform:
   m_ObjectHideFlags: 0
