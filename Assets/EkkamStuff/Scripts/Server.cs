@@ -4,8 +4,11 @@ using UnityEngine;
 using System.Net.Sockets;
 using System.Net;
 using System.Threading.Tasks;
-using ParrelSync;
 using UnityEngine.SceneManagement;
+
+#if UNITY_EDITOR
+using ParrelSync;
+#endif
 
 namespace Ekkam
 {
@@ -26,11 +29,13 @@ namespace Ekkam
 
         void Start()
         {
+            #if UNITY_EDITOR
             if (ClonesManager.IsClone())
             {
                 Destroy(gameObject);
                 return;
             }
+            #endif
             
             if (instance == null)
             {
@@ -92,7 +97,9 @@ namespace Ekkam
 
         private void OnDestroy()
         {
+            #if UNITY_EDITOR
             if (ClonesManager.IsClone()) return;
+            #endif
             socket.Close();
         }
 
