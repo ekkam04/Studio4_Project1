@@ -19,12 +19,12 @@ public class PlayerPickUpItems : MonoBehaviour
     
     void Start()
     {
-        networkComponent = GetComponent<NetworkComponent>();
+        networkComponent = FindObjectOfType<NetworkComponent>();
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (!networkComponent.IsMine()) return;
+       //if (!networkComponent.IsMine()) return;
         Item item = other.GetComponent<Item>();
         if (item != null)
         {
@@ -34,7 +34,7 @@ public class PlayerPickUpItems : MonoBehaviour
                 if (result)
                 {
                     inventoryItem.InitializeItem(item.item);
-                    NetworkManager.instance.SendItemPacket(item.item.itemKey);
+                   // NetworkManager.instance.SendItemPacket(item.item.itemKey);
                     Destroy(other.gameObject);
 
                 }
@@ -44,7 +44,7 @@ public class PlayerPickUpItems : MonoBehaviour
             {
                 abilityManager.AddAbility((AbilityItemObject)item.item);
                 inventoryItem.InitializeItem(item.item);
-                NetworkManager.instance.SendItemPacket(item.item.itemKey);
+              //  NetworkManager.instance.SendItemPacket(item.item.itemKey);
                 onItemPickedUp?.Invoke(item.item.itemKey);
                 Destroy(other.gameObject);
             }
@@ -57,7 +57,7 @@ public class PlayerPickUpItems : MonoBehaviour
                     
                     abilityManager.AddAbility((AbilityItemObject)equipmentItem.ability);
                     inventoryItem.InitializeItem(item.item);
-                    NetworkManager.instance.SendItemPacket(item.item.itemKey);
+                    //NetworkManager.instance.SendItemPacket(item.item.itemKey);
                     Destroy(other.gameObject);
                 }
             }

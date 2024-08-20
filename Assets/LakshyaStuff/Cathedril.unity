@@ -2354,7 +2354,7 @@ TilemapRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 9dfc825aed78fcd4ba02077103263b40, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -5917,6 +5917,11 @@ PrefabInstance:
       propertyPath: m_Materials.Array.data[1]
       value: 
       objectReference: {fileID: 2100000, guid: 137b1c14964e37045a1586d909efa3c1, type: 2}
+    - target: {fileID: 5186479509959800590, guid: 8345e5da0b66a444995c0671529fb3d7,
+        type: 3}
+      propertyPath: m_Materials.Array.data[2]
+      value: 
+      objectReference: {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
     - target: {fileID: 5186479509959800590, guid: 8345e5da0b66a444995c0671529fb3d7,
         type: 3}
       propertyPath: m_Materials.Array.data[3]
@@ -18102,6 +18107,11 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 5186479509959800590, guid: 8345e5da0b66a444995c0671529fb3d7,
+        type: 3}
+      propertyPath: m_Materials.Array.data[2]
+      value: 
+      objectReference: {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
     - target: {fileID: 6318901563479886945, guid: 8345e5da0b66a444995c0671529fb3d7,
         type: 3}
       propertyPath: m_LocalScale.x
@@ -39611,6 +39621,11 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 5186479509959800590, guid: 8345e5da0b66a444995c0671529fb3d7,
+        type: 3}
+      propertyPath: m_Materials.Array.data[2]
+      value: 
+      objectReference: {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
     - target: {fileID: 6318901563479886945, guid: 8345e5da0b66a444995c0671529fb3d7,
         type: 3}
       propertyPath: m_LocalPosition.x

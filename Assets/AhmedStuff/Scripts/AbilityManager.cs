@@ -49,7 +49,7 @@ public class AbilityManager : MonoBehaviour
 
             if (ability != null)
             {
-                
+                // change to ability use logic
                 Debug.Log($"Using ability: {ability.abilityName}");
             }
         }

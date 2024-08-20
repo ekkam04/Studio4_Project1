@@ -478,6 +478,8 @@ MonoBehaviour:
   hCostText: {fileID: 6892375143611412494}
   fCostText: {fileID: 6501983239899568036}
   Parent: {fileID: 0}
+  cover: 0
+  occupant: {fileID: 0}
   occupantText: {fileID: 795841985067379561}
 --- !u!1 &4762519373182219994
 GameObject:
