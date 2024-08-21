@@ -37,13 +37,25 @@ namespace Ekkam
         
         IEnumerator SpawnEnemies()
         {
-            List<EnemySpawner> spawners = new List<EnemySpawner>(enemySpawners);
+            List<EnemySpawner> spawners = enemySpawners;
+            // for (int i = 0; i < enemiesToSpawn; i++)
+            // {
+            //     if (i >= spawners.Count || i <= 0) continue;
+            //     spawners[i - 1].Spawn(spawners[i - 1].transform.position);
+            //     yield return new WaitForSeconds(0.2f);
+            // }
+            
+            // spawning alternate
+            enemiesToSpawn = enemySpawners.Count;
             for (int i = 0; i < enemiesToSpawn; i++)
             {
-                int randomIndex = Random.Range(0, spawners.Count);
-                spawners[randomIndex].Spawn(spawners[randomIndex].transform.position);
-                spawners.RemoveAt(randomIndex);
-                if (spawners.Count == 0) break;
+                if (i >= spawners.Count || i <= 0) continue;
+                
+                // ez diversity
+                if (i == 1) continue;
+                if (i == 3) continue;
+                if (i == 5) continue;
+                spawners[i - 1].Spawn(spawners[i - 1].transform.position);
                 yield return new WaitForSeconds(0.2f);
             }
         }

@@ -183,25 +183,25 @@ namespace Ekkam
     // This packet is sent when an agent uses an ability
     public class AbilityActionPacket : BasePacket
     {
-        public string attackName;
+        public string abilityName;
         public Agent.AttackDirection direction;
 
         public AbilityActionPacket() : base(Type.AbilityAction, new AgentData("", ""))
         {
-            this.attackName = "";
+            this.abilityName = "";
             this.direction = Agent.AttackDirection.North;
         }
 
         public AbilityActionPacket(Type type, AgentData agentData, string abilityName, Agent.AttackDirection direction) : base(type, agentData)
         {
-            this.attackName = abilityName;
+            this.abilityName = abilityName;
             this.direction = direction;
         }
 
         public override byte[] Serialize()
         {
             BeginSerialize();
-            bw.Write(attackName);
+            bw.Write(abilityName);
             bw.Write((int)direction);
             return EndSerialize();
         }
@@ -212,7 +212,7 @@ namespace Ekkam
             BasePacket basePacket = packet.BaseDeserialize(data);
             packet.type = basePacket.type;
             packet.AgentData = basePacket.AgentData;
-            packet.attackName = basePacket.br.ReadString();
+            packet.abilityName = basePacket.br.ReadString();
             packet.direction = (Agent.AttackDirection)basePacket.br.ReadInt32();
             return packet;
         }

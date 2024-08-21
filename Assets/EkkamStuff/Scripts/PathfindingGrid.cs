@@ -110,18 +110,6 @@ namespace Ekkam
                 {
                     node.ResetColor();
                 }
-
-                // // Top Edge
-                // node.isBlockedFromTopEdge = Physics.BoxCast(node.transform.position + new Vector3(0, blockCheckHeightOffset, edgeOffset), new Vector3(edgeCheckSize, edgeCheckSize, edgeCheckWidth), Vector3.forward, Quaternion.identity, 0.1f, edgeMask);
-                //
-                // // Bottom Edge
-                // node.isBlockedFromBottomEdge = Physics.BoxCast(node.transform.position + new Vector3(0, blockCheckHeightOffset, -edgeOffset), new Vector3(edgeCheckSize, edgeCheckSize, edgeCheckWidth), Vector3.back, Quaternion.identity, 0.1f, edgeMask);
-                //
-                // // Left Edge
-                // node.isBlockedFromLeftEdge = Physics.BoxCast(node.transform.position + new Vector3(-edgeOffset, blockCheckHeightOffset, 0), new Vector3(edgeCheckWidth, edgeCheckSize, edgeCheckSize), Vector3.left, Quaternion.identity, 0.1f, edgeMask);
-                //
-                // // Right Edge
-                // node.isBlockedFromRightEdge = Physics.BoxCast(node.transform.position + new Vector3(edgeOffset, blockCheckHeightOffset, 0), new Vector3(edgeCheckWidth, edgeCheckSize, edgeCheckSize), Vector3.right, Quaternion.identity, 0.1f, edgeMask);
                 
                 // Top Edge (Forward in world space)
                 node.isBlockedFromTopEdge = Physics.CheckBox(node.transform.position + new Vector3(0, blockCheckHeightOffset, edgeOffset), new Vector3(0.5f, 0.5f, edgeCheckWidth), Quaternion.identity, mask);
@@ -134,6 +122,25 @@ namespace Ekkam
 
                 // Right Edge (Right in world space)
                 node.isBlockedFromRightEdge = Physics.CheckBox(node.transform.position + new Vector3(edgeOffset, blockCheckHeightOffset, 0), new Vector3(edgeCheckWidth, edgeCheckSize, edgeCheckSize), Quaternion.identity, mask);
+                
+                int edgeCount = 0;
+                if (node.isBlockedFromTopEdge) edgeCount++;
+                if (node.isBlockedFromBottomEdge) edgeCount++;
+                if (node.isBlockedFromLeftEdge) edgeCount++;
+                if (node.isBlockedFromRightEdge) edgeCount++;
+                
+                if (edgeCount >= 2)
+                {
+                    node.cover = PathfindingNode.CoverType.Full;
+                }
+                else if (edgeCount == 1)
+                {
+                    node.cover = PathfindingNode.CoverType.Half;
+                }
+                else
+                {
+                    node.cover = PathfindingNode.CoverType.None;
+                }
             }
         }
 

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Cinemachine;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace Ekkam
@@ -29,10 +30,10 @@ namespace Ekkam
         public List<PathfindingNode> attackableNodesWest = new List<PathfindingNode>();
 
         public AttackDirection currentAttackDirection;
-        public Attack currentAttack;
+        [FormerlySerializedAs("currentAttack")] public Ability currentAbility;
         
         public PathfindingNode lastSelectedNode;
-        // public bool selectingTarget;
+        public bool gunEquipped;
         
         public enum SelectingTarget
         {
@@ -56,7 +57,7 @@ namespace Ekkam
             if (!networkComponent.IsMine())
             {
                 healthSlider.fillRect.GetComponent<Image>().color = Color.yellow;
-                agentType = AgentType.Hostile;
+                // agentType = AgentType.Hostile;
                 return;
             }
             else
@@ -76,6 +77,16 @@ namespace Ekkam
             if (networkComponent.IsMine()) onLocalPlayerLoaded?.Invoke();
         }
 
+        private void OnEnable()
+        {
+            InventorySlot.onItemDropped += HandleItemDropped;
+        }
+        
+        private void OnDisable()
+        {
+            InventorySlot.onItemDropped -= HandleItemDropped;
+        }
+
         private new void Update()
         {
             base.Update();
@@ -84,12 +95,6 @@ namespace Ekkam
             if (isTakingAction) return;
             
             Vector2Int mousePositionOnGrid = grid.GetPositionFromWorldPoint(mousePosition3D.transform.position);
-            
-            // Test ability
-            if (Input.GetKeyDown(KeyCode.E))
-            {
-                AbilityButton("Dragons Breath");
-            }
 
             // Update current attack direction when selecting target for ability
             if (selectingTarget == SelectingTarget.Ability)
@@ -180,10 +185,11 @@ namespace Ekkam
                 {
                     if (selectingTarget == SelectingTarget.None) // Select player and show actions
                     {
-                        print("Selected self");
-                        selectedNode.SetActionable(false, PathfindingNode.VisualType.Selected);
-                        lastSelectedNode = selectedNode;
-                        uiManager.playerActionsUI.SetActive(true);
+                        // print("Selected self");
+                        // selectedNode.SetActionable(false, PathfindingNode.VisualType.Selected);
+                        // lastSelectedNode = selectedNode;
+                        // uiManager.playerActionsUI.SetActive(true);
+                        SelectSelf();
                     }
                     else // Cancel action
                     {
@@ -231,6 +237,7 @@ namespace Ekkam
                         
                         AttackAction(mousePositionOnGrid, damage);
                         NetworkManager.instance.SendAttackAction(mousePositionOnGrid, damage);
+                        if (damage > 0) manaPoints += 1;
                         break;
                     
                     case SelectingTarget.Ability:
@@ -242,8 +249,8 @@ namespace Ekkam
                         }
                         
                         print("Using ability in direction: " + currentAttackDirection);
-                        AbilityAction(currentAttack.attackName, currentAttackDirection);
-                        NetworkManager.instance.SendAbilityAction(currentAttack.attackName, currentAttackDirection);
+                        AbilityAction(currentAbility.abilityName, currentAttackDirection);
+                        NetworkManager.instance.SendAbilityAction(currentAbility.abilityName, currentAttackDirection);
                         break;
                 }
             }
@@ -262,6 +269,14 @@ namespace Ekkam
             {
                 playerCamera.GetCinemachineComponent<CinemachineOrbitalTransposer>().m_XAxis.m_MaxSpeed = 0;
             }
+        }
+        
+        private void SelectSelf()
+        {
+            var selectedNode = grid.GetNode(grid.GetPositionFromWorldPoint(transform.position));
+            selectedNode.SetActionable(false, PathfindingNode.VisualType.Selected);
+            lastSelectedNode = selectedNode;
+            uiManager.playerActionsUI.SetActive(true);
         }
         
         private void UnselectAction()
@@ -287,11 +302,7 @@ namespace Ekkam
             
             uiManager.gameUI.SetActive(true);
             
-            // print("Auto Selected self");
-            // var selectedNode = grid.GetNode(grid.GetPositionFromWorldPoint(transform.position));
-            // selectedNode.SetActionable(false, PathfindingNode.VisualType.Selected);
-            // lastSelectedNode = selectedNode;
-            // uiManager.playerActionsUI.SetActive(true);
+            SelectSelf();
         }
         
         public override void OnActionStart()
@@ -312,6 +323,15 @@ namespace Ekkam
             if (!networkComponent.IsMine()) return;
             
             uiManager.endTurnButton.interactable = true;
+            SelectSelf();
+        }
+
+        private void HandleItemDropped(string itemKey, string slotName)
+        {
+            if (itemKey == "gun")
+            {
+                gunEquipped = slotName == "WeaponSlot";
+            }
         }
         
         public void EndTurnButton()
@@ -332,6 +352,7 @@ namespace Ekkam
             }
             
             reachableNodes = GetReachableNodes(movementPoints);
+            reachableNodes.RemoveAll(x => x.Occupant != null);
             foreach (var node in reachableNodes)
             {
                 node.SetActionable(true, PathfindingNode.VisualType.Path);
@@ -356,7 +377,10 @@ namespace Ekkam
                 return;
             }
             
-            reachableNodes = GetReachableNodes(attackRange, true, new AgentType[] {AgentType.Hostile, AgentType.Friendly});
+            reachableNodes = GetReachableNodesWithoutNeighborCheck(attackRange);
+            reachableNodes.RemoveAll(x => x.Occupant == null);
+            reachableNodes.RemoveAll(x => x.Occupant == this.gameObject);
+            
             foreach (var node in reachableNodes)
             {
                 node.SetActionable(true, PathfindingNode.VisualType.Enemy);
@@ -373,26 +397,38 @@ namespace Ekkam
             }
         }
         
-        public void AbilityButton(string attackName)
+        public void AbilityButton(Ability ability, List<Ability> allAbilities = null)
         {
+            if (allAbilities != null) attacks = allAbilities;
+            if (selectingTarget == SelectingTarget.Ability)
+            {
+                UnselectAction();
+                return;
+            }
+            
             if (actionPoints <= 0)
             {
                 Debug.LogWarning("Not enough action points");
                 return;
             }
             
-            Attack attack = attacks.Find(x => x.name == attackName);
-            if (attack == null)
+            if (manaPoints <= 0)
             {
-                Debug.LogWarning("No attack with name: " + attackName);
+                Debug.LogWarning("Not enough mana points");
                 return;
             }
-            currentAttack = attack;
+            
+            if (ability == null)
+            {
+                Debug.LogWarning("No attack with name: " + ability.abilityName);
+                return;
+            }
+            currentAbility = ability;
 
-            attackableNodesNorth = GetAllAttackNodes(attack, AttackDirection.North);
-            attackableNodesEast = GetAllAttackNodes(attack, AttackDirection.East);
-            attackableNodesSouth = GetAllAttackNodes(attack, AttackDirection.South);
-            attackableNodesWest = GetAllAttackNodes(attack, AttackDirection.West);
+            attackableNodesNorth = GetAllAttackNodes(ability, AttackDirection.North);
+            attackableNodesEast = GetAllAttackNodes(ability, AttackDirection.East);
+            attackableNodesSouth = GetAllAttackNodes(ability, AttackDirection.South);
+            attackableNodesWest = GetAllAttackNodes(ability, AttackDirection.West);
             
             attackableNodes = new List<PathfindingNode>();
             attackableNodes.AddRange(attackableNodesNorth);
@@ -416,10 +452,10 @@ namespace Ekkam
             }
         }
         
-        public void ActivateDragonsBreath()
-        {
-            AbilityButton("Dragons Breath");
-        }
+        // public void ActivateDragonsBreath()
+        // {
+        //     AbilityButton("Dragons Breath");
+        // }
 
         public async void SetCameraFocus(int delay, Transform focus = null)
         {

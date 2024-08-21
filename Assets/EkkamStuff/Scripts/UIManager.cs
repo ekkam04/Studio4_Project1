@@ -17,7 +17,6 @@ namespace Ekkam
         
         public Button moveButton;
         public Button attackButton;
-        public Button abilityButton;
         
         public Button endTurnButton;
         
@@ -34,7 +33,10 @@ namespace Ekkam
         public TMP_Text actionPointsText;
         public TMP_Text movementPointsText;
         public TMP_Text waitingText;
-        public TMP_Text turnText;
+        public TMP_Text levelText;
+        
+        public Slider healthSlider;
+        public Slider manaSlider;
         
         private Player player;
         
@@ -54,7 +56,6 @@ namespace Ekkam
             
             moveButton.onClick.AddListener(player.MoveButton);
             attackButton.onClick.AddListener(player.AttackButton);
-            abilityButton.onClick.AddListener(player.ActivateDragonsBreath);
             endTurnButton.onClick.AddListener(player.EndTurnButton);
             
             pauseButton.onClick.AddListener(Pause);
@@ -116,11 +117,15 @@ namespace Ekkam
             {
                 actionPointsText.text = "Action Points: " + player.actionPoints;
                 movementPointsText.text = "Movement Points: " + player.movementPoints;
+                levelText.text = player.manaPoints.ToString();
                 
                 moveButton.interactable = player.movementPoints > 0;
-                attackButton.interactable = player.actionPoints > 0;
+                attackButton.interactable = player.gunEquipped && player.actionPoints > 0;
                 
                 waitingText.gameObject.SetActive(player.isTakingAction);
+
+                healthSlider.value = player.health;
+                manaSlider.value = player.manaPoints;
             }
 
             if (Input.GetKeyDown(KeyCode.I))

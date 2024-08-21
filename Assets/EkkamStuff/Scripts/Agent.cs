@@ -36,9 +36,10 @@ namespace Ekkam
         public bool findPath;
         private bool isPathfindingJobRunning;
         private bool startFollowingPath = false;
-        
+
         [Header("--- Agent Settings ---")] // ---------------------------
-        
+
+        public int intelligence = 1;
         public bool isTakingTurn;
         
         public GameObject leftHand;
@@ -75,7 +76,7 @@ namespace Ekkam
         protected int maxManaPoints;
         
         public int attackRange = 4;
-        public List<Attack> attacks = new List<Attack>();
+        public List<Ability> attacks = new List<Ability>();
         public enum AttackDirection
         {
             North,
@@ -203,7 +204,7 @@ namespace Ekkam
 
             isPathfindingJobRunning = true;
             JobManager.instance.EnqueueJob(new Job(FindPathJob, OnPathFindingComplete));
-            Debug.Log("Pathfinding job queued");
+            // Debug.Log("Pathfinding job queued");
         }
         
         void FindPathJob()
@@ -256,7 +257,7 @@ namespace Ekkam
         
         void OnPathFindingComplete()
         {
-            Debug.Log("Pathfinding job complete");
+            // Debug.Log("Pathfinding job complete");
             isPathfindingJobRunning = false;
             
             if (pathNodes.Count > 0)
@@ -381,7 +382,6 @@ namespace Ekkam
                 if (upNode != null && !node.isBlockedFromTopEdge && !upNode.isBlockedFromBottomEdge)
                 {
                     node.neighbours.Add(upNode);
-                    Debug.Log($"Top neighbor added: {upNode.gridPosition}");
                 }
             }
 
@@ -393,7 +393,6 @@ namespace Ekkam
                 if (downNode != null && !node.isBlockedFromBottomEdge && !downNode.isBlockedFromTopEdge)
                 {
                     node.neighbours.Add(downNode);
-                    Debug.Log($"Bottom neighbor added: {downNode.gridPosition}");
                 }
             }
 
@@ -451,6 +450,45 @@ namespace Ekkam
             if (filterByType)
             {
                 reachableNodes.RemoveAll(node => node.Occupant == null || Array.IndexOf(agentTypes, node.Occupant.GetComponent<Agent>().agentType) == -1);
+            }
+            
+            return reachableNodes;
+        }
+        
+        public List<PathfindingNode> GetReachableNodesWithoutNeighborCheck(int range)
+        {
+            List<PathfindingNode> reachableNodes = new List<PathfindingNode>();
+            List<PathfindingNode> openNodes = new List<PathfindingNode>();
+            List<PathfindingNode> closedNodes = new List<PathfindingNode>();
+            
+            PathfindingNode startNode = grid.GetNode(startNodePosition);
+            openNodes.Add(startNode);
+            reachableNodes.Add(startNode);
+            int currentRange = 0;
+
+            while (currentRange < range)
+            {
+                List<PathfindingNode> currentNodes = new List<PathfindingNode>(openNodes);
+                openNodes.Clear();
+
+                foreach (var node in currentNodes)
+                {
+                    foreach (var neighbour in GetNeighbours(node, node.gridPosition))
+                    {
+                        if (neighbour == null) continue;
+                        
+                        if (closedNodes.Contains(neighbour) || reachableNodes.Contains(neighbour))
+                        {
+                            continue;
+                        }
+                        
+                        openNodes.Add(neighbour);
+                        reachableNodes.Add(neighbour);
+                    }
+                    closedNodes.Add(node);
+                }
+
+                currentRange++;
             }
             
             return reachableNodes;
@@ -537,32 +575,33 @@ namespace Ekkam
             
             OnActionEnd();
         }
-        public List<PathfindingNode> GetAllAttackNodes(Attack attack, AttackDirection direction)
+        public List<PathfindingNode> GetAllAttackNodes(Ability ability, AttackDirection direction)
         {
+            print("Getting attack nodes: " + ability.name + " " + direction);
             Vector2Int playerPosition = startNodePosition;
             List<PathfindingNode> affectedNodes = new List<PathfindingNode>();
 
             switch (direction)
             {
                 case AttackDirection.North:
-                    affectedNodes.AddRange(GetAttackNodes(playerPosition, attack.frontLeft, 1, -1, false));
-                    affectedNodes.AddRange(GetAttackNodes(playerPosition, attack.frontMiddle, 1, 0, false));
-                    affectedNodes.AddRange(GetAttackNodes(playerPosition, attack.frontRight, 1, 1, false));
+                    affectedNodes.AddRange(GetAttackNodes(playerPosition, ability.frontLeft, 1, -1, false));
+                    affectedNodes.AddRange(GetAttackNodes(playerPosition, ability.frontMiddle, 1, 0, false));
+                    affectedNodes.AddRange(GetAttackNodes(playerPosition, ability.frontRight, 1, 1, false));
                     break;
                 case AttackDirection.South:
-                    affectedNodes.AddRange(GetAttackNodes(playerPosition, attack.frontLeft, -1, 1, false));
-                    affectedNodes.AddRange(GetAttackNodes(playerPosition, attack.frontMiddle, -1, 0, false));
-                    affectedNodes.AddRange(GetAttackNodes(playerPosition, attack.frontRight, -1, -1, false));
+                    affectedNodes.AddRange(GetAttackNodes(playerPosition, ability.frontLeft, -1, 1, false));
+                    affectedNodes.AddRange(GetAttackNodes(playerPosition, ability.frontMiddle, -1, 0, false));
+                    affectedNodes.AddRange(GetAttackNodes(playerPosition, ability.frontRight, -1, -1, false));
                     break;
                 case AttackDirection.East:
-                    affectedNodes.AddRange(GetAttackNodes(playerPosition, attack.frontLeft, 1, -1, true));
-                    affectedNodes.AddRange(GetAttackNodes(playerPosition, attack.frontMiddle, 1, 0, true));
-                    affectedNodes.AddRange(GetAttackNodes(playerPosition, attack.frontRight, 1, 1, true));
+                    affectedNodes.AddRange(GetAttackNodes(playerPosition, ability.frontLeft, 1, -1, true));
+                    affectedNodes.AddRange(GetAttackNodes(playerPosition, ability.frontMiddle, 1, 0, true));
+                    affectedNodes.AddRange(GetAttackNodes(playerPosition, ability.frontRight, 1, 1, true));
                     break;
                 case AttackDirection.West:
-                    affectedNodes.AddRange(GetAttackNodes(playerPosition, attack.frontLeft, -1, 1, true));
-                    affectedNodes.AddRange(GetAttackNodes(playerPosition, attack.frontMiddle, -1, 0, true));
-                    affectedNodes.AddRange(GetAttackNodes(playerPosition, attack.frontRight, -1, -1, true));
+                    affectedNodes.AddRange(GetAttackNodes(playerPosition, ability.frontLeft, -1, 1, true));
+                    affectedNodes.AddRange(GetAttackNodes(playerPosition, ability.frontMiddle, -1, 0, true));
+                    affectedNodes.AddRange(GetAttackNodes(playerPosition, ability.frontRight, -1, -1, true));
                     break;
             }
 
@@ -608,13 +647,13 @@ namespace Ekkam
         }
 
 
-        public IEnumerator ActivateAbility(Attack attack, AttackDirection direction, List<PathfindingNode> nodesToDamage)
+        public IEnumerator ActivateAbility(Ability ability, AttackDirection direction, List<PathfindingNode> nodesToDamage)
         {
             yield return new WaitForSeconds(0.5f);
             GameObject attackVisuals = null;
-            if (attack.vfxPrefab != null)
+            if (ability.vfxPrefab != null)
             {
-                attackVisuals = Instantiate(attack.vfxPrefab, transform.position, Quaternion.identity);
+                attackVisuals = Instantiate(ability.vfxPrefab, transform.position, Quaternion.identity);
                 switch (direction)
                 {
                     case AttackDirection.North:
@@ -630,15 +669,17 @@ namespace Ekkam
                         attackVisuals.transform.rotation = Quaternion.Euler(0, -90, 0);
                         break;
                 }
+                attackVisuals.transform.localScale = Vector3.one * ability.vfxScale;
+                attackVisuals.transform.position += attackVisuals.transform.forward * ability.vfxForwardOffset;
             }
             
-            yield return new WaitForSeconds(attack.damageDelay);
+            yield return new WaitForSeconds(ability.damageDelay);
             foreach (var node in nodesToDamage)
             {
                 try
                 {
                     Agent targetAgent = node.Occupant.GetComponent<Agent>();
-                    targetAgent.TakeDamage(attack.damage);
+                    targetAgent.TakeDamage(ability.damage);
                 }
                 catch
                 {
@@ -646,7 +687,7 @@ namespace Ekkam
                 }
             }
             
-            yield return new WaitForSeconds(attack.vfxDelay);
+            yield return new WaitForSeconds(ability.vfxDelay);
             if (attackVisuals != null) Destroy(attackVisuals);
             
             OnActionEnd();
@@ -659,6 +700,7 @@ namespace Ekkam
             isTakingTurn = true;
             movementPoints = maxMovementPoints;
             actionPoints = maxActionPoints;
+            manaPoints = maxManaPoints;
         }
         
         public virtual void OnActionStart()
@@ -668,10 +710,10 @@ namespace Ekkam
             if (agentType == AgentType.Hostile)
             {
                 var distance = Vector3.Distance(transform.position, NetworkManager.instance.myPlayer.transform.position);
-                if (distance < turnSystem.hostilityRange)
-                {
+                // if (distance < turnSystem.hostilityRange)
+                // {
                     NetworkManager.instance.myPlayer.SetCameraFocus(0, this.transform);
-                }
+                // }
             }
         }
         
@@ -701,6 +743,7 @@ namespace Ekkam
         {
             OnActionStart();
             actionPoints--;
+            manaPoints--;
             
             var attack = attacks.Find(a => a.name == attackName);
             var nodesToDamage = GetAllAttackNodes(attack, direction);

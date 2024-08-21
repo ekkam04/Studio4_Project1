@@ -3442,6 +3442,7 @@ MonoBehaviour:
   closedNodes: []
   pathNodes: []
   findPath: 0
+  intelligence: 1
   isTakingTurn: 0
   leftHand: {fileID: 3957595860247328352}
   rightHand: {fileID: 5025158259634847892}
@@ -3457,7 +3458,7 @@ MonoBehaviour:
   actionPoints: 1
   manaPointsText: {fileID: 2169284831668668802}
   manaPoints: 1
-  attackRange: 1
+  attackRange: 2
   attacks: []
   enemyRank: 0
 --- !u!1 &8240757945147479900

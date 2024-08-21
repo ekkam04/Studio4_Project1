@@ -50,12 +50,19 @@ namespace Ekkam
                     };
                     break;
                 case "Arena":
-                    NetworkManager.instance.spawnPositions = new Vector3[]
+                    // NetworkManager.instance.spawnPositions = new Vector3[]
+                    // {
+                    //     new Vector3(-33.2f,-0.891906738f,11f),
+                    //     new Vector3(27.6f,-0.891906738f,11f),
+                    //     new Vector3(-33.2f,-0.891906738f,9f),
+                    //     new Vector3(27.6f,-0.891906738f,9f),
+                    // };
+                    NetworkManager.instance.spawnPositions = new Vector3[] // Co-op spawns
                     {
                         new Vector3(-33.2f,-0.891906738f,11f),
-                        new Vector3(27.6f,-0.891906738f,11f),
                         new Vector3(-33.2f,-0.891906738f,9f),
                         new Vector3(27.6f,-0.891906738f,9f),
+                        new Vector3(27.6f,-0.891906738f,11f),
                     };
                     break;
             }

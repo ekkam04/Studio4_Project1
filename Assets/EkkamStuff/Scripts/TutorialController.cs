@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace Ekkam
@@ -26,16 +27,23 @@ namespace Ekkam
             dialogueController = FindObjectOfType<DialogueController>();
             
             uiManager.endTurnButtonGO.SetActive(false);
-            uiManager.shootButtonGO.SetActive(false);
             blackScreen.SetActive(true);
             objectiveLight1.SetActive(false);
             objectiveLight2.SetActive(false);
             
             StartCoroutine(StartTutorial());
-            
-            PlayerPickUpItems.onItemPickedUp += OnItemPickedUp;
         }
         
+        private void OnEnable()
+        {
+            PlayerPickUpItems.onItemPickedUp += OnItemPickedUp;
+        }
+
+        private void OnDisable()
+        {
+            PlayerPickUpItems.onItemPickedUp -= OnItemPickedUp;
+        }
+
         private void OnItemPickedUp(string itemKey)
         {
             switch (itemKey)
@@ -54,7 +62,7 @@ namespace Ekkam
             var dialogues = new Dialogue[]
             {
                 new Dialogue(playerName, "So where is this cemetery?"),
-                new Dialogue("Jeff", "Let me ask siri real quick... It should be somewhere near your position... Oh, she ways you should take the next left."),
+                new Dialogue("Jeff", "Let me ask siri real quick... It should be somewhere near your position... Oh, she says you should take the next left."),
                 new Dialogue(playerName, "You're the boss."),
                 new Dialogue("", "*Loud crashing sounds*"),
                 new Dialogue("Jeff", "Are you alive? respond? Helloooooooo?"),
@@ -110,53 +118,54 @@ namespace Ekkam
             
             yield return new WaitForSeconds(0.1f); // --------------------------------------------------------------------------------
             
-            // if (!gunPickedUp)
-            // {
-            //     dialogues = new Dialogue[]
-            //     {
-            //         new Dialogue("Jeff", "There's a gun near that chest. You should pick it up.")
-            //     };
-            //     StartCoroutine(dialogueController.ShowDialogues(dialogues, false));
-            //     while (!gunPickedUp)
-            //     {
-            //         player.movementPoints = 4;
-            //         yield return null;
-            //     }
-            //     dialogueController.continueDialogueManual = true;
-            // }
-            // else
-            // {
-            //     dialogues = new Dialogue[]
-            //     {
-            //         new Dialogue("Jeff", "Great! Good thing you picked up that gun.")
-            //     };
-            //     StartCoroutine(dialogueController.ShowDialogues(dialogues));
-            //     yield return new WaitUntil(() => !dialogueController.isShowingDialogues);
-            // }
-            //
-            // player.movementPoints = 4;
-            // objectiveLight1.SetActive(false);
-            // uiManager.moveButtonGO.SetActive(false);
+            if (!gunPickedUp)
+            {
+                dialogues = new Dialogue[]
+                {
+                    new Dialogue("Jeff", "There's a gun near that chest. You should pick it up.")
+                };
+                StartCoroutine(dialogueController.ShowDialogues(dialogues, false));
+                while (!gunPickedUp)
+                {
+                    player.movementPoints = 4;
+                    yield return null;
+                }
+                dialogueController.continueDialogueManual = true;
+            }
+            else
+            {
+                dialogues = new Dialogue[]
+                {
+                    new Dialogue("Jeff", "Great! Good thing you picked up that gun.")
+                };
+                StartCoroutine(dialogueController.ShowDialogues(dialogues));
+                yield return new WaitUntil(() => !dialogueController.isShowingDialogues);
+            }
+            
+            player.movementPoints = 4;
+            objectiveLight1.SetActive(false);
+            uiManager.moveButtonGO.SetActive(false);
             
             yield return new WaitForSeconds(0.1f); // --------------------------------------------------------------------------------
             
-            // dialogues = new Dialogue[]
-            // {
-            //     new Dialogue("Jeff", "Press I or click on the chest icon to open your inventory")
-            // };
-            // StartCoroutine(dialogueController.ShowDialogues(dialogues, false));
-            // yield return new WaitUntil(() => !uiManager.openInventoryButton.gameObject.activeSelf);
-            // dialogueController.continueDialogueManual = true;
+            dialogues = new Dialogue[]
+            {
+                new Dialogue("Jeff", "Press I or click on the pouch icon to open your inventory")
+            };
+            StartCoroutine(dialogueController.ShowDialogues(dialogues, false));
+            yield return new WaitUntil(() => !uiManager.openInventoryButton.gameObject.activeSelf);
+            dialogueController.continueDialogueManual = true;
             
             yield return new WaitForSeconds(0.1f); // --------------------------------------------------------------------------------
             
-            // dialogues = new Dialogue[]
-            // {
-            //     new Dialogue("Jeff", "Great! Now drag the gun to your right hand slot and close the inventory.")
-            // };
-            // StartCoroutine(dialogueController.ShowDialogues(dialogues, false));
-            // yield return new WaitUntil(() => uiManager.openInventoryButton.gameObject.activeSelf);
-            // dialogueController.continueDialogueManual = true;
+            dialogues = new Dialogue[]
+            {
+                new Dialogue("Jeff", "Great! Now drag the gun to your right hand slot and close the inventory.")
+            };
+            StartCoroutine(dialogueController.ShowDialogues(dialogues, false));
+            yield return new WaitUntil(() => player.gunEquipped);
+            yield return new WaitUntil(() => uiManager.openInventoryButton.gameObject.activeSelf);
+            dialogueController.continueDialogueManual = true;
             
             yield return new WaitForSeconds(0.1f); // --------------------------------------------------------------------------------
             
@@ -203,8 +212,7 @@ namespace Ekkam
             }
             
             yield return new WaitForSeconds(0.1f); // --------------------------------------------------------------------------------
-
-            uiManager.shootButtonGO.SetActive(true);
+            
             uiManager.endTurnButtonGO.SetActive(true);
             foreach (var spawner in startingSkeletonSpawners)
             {
@@ -217,6 +225,31 @@ namespace Ekkam
             };
             StartCoroutine(dialogueController.ShowDialogues(dialogues));
             yield return new WaitUntil(() => !dialogueController.isShowingDialogues);
+            
+            yield return new WaitForSeconds(0.1f); // --------------------------------------------------------------------------------
+            
+            var turnSystem = FindObjectOfType<TurnSystem>();
+            yield return new WaitUntil(() => turnSystem.hostileCount == 0);
+            
+            yield return new WaitForSeconds(2f); // --------------------------------------------------------------------------------
+            
+            dialogues = new Dialogue[]
+            {
+                new Dialogue("Jeff", "Great job! You did it!"),
+                new Dialogue("Jeff", "You are now ready to face the challenges ahead."),
+            };
+            StartCoroutine(dialogueController.ShowDialogues(dialogues));
+            yield return new WaitUntil(() => !dialogueController.isShowingDialogues);
+            
+            blackScreen.SetActive(true);
+            timer = 0f;
+            while (timer < 2f)
+            {
+                timer += Time.deltaTime;
+                blackScreen.GetComponent<RawImage>().color = Color.Lerp(Color.clear, Color.black, timer);
+                yield return null;
+            }
+            SceneManager.LoadScene("Lobby");
             
             yield return null;
         }

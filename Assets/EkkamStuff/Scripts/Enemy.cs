@@ -16,12 +16,12 @@ namespace Ekkam
         }
         public EnemyRank enemyRank;
         
-        public static int enemyID = 0;
+        // public static int enemyID = 0;
 
         private new void Start()
         {
-            enemyID++;
-            gameObject.name = "Enemy_" + enemyID;
+            // enemyID++;
+            // gameObject.name = "Enemy_" + enemyID;
             
             base.Start();
             agentData = new AgentData(gameObject.name, gameObject.name);
@@ -44,16 +44,32 @@ namespace Ekkam
         IEnumerator SimulateTurn()
         {
             yield return new WaitForSeconds(1f);
-            var reachableNodes = GetReachableNodes(attackRange, true, new AgentType[] {AgentType.Friendly});
+            var reachableNodes = GetReachableNodesWithoutNeighborCheck(attackRange);
+            reachableNodes.RemoveAll(x => x.Occupant == null);
+            reachableNodes.RemoveAll(x => x.Occupant != null && x.Occupant.GetComponent<Agent>().agentType == AgentType.Hostile);
+            reachableNodes.RemoveAll(x => x.Occupant == this.gameObject);
+            
             if (reachableNodes.Count > 0)
             {
+                foreach (var node in reachableNodes)
+                {
+                    node.SetActionable(true, PathfindingNode.VisualType.Enemy);
+                }
+                
                 var targetNode = reachableNodes[Random.Range(0, reachableNodes.Count)];
-                AttackAction(targetNode.gridPosition, 50f);
-                NetworkManager.instance.SendAttackAction(targetNode.gridPosition, 50f, agentData);
+                var damage = targetNode.Occupant.GetComponent<Agent>().CalculateDamage(100 - targetNode.Occupant.GetComponent<Agent>().evasion, 25f);
+                AttackAction(targetNode.gridPosition, damage);
+                NetworkManager.instance.SendAttackAction(targetNode.gridPosition, damage, agentData);
                 yield return new WaitForSeconds(3f);
+                
+                foreach (var node in reachableNodes)
+                {
+                    node.SetActionable(false);
+                }
             }
             else
             {
+                Debug.Log("No reachable nodes for attack. Moving to closest friendly node.");
                 PathfindingNode closestFriendlyNode = null;
                 float closestDistance = Mathf.Infinity;
                 foreach (var node in grid.nodes)

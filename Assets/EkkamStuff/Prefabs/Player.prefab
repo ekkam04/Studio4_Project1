@@ -949,6 +949,7 @@ MonoBehaviour:
   closedNodes: []
   pathNodes: []
   findPath: 0
+  intelligence: 1
   isTakingTurn: 0
   leftHand: {fileID: 8342296193573279981}
   rightHand: {fileID: 3978308335651146441}
@@ -970,7 +971,15 @@ MonoBehaviour:
   mousePosition3DPrefab: {fileID: 6247423640985755484, guid: 20e8461a506c9354c9d87839c45baa95,
     type: 3}
   reachableNodes: []
+  attackableNodes: []
+  attackableNodesNorth: []
+  attackableNodesEast: []
+  attackableNodesSouth: []
+  attackableNodesWest: []
+  currentAttackDirection: 0
+  currentAbility: {fileID: 0}
   lastSelectedNode: {fileID: 0}
+  gunEquipped: 0
   selectingTarget: 0
   playerCamera: {fileID: 0}
 --- !u!114 &-1348554247054621393
