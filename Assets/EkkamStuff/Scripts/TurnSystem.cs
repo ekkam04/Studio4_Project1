@@ -39,7 +39,7 @@ namespace Ekkam
             if (agentType == Agent.AgentType.Friendly)
             {
                 friendlyTurnsCompleted++;
-                if (friendlyTurnsCompleted == friendlyCount)
+                if (friendlyTurnsCompleted >= friendlyCount)
                 {
                     friendlyTurnsCompleted = 0;
                     currentTurn = Agent.AgentType.Hostile;
@@ -49,7 +49,7 @@ namespace Ekkam
             else if (agentType == Agent.AgentType.Hostile)
             {
                 hostileTurnsCompleted++;
-                if (hostileTurnsCompleted == hostileCount)
+                if (hostileTurnsCompleted >= hostileCount)
                 {
                     hostileTurnsCompleted = 0;
                     currentTurn = Agent.AgentType.Friendly;
