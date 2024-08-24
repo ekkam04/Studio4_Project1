@@ -15,7 +15,7 @@ namespace Ekkam
     {
         public static NetworkManager instance;
 
-        private Socket socket;
+        public Socket socket;
         
         public GameObject playerPrefab;
         public Player myPlayer;
@@ -35,13 +35,6 @@ namespace Ekkam
             new Vector3(0.5f, 0, 1f),
             new Vector3(-1f, 0, 0.5f)
         };
-        
-        // public Vector3[] spawnPositions = new Vector3[]
-        // {
-        //     new Vector3(36.75f,0.38f,-3),
-        //     new Vector3(36.75f,0.38f,-3),
-        //     new Vector3(36.75f,0.38f,-3)
-        // };
 
         void Start()
         {
@@ -107,8 +100,6 @@ namespace Ekkam
 
             if (gameStartPacket.clientIndex == 0)
             {
-                // var enemyManager = FindObjectOfType<EnemyManager>();
-                // enemyManager.isMasterClient = true;
                 turnSystem.isMasterClient = true;
             }
         }
@@ -192,6 +183,16 @@ namespace Ekkam
                         actionableAgent.AttackAction(attackActionPacket.targetPosition, attackActionPacket.damage);
                         break;
                     
+                    case BasePacket.Type.AbilityAction:
+                        AbilityActionPacket abilityActionPacket = new AbilityActionPacket().Deserialize(buffer);
+                        Debug.Log($"Received ability action: {abilityActionPacket.abilityName} from {abilityActionPacket.AgentData.name}");
+                        
+                        actionableAgent = GetActionableAgent(abilityActionPacket.AgentData);
+                        if (actionableAgent == null) return;
+                        
+                        actionableAgent.AbilityAction(abilityActionPacket.abilityName, abilityActionPacket.direction);
+                        break;
+                    
                     case BasePacket.Type.StartTurn:
                         StartTurnPacket startTurnPacket = new StartTurnPacket().Deserialize(buffer);
                         Debug.Log($"Received start turn from {startTurnPacket.AgentData.name}");
@@ -208,6 +209,28 @@ namespace Ekkam
                         
                         actionableAgent = GetActionableAgent(endTurnPacket.AgentData);
                         if (actionableAgent == null) return;
+
+                        // var turnSystem = FindObjectOfType<TurnSystem>();
+                        // if (actionableAgent.agentType == Agent.AgentType.Hostile)
+                        // {
+                        //     // Check if local player is near the sending enemy
+                        //     var enemy = actionableAgent.GetComponent<Enemy>();
+                        //     var enemiesNearLocalPlayer = turnSystem.GetEnemiesInRange(myPlayer);
+                        //     if (enemiesNearLocalPlayer.Contains(enemy))
+                        //     {
+                        //         actionableAgent.EndTurn();
+                        //     }
+                        // }
+                        // else if (actionableAgent.agentType == Agent.AgentType.Friendly)
+                        // {
+                        //     // Check if local player is near the sending player
+                        //     var player = actionableAgent.GetComponent<Player>();
+                        //     var playersNearSendingPlayer = turnSystem.GetFriendliesInRange(player);
+                        //     if (playersNearSendingPlayer.Contains(myPlayer))
+                        //     {
+                        //         actionableAgent.EndTurn();
+                        //     }
+                        // }
                         
                         actionableAgent.EndTurn();
                         break;
@@ -216,11 +239,12 @@ namespace Ekkam
                         ItemPacket itemPacket = new ItemPacket().Deserialize(buffer);
                         Debug.Log($"Received item pickup from {itemPacket.AgentData.name}: {itemPacket.itemKey}");
                         
-                        // We don't need to get the actionable agent for item pickup yet. Maybe later on for item pickup animations
-                        // actionableAgent = GetActionableAgent(itemPacket.AgentData);
-                        // if (actionableAgent == null) return;
+                        actionableAgent = GetActionableAgent(itemPacket.AgentData);
+                        if (actionableAgent == null) return;
                         
                         var allItems = FindObjectsOfType<Item>();
+                        // Since there can be multiple items with the same key, I'm sorting them by distance and destroying the closest one
+                        Array.Sort(allItems, (x, y) => Vector3.Distance(x.transform.position, actionableAgent.transform.position).CompareTo(Vector3.Distance(y.transform.position, actionableAgent.transform.position)));
                         foreach (var item in allItems)
                         {
                             if (item.item.itemKey == itemPacket.itemKey)
@@ -272,6 +296,13 @@ namespace Ekkam
             SendDataToServer(gridPositionPacket);
         }
         
+        public void SendAbilityAction(string abilityName, Agent.AttackDirection direction, AgentData agentData = null)
+        {
+            if (agentData == null) agentData = AgentData;
+            AbilityActionPacket abilityActionPacket = new AbilityActionPacket(BasePacket.Type.AbilityAction, agentData, abilityName, direction);
+            SendDataToServer(abilityActionPacket);
+        }
+        
         public void SendStartTurn(string agentID, AgentData agentData = null)
         {
             if (agentData == null) agentData = AgentData;
@@ -321,6 +352,7 @@ namespace Ekkam
                 playerVCam.Follow = player.transform;
                 playerVCam.LookAt = player.transform;
                 playerVCam.gameObject.SetActive(true);
+                player.playerCamera = playerVCam;
                 
                 actionVCam = GameObject.Find("ActionVCam").GetComponent<CinemachineVirtualCamera>();
                 actionVCam.gameObject.SetActive(false);

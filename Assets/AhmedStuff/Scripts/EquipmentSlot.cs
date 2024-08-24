@@ -13,10 +13,11 @@ public class EquipmentSlot : InventorySlot
         {
             GameObject dropped = eventData.pointerDrag;
             InventoryItem inventoryItem = dropped.GetComponent<InventoryItem>();
+            CallOnItemDropped(inventoryItem.item.itemKey, transform.name);
             if (inventoryItem.item.itemType == ItemType.Equipment)
             {
                 inventoryItem.parentAfterDrag = transform;
-                inventoryManager.UpdatePlayerStats();
+                // inventoryManager.UpdatePlayerStats();
             }
         }
     }

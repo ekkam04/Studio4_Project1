@@ -4,7 +4,11 @@ using UnityEngine;
 using System.Net.Sockets;
 using System.Net;
 using System.Threading.Tasks;
+using UnityEngine.SceneManagement;
+
+#if UNITY_EDITOR
 using ParrelSync;
+#endif
 
 namespace Ekkam
 {
@@ -25,11 +29,13 @@ namespace Ekkam
 
         void Start()
         {
+            #if UNITY_EDITOR
             if (ClonesManager.IsClone())
             {
                 Destroy(gameObject);
                 return;
             }
+            #endif
             
             if (instance == null)
             {
@@ -47,10 +53,53 @@ namespace Ekkam
             socket.Blocking = false;
             Debug.Log("Server started, waiting for connections...");
         }
+        
+        private void OnEnable()
+        {
+            SceneManager.sceneLoaded += OnSceneLoaded;
+        }
+
+        private void OnDisable()
+        {
+            SceneManager.sceneLoaded -= OnSceneLoaded;
+        }
+        
+        private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+        {
+            if (!acceptingNewClients && scene.name == "Lobby")
+            {
+                // DisconnectAllClients();
+            }
+        }
+        
+        public async void DisconnectAllClients()
+        {
+            NetworkManager.instance.socket.Close();
+            await Task.Delay(100);
+            foreach (Socket client in clients)
+            {
+                client.Close();
+                await Task.Delay(100);
+            }
+            socket.Close();
+            clients.Clear();
+            
+            acceptingNewClients = true;
+            Debug.Log("Server is accepting new clients again.");
+            
+            await Task.Delay(1000);
+            socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            socket.Bind(new IPEndPoint(IPAddress.Any, 3000));
+            socket.Listen(10);
+            socket.Blocking = false;
+            Debug.Log("Server started, waiting for connections...");
+        }
 
         private void OnDestroy()
         {
+            #if UNITY_EDITOR
             if (ClonesManager.IsClone()) return;
+            #endif
             socket.Close();
         }
 

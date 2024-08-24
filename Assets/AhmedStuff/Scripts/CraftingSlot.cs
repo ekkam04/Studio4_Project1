@@ -12,6 +12,7 @@ public class CraftingSlot : InventorySlot
         {
             GameObject dropped = eventData.pointerDrag;
             InventoryItem inventoryItem = dropped.GetComponent<InventoryItem>();
+            CallOnItemDropped(inventoryItem.item.itemKey, transform.name);
             inventoryItem.parentAfterDrag = transform;
             //inventoryManager.CheckCrafting();
         }

@@ -1274,6 +1274,8 @@ MonoBehaviour:
   agentType: 2
   isTakingAction: 0
   agentStatsUI: {fileID: 12387204732509304}
+  agentStatsUIPoints: {fileID: 8042150428811158263}
+  showPoints: 1
   nameText: {fileID: 4731964515784096460}
   movementPointsText: {fileID: 798165210223364618}
   movementPoints: 3
@@ -1281,7 +1283,6 @@ MonoBehaviour:
   actionPoints: 1
   manaPointsText: {fileID: 4701099648422185188}
   manaPoints: 4
-  maxManaPoints: 0
   attackRange: 3
   attacks: []
   enemyRank: 0
@@ -4569,3 +4570,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 67db9e8f0e2ae9c40bc1e2b64352a6b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &8042150428811158263 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 271281213512757632, guid: 5e47157ff9363554e9afeb9c72c9909b,
+    type: 3}
+  m_PrefabInstance: {fileID: 7807198754924221303}
+  m_PrefabAsset: {fileID: 0}

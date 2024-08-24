@@ -13,6 +13,7 @@ public class AbilitySlot : InventorySlot
         {
             GameObject dropped = eventData.pointerDrag;
             InventoryItem inventoryItem = dropped.GetComponent<InventoryItem>();
+            CallOnItemDropped(inventoryItem.item.itemKey, transform.name);
             if (inventoryItem.item.itemType == ItemType.Ability)
             {
                 inventoryItem.parentAfterDrag = transform;

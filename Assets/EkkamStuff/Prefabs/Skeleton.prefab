@@ -3442,12 +3442,15 @@ MonoBehaviour:
   closedNodes: []
   pathNodes: []
   findPath: 0
+  intelligence: 1
   isTakingTurn: 0
   leftHand: {fileID: 3957595860247328352}
   rightHand: {fileID: 5025158259634847892}
   agentType: 2
   isTakingAction: 0
   agentStatsUI: {fileID: 6848693202329623838}
+  agentStatsUIPoints: {fileID: 3511687315961504657}
+  showPoints: 1
   nameText: {fileID: 2201170126374075306}
   movementPointsText: {fileID: 6067711203543239532}
   movementPoints: 2
@@ -3455,8 +3458,7 @@ MonoBehaviour:
   actionPoints: 1
   manaPointsText: {fileID: 2169284831668668802}
   manaPoints: 1
-  maxManaPoints: 0
-  attackRange: 1
+  attackRange: 2
   attacks: []
   enemyRank: 0
 --- !u!1 &8240757945147479900
@@ -4365,6 +4367,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &3511687315961504657 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 271281213512757632, guid: 5e47157ff9363554e9afeb9c72c9909b,
+    type: 3}
+  m_PrefabInstance: {fileID: 3710910918118035985}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &5950347540802585288 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 7056063500436836569, guid: 5e47157ff9363554e9afeb9c72c9909b,
